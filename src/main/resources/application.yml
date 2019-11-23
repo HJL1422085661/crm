@@ -1,0 +1,25 @@
+server:
+  servlet:
+    context-path: /crm
+  port: 8000
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost/crm?serverTimezone=UTC&&characterEncoding=utf-8
+  jpa:
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  pattern:
+    console: "%d - %msg%n"
+  #path: /Study/Idea_work/demo/var/log/tomcat/
+  file: /Study/Idea_work/demo/var/log/tomcat/crm.log
+  level:
+    com.imooc.sell.LoggerTest: debug
