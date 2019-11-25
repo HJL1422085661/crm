@@ -10,7 +10,15 @@ import java.util.List;
  * @Date 2019/11/22 15:14
  * @Version 1.0
  */
-public interface BusinessRepository  extends JpaRepository<Business, String> {
+public interface BusinessRepository extends JpaRepository<Business, String> {
     List<Business> getBusinessByEmployeeId(String employeeId);
+
+    Business getBusinessByBusinessId(String businessId);
+
+    public Boolean createPublicBusiness(Business business);
+
+    Boolean createBusiness(Business business);
+
+    Boolean updateBusinessStatusById(String businessId, Integer businessStatus);
 
 }

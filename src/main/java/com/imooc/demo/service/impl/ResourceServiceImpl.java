@@ -20,6 +20,17 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
     public ResourceRepository resourceRepository;
+
+    Boolean addResource(Resource resource){
+        Resource resource1 = resourceRepository.save(resource);
+        if (resource1 != null) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+
     @Override
     public List<Resource> getResourceByEmployeeId(String employeeId) {
         return resourceRepository.getResourceListByEmployeeId(employeeId);

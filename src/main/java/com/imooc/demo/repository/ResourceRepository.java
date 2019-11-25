@@ -15,6 +15,8 @@ import java.util.List;
  * @Version 1.0
  */
 public interface ResourceRepository extends JpaRepository<Resource, String> {
+    Boolean addResource(Resource resource);
+
     List<Resource> getResourceListByEmployeeId(String employeeId);
     Resource getResourceByResourceId(String resourceId);
     Boolean deleteByResourceId(String resourceId);

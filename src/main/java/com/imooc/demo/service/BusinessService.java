@@ -11,5 +11,13 @@ import java.util.List;
  */
 public interface BusinessService {
     List<Business> getBusinessByEmployeeId(String employeeId);
+
     Boolean createPublicBusiness(Business business);
+
+    Business getBusinessByBusinessId(String businessId);
+
+    Boolean updateBusinessStatusById(Integer businessId, Integer businessStatus);
+
+
+
 }

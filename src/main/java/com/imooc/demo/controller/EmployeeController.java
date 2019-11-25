@@ -2,9 +2,11 @@ package com.imooc.demo.controller;
 
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
+import com.imooc.demo.modle.Business;
+import com.imooc.demo.modle.Company;
+import com.imooc.demo.modle.PayBackRecord;
 import com.imooc.demo.modle.Resource;
-import com.imooc.demo.service.EmployeeService;
-import com.imooc.demo.service.ResourceService;
+import com.imooc.demo.service.*;
 import com.imooc.demo.utils.ResultVOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +36,13 @@ public class EmployeeController {
     public ResourceService resourceService;
     @Autowired
     public EmployeeService employeeService;
+    @Autowired
+    public CompanyService companyService;
+    @Autowired
+    public BusinessService businessService;
+    @Autowired
+    public PayBackRecordService payBackRecordService;
+
     @Modifying
     @Transactional
     @PostMapping("/createResource")
@@ -53,19 +62,20 @@ public class EmployeeController {
 
     /**
      * 修改人才信息(不修改人才状态)
+     *
      * @param resourceId
      * @param resource
      * @return
      */
     @PostMapping("/updateResource")
     public ResultVO<Map<String, String>> updateResource(@RequestParam("resourceId") String resourceId,
-                                                            @RequestParam("resource") Resource resource) {
+                                                        @RequestParam("resource") Resource resource) {
         Resource resource1 = resourceService.getResourceByResourceId(resourceId);
         BeanUtils.copyProperties(resource, resource1);
         Boolean flag = resourceService.saveResource(resource);
-        if(flag){
+        if (flag) {
             return ResultVOUtil.success();
-        }else{
+        } else {
             log.error("【更新人才资源信息】发生错误");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
         }
@@ -73,32 +83,122 @@ public class EmployeeController {
 
     /**
      * 修改人才状态
+     *
      * @param resourceId
      * @param shareStatus
      * @return
      */
     @PostMapping("/updateResourceShareStatus")
     public ResultVO<Map<String, String>> updateResourceShareStatus(@RequestParam("resourceId") String resourceId,
-                                                        @RequestParam("shareStatus") String shareStatus) {
+                                                                   @RequestParam("shareStatus") String shareStatus) {
         Boolean flag = resourceService.updateShareStatusByResourceId(shareStatus, resourceId);
         //TODO
-        if(flag){
+        if (flag) {
             return ResultVOUtil.success();
-        }else{
+        } else {
             log.error("【更新人才状态】发生错误");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
         }
     }
+
     @PostMapping("/deleteResource")
     public ResultVO<Map<String, String>> deleteResource(@RequestParam("resourceId") String resourceId) {
         Boolean flag = resourceService.deleteResourceByResourceId(resourceId);
-        if(flag){
+        if (flag) {
             return ResultVOUtil.success();
-        }else{
+        } else {
             log.error("【删除人才资源信息】发生错误");
             return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
         }
     }
+
+    /**
+     * 录入人才信息
+     *
+     * @param resource: 人才对象
+     * @return
+     */
+    @PostMapping("/addResource")
+    public ResultVO<Map<String, String>> addResource(@RequestParam("resource") Resource resource) {
+
+        boolean isSuccess = resourceService.addResource(resource);
+        if (isSuccess) {
+            return ResultVOUtil.success();
+        } else {
+            log.error("【录入人才】发生错误");
+            return ResultVOUtil.error(ResultEnum.SAVE_RESOURCE_ERROR);
+        }
+    }
+
+    /**
+     * 录入企业信息
+     *
+     * @param company: 企业对象
+     * @return
+     */
+    @PostMapping("/addCompany")
+    public ResultVO<Map<String, String>> addCompany(@RequestParam("company") Company company) {
+
+        boolean isSuccess = companyService.addCompany(company);
+        if (isSuccess) {
+            return ResultVOUtil.success();
+        } else {
+            log.error("【录入企业】发生错误");
+            return ResultVOUtil.error(ResultEnum.SAVE_RESOURCE_ERROR);
+        }
+    }
+
+    /**
+     * 新建订单
+     *
+     * @param business: 订单信息
+     * @return
+     */
+    @PostMapping("/createBusiness")
+    public ResultVO<Map<String, String>> createBusiness(@RequestParam("business") Business business) {
+
+        boolean isSuccess = businessService.createBusiness(business);
+        if (isSuccess) {
+            return ResultVOUtil.success();
+        } else {
+            log.error("【新建订单】发生错误");
+            return ResultVOUtil.error(ResultEnum.CREATE_BUSINESS_ERROR);
+        }
+    }
+
+    /**
+     * 更改订单状态（进行中 --> 已完成）
+     *
+     * @param businessId:     订单ID
+     * @param businessStatus: 订单状态
+     * @return
+     */
+    @PostMapping("/updateBusinessStatus")
+    public ResultVO<Map<String, String>> updateBusinessStatusById(@RequestParam("businessId") Integer businessId,
+                                                                  @RequestParam("businessStatus") Integer businessStatus) {
+
+        boolean isSuccess = businessService.updateBusinessStatusById(businessId, businessStatus);
+        if (isSuccess) {
+            return ResultVOUtil.success();
+        } else {
+            log.error("【更改订单状态】发生错误");
+            return ResultVOUtil.error(ResultEnum.CREATE_PAYBACKRECORD_ERROR);
+        }
+    }
+
+    /**
+     * 检查订单状态是否为已完成
+     *
+     * @param businessId: 订单ID
+     * @return
+     */
+    @PostMapping("/checkBusinessStatus")
+    public boolean checkBusinessStatus(@RequestParam("businessId") String businessId) {
+        Business business = businessService.getBusinessByBusinessId(businessId);
+        // 0 表示ing; 1表示完成
+        return business.businessStatus == 1;
+    }
+
 
     //分页显示私有客户信息
     @GetMapping("/getResourceList")
@@ -107,7 +207,7 @@ public class EmployeeController {
                                                          HttpServletRequest req) {
         String token = req.getHeader("Authorization");
         String employeeId = employeeService.getEmployeeIdByTicket(token);
-        if(StringUtils.isEmpty(employeeId)){
+        if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
