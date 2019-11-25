@@ -12,4 +12,5 @@ import java.util.List;
  */
 public interface BusinessRepository  extends JpaRepository<Business, String> {
     List<Business> getBusinessByEmployeeId(String employeeId);
+
 }

@@ -22,4 +22,10 @@ public class BusinessServiceImpl implements BusinessService {
     public List<Business> getBusinessByEmployeeId(String employeeId) {
         return businessRepository.getBusinessByEmployeeId(employeeId);
     }
+    @Override
+    public Boolean createPublicBusiness(Business business) {
+        Business business1 = businessRepository.saveAndFlush(business);
+        if(business1 != null) return true;
+        return false;
+    }
 }

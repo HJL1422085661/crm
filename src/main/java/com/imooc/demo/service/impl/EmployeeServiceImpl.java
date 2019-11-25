@@ -1,6 +1,7 @@
 package com.imooc.demo.service.impl;
 
 import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.modle.Resource;
 import com.imooc.demo.repository.EmployeeRepository;
 import com.imooc.demo.repository.LoginTicketRepository;
 import com.imooc.demo.service.EmployeeService;
@@ -9,6 +10,8 @@ import com.imooc.demo.utils.PassUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,4 +118,5 @@ public class EmployeeServiceImpl implements EmployeeService {
             return true;
         return false;
     }
+
 }

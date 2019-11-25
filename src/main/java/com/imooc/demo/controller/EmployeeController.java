@@ -8,8 +8,11 @@ import com.imooc.demo.utils.ResultVOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -29,8 +32,8 @@ public class EmployeeController {
     public ResourceService resourceService;
     @Modifying
     @Transactional
-    @PostMapping("/saveResource")
-    public ResultVO<Map<String, String>> saveResource(@RequestParam("resource") Resource resource) {
+    @PostMapping("/createResource")
+    public ResultVO<Map<String, String>> createResource(@RequestParam("resource") Resource resource) {
         try {
             Boolean flag = resourceService.saveResource(resource);
             if (!flag) {
@@ -44,6 +47,12 @@ public class EmployeeController {
     }
 
 
+    /**
+     * 修改人才信息(不修改人才状态)
+     * @param resourceId
+     * @param resource
+     * @return
+     */
     @PostMapping("/updateResource")
     public ResultVO<Map<String, String>> updateResource(@RequestParam("resourceId") String resourceId,
                                                             @RequestParam("resource") Resource resource) {
@@ -54,6 +63,25 @@ public class EmployeeController {
             return ResultVOUtil.success();
         }else{
             log.error("【更新人才资源信息】发生错误");
+            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
+        }
+    }
+
+    /**
+     * 修改人才状态
+     * @param resourceId
+     * @param shareStatus
+     * @return
+     */
+    @PostMapping("/updateResourceShareStatus")
+    public ResultVO<Map<String, String>> updateResourceShareStatus(@RequestParam("resourceId") String resourceId,
+                                                        @RequestParam("shareStatus") String shareStatus) {
+        Boolean flag = resourceService.updateShareStatusByResourceId(shareStatus, resourceId);
+        //TODO
+        if(flag){
+            return ResultVOUtil.success();
+        }else{
+            log.error("【更新人才状态】发生错误");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
         }
     }
@@ -68,9 +96,20 @@ public class EmployeeController {
         }
     }
 
-    //分页处理
+    //分页显示私有客户信息
     @GetMapping("/getResourceList")
-    public ResultVO<Map<String, String>> getResourceList(@RequestParam("employeeId") String employeeId) {
+    public ResultVO<Map<String, String>> getResourceList(@RequestParam("employeeId") String employeeId,
+                                                         @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        if(StringUtils.isEmpty(employeeId)){
+            log.error("【获取人才列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        PageRequest request = PageRequest.of(page, size);
+        Page<Resource> resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
 
+        return ResultVOUtil.success(resourcePage.getContent());
     }
+
+
 }

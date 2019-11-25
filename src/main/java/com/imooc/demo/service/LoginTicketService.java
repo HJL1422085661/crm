@@ -14,5 +14,6 @@ public interface LoginTicketService {
     LoginTicket selectByTicket(String ticket);
     void updateStatus(String ticket, int status);
     String addLoginTicket(String employeeId);
+    String findEmployeeIdByTicket(String ticket);
 
 }

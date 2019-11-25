@@ -30,8 +30,9 @@ public enum ResultEnum {
     SAVE_RESOURCE_ERROR(19,"录入人才信息发生错误"),
     UPDATE_RESOURCE_ERROR(20,"更新人才信息发生错误"),
     DELETE_RESOURCE_ERROR(21,"删除人才信息发生错误"),
-    UPDATE_EMPLOYEE_ROLE_ERROR(22, "修改员工权限发生错误");
-
+    UPDATE_EMPLOYEE_ROLE_ERROR(22, "修改员工权限发生错误"),
+    CREATE_PUBLIC_RESOURCE_ERROR(23, "创建共享人才发生错误"),
+    CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误");
     private Integer code;
     private String message;
 

@@ -1,6 +1,8 @@
 package com.imooc.demo.service;
 
 import com.imooc.demo.modle.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,4 +17,6 @@ public interface ResourceService {
     Resource getResourceByResourceId(String resourceId);
     Boolean deleteResourceByResourceId(String resourceId);
     Boolean updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, String resourceId);
+    Boolean updateShareStatusByResourceId(String sharStatus, String resourceId);
+    Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
 }

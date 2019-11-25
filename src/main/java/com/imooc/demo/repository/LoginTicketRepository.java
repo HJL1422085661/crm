@@ -11,5 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LoginTicketRepository extends JpaRepository<LoginTicket, Integer> {
 
     LoginTicket findLoginTicketByTicket(String ticket);
+    String findEmployeeIdByTicket(String ticket);
 
 }
