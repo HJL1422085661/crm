@@ -2,10 +2,14 @@ package com.imooc.demo.service;
 
 import com.imooc.demo.modle.Business;
 
+import java.util.List;
+
+/**
+ * @Author emperor
+ * @Date 2019/11/22 14:40
+ * @Version 1.0
+ */
 public interface BusinessService {
-    Boolean createBusiness(Business business);
-    Boolean updateBusinessStatusById(Integer businessId, Integer businessStatus);
-
-
-
+    List<Business> getBusinessByEmployeeId(String employeeId);
+    Boolean createPublicBusiness(Business business);
 }

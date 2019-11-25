@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Entity
 @Data
-public class PayBackRecord {
+public class PayBackRecod {
     /** 记录ID **/
     @Id
     @Column(name = "recordId")

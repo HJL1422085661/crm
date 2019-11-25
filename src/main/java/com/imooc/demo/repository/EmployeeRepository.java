@@ -20,7 +20,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
     Boolean deleteByEmployeeId(String employeeId);
 
     @Transactional
-    @Modifying  
+    @Modifying
     @Query(nativeQuery = true, value = "UPDATE employee SET employeeRole = ?1  WHERE employeeId = ?2 ")
     int updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
 }

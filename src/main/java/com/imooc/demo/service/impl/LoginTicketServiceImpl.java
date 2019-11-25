@@ -1,7 +1,9 @@
 package com.imooc.demo.service.impl;
 
 import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.repository.LoginTicketRepository;
 import com.imooc.demo.service.LoginTicketService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class LoginTicketServiceImpl implements LoginTicketService {
+
+    @Autowired
+    private LoginTicketRepository loginTicketRepository;
     @Override
     public void addTicket(LoginTicket ticket) {
 
@@ -31,4 +36,8 @@ public class LoginTicketServiceImpl implements LoginTicketService {
         return null;
     }
 
+    @Override
+    public String findEmployeeIdByTicket(String ticket) {
+        return loginTicketRepository.findEmployeeIdByTicket(ticket);
+    }
 }

@@ -14,6 +14,7 @@ import com.imooc.demo.service.ManagerService;
 import com.imooc.demo.service.ResourceService;
 import com.imooc.demo.utils.ResultVOUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +109,6 @@ public class ManagerController {
         }
         return ResultVOUtil.success();
     }
-
     /**
      * 删除员工
      * @param employeeId
@@ -156,5 +156,49 @@ public class ManagerController {
         return ResultVOUtil.success();
     }
 
+    // 创建共享人才库
+    @PostMapping("/createPublicEmployee")
+    public ResultVO<Map<String, String>> createPublicResource(@RequestParam("resource") Resource resource){
+        //设置人才状态
+        resource.setShareStatus("public");
+        Boolean flag = resourceService.saveResource(resource);
+        if(flag){
+            return ResultVOUtil.success();
+        }else{
+            log.error("【创建共享人才】发生错误");
+            return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
+        }
+    }
+    // 修改共享人才库
+    @PostMapping("/updatePublicEmployee")
+    public ResultVO<Map<String, String>> updatePublicResource(@RequestParam("resource") Resource resource){
+        //首先获取数据库中的人才对象
+        Resource resource1 = resourceService.getResourceByResourceId(resource.getResourceId());
+        //TODO
+        BeanUtils.copyProperties(resource1, resource);
+        Boolean flag = resourceService.saveResource(resource);
+        if(flag){
+            return ResultVOUtil.success();
+        }else{
+            log.error("【修改共享人才】发生错误");
+            return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
+        }
+    }
+//    @PostMapping("/deletePublicResource")
+//    public ResultVO<Map<String, String>> deletePublicResource(@RequestParam("resourceId") String resourceId){
+//
+//
+//    }
+    //共享企业库
+    @PostMapping("/createPublicBusiness")
+    public ResultVO<Map<String, String>> createPublicBusiness(@RequestParam("business") Business business){
+        Boolean flag = businessService.createPublicBusiness(business);
+        if(flag){
+            return ResultVOUtil.success();
+        }else {
+            log.error("【创建共享企业】发生错误");
+            return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_BUSINESS_ERROR);
+        }
+    }
 
 }
