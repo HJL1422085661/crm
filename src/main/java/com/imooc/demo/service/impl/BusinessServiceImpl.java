@@ -1,25 +1,43 @@
-package com.imooc.demo.service.impl;
+package com.imooc.demo.service.impl;/*
+ * @program: demo
+ * @author: Mason Wang
+ * @create: 2019-11-22 12:35
+ **/
 
 import com.imooc.demo.modle.Business;
 import com.imooc.demo.repository.BusinessRepository;
-import com.imooc.demo.service.BusinessService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-/**
- * @Author emperor
- * @Date 2019/11/22 15:13
- * @Version 1.0
- */
 @Service
-public class BusinessServiceImpl implements BusinessService {
+@Slf4j
 
+public class BusinessServiceImpl {
     @Autowired
     public BusinessRepository businessRepository;
-    @Override
-    public List<Business> getBusinessByEmployeeId(String employeeId) {
-        return businessRepository.getBusinessByEmployeeId(employeeId);
+
+
+    Boolean createBusiness(Business business) {
+        Business business1 = businessRepository.save(business);
+        if (business1 != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    Boolean updateBusinessStatusById(String businessId, Integer businessStatus){
+        Business business = businessRepository.getBusinessByBusinessId(businessId);
+        business.setBusinessStatus(businessStatus);
+        Business business1 =  businessRepository.save(business);
+
+        if (business1 != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 }
