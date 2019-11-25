@@ -7,12 +7,14 @@ import java.util.Date;
 
 @Entity
 @Data
-public class LoginTicket {
+@Table(name="ticket")
+public class Ticket {
 
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     private int id;
+    @Column(name = "employeeId")
     private String employeeId;
     private Date expired; //过期
     private int status;// 0有效，1无效
