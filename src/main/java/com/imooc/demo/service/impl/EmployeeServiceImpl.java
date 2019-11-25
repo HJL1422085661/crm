@@ -119,4 +119,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         return false;
     }
 
+    @Override
+    public String getEmployeeIdByTicket(String ticket) {
+        return loginTicketRepository.findEmployeeIdByTicket(ticket);
+    }
 }

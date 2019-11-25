@@ -3,6 +3,7 @@ package com.imooc.demo.controller;
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.Resource;
+import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.ResourceService;
 import com.imooc.demo.utils.ResultVOUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -30,6 +32,8 @@ public class EmployeeController {
 
     @Autowired
     public ResourceService resourceService;
+    @Autowired
+    public EmployeeService employeeService;
     @Modifying
     @Transactional
     @PostMapping("/createResource")
@@ -98,9 +102,11 @@ public class EmployeeController {
 
     //分页显示私有客户信息
     @GetMapping("/getResourceList")
-    public ResultVO<Map<String, String>> getResourceList(@RequestParam("employeeId") String employeeId,
-                                                         @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResultVO<Map<String, String>> getResourceList(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                         HttpServletRequest req) {
+        String token = req.getHeader("Authorization");
+        String employeeId = employeeService.getEmployeeIdByTicket(token);
         if(StringUtils.isEmpty(employeeId)){
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
