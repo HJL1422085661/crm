@@ -32,7 +32,9 @@ public enum ResultEnum {
     DELETE_RESOURCE_ERROR(21,"删除人才信息发生错误"),
     UPDATE_EMPLOYEE_ROLE_ERROR(22, "修改员工权限发生错误"),
     CREATE_PUBLIC_RESOURCE_ERROR(23, "创建共享人才发生错误"),
-    CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误");
+    CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误"),
+    TOKEN_IS_EMPTY(25, "token不能为空"),
+    RESOURCE_LIST_EMPTY(26, "人才资源为空");
     private Integer code;
     private String message;
 

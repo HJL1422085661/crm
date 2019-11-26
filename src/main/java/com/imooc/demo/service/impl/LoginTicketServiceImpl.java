@@ -37,7 +37,13 @@ public class LoginTicketServiceImpl implements LoginTicketService {
     }
 
     @Override
-    public String findEmployeeIdByTicket(String ticket) {
-        return loginTicketRepository.findEmployeeIdByTicket(ticket);
+    public String getEmployeeIdByTicket(String ticket) {
+//        System.out.println("ticket: " + ticket);
+//        String res = loginTicketRepository.getEmployeeIdByTicket(ticket);
+//        System.out.println("res:" + res);
+        LoginTicket loginTicket = loginTicketRepository.findLoginTicketByTicket(ticket);
+        System.out.println("为空:" + loginTicket == null);
+        return loginTicket.getEmployeeId();
+
     }
 }

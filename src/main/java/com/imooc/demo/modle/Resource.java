@@ -1,6 +1,7 @@
 package com.imooc.demo.modle;
 
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 @Entity
 @Data
+@DynamicUpdate
 public class Resource {
 
     /** 人才ID **/
@@ -42,12 +44,13 @@ public class Resource {
     /** QQ **/
     public String QQ;
     /** 性别 **/
-    public String sex;
+    public Integer gender;
     /** 邮箱 **/
     public String email;
     /** 备注 **/
     public String info;
-
+    /** 客户状态 **/
+    public Integer status;
 
 
 

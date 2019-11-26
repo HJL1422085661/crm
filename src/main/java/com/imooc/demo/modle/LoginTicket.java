@@ -7,8 +7,8 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name="ticket")
-public class Ticket {
+@Table(name="loginticket")
+public class LoginTicket {
 
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Id
@@ -18,6 +18,7 @@ public class Ticket {
     private String employeeId;
     private Date expired; //过期
     private int status;// 0有效，1无效
+    @Column(name = "ticket")
     private String ticket;
 
 }

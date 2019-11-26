@@ -38,18 +38,19 @@ public class LoginController {
     public ResultVO<Map<String, String>> login(@RequestBody Employee employee,
                                   @RequestParam(value = "remember", defaultValue = "false") Boolean remember,
                                   HttpServletResponse response, HttpServletRequest request){
-        String token = request.getHeader("Authorization");
-        System.out.println(token);
+//        String token = request.getHeader("Authorization");
+//        System.out.println(token);
         try{
             Map<String, Object> map = employeeService.login(employee.getEmployeeId(), employee.getPassWord());
             if(map.containsKey("ticket")){
+                String token =  map.get("ticket").toString();
                 Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
                 cookie.setPath("/");
                 response.addCookie(cookie);
                 if(remember){
                     cookie.setMaxAge(3600*24*5);
                 }
-                return getInfo(employee.getEmployeeId());
+                return getInfo(token,employee.getEmployeeId());
             }
             return ResultVOUtil.error(map);
         }catch (Exception e){
@@ -68,13 +69,13 @@ public class LoginController {
      * @param employeeId
      * @return
      */
-    public ResultVO<Map<String, String>> getInfo(String employeeId){
+    public ResultVO<Map<String, String>> getInfo(String token, String employeeId){
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         Map<String, String> map = new HashMap<>();
-        map.put("employeeId", employee.getEmployeeId());
-        map.put("employeeName", employee.getEmployeeName());
-        map.put("sex", employee.getSex());
-        map.put("iphoneNumber", employee.getIphoneNumber());
+        map.put("token", token);
+        map.put("user_name", employee.getEmployeeName());
+        map.put("user_Id", employee.getEmployeeId());
+        map.put("user_role", employee.getEmployRole().toString());
 
         return ResultVOUtil.success(map);
     }

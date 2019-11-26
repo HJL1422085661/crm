@@ -4,6 +4,7 @@ import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.Resource;
 import com.imooc.demo.service.EmployeeService;
+import com.imooc.demo.service.LoginTicketService;
 import com.imooc.demo.service.ResourceService;
 import com.imooc.demo.utils.ResultVOUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,8 @@ public class EmployeeController {
     public ResourceService resourceService;
     @Autowired
     public EmployeeService employeeService;
+    @Autowired
+    public LoginTicketService loginTicketService;
     @Modifying
     @Transactional
     @PostMapping("/createResource")
@@ -100,22 +103,36 @@ public class EmployeeController {
         }
     }
 
+    //解析token
+    public String parseToken( HttpServletRequest req){
+        String token = req.getHeader("Authorization").split(" ")[1];
+        if(token.equals("")) return "";
+        token = token.substring(1, token.length() - 1);
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        return employeeId;
+    }
+
     //分页显示私有客户信息
     @GetMapping("/getResourceList")
     public ResultVO<Map<String, String>> getResourceList(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                          @RequestParam(value = "size", defaultValue = "10") Integer size,
                                                          HttpServletRequest req) {
-        String token = req.getHeader("Authorization");
-        String employeeId = employeeService.getEmployeeIdByTicket(token);
+        String employeeId = parseToken(req);
+        if(employeeId.equals("")) return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        System.out.println("ID:" + employeeId);
         if(StringUtils.isEmpty(employeeId)){
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         PageRequest request = PageRequest.of(page, size);
         Page<Resource> resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
-
+        System.out.println(resourcePage.getContent());
+        if(resourcePage.isEmpty()) return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
         return ResultVOUtil.success(resourcePage.getContent());
     }
-
+    @PostMapping("/test")
+    public String test(){
+        return "hello world";
+    }
 
 }

@@ -87,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         ticket.setStatus(0);
         ticket.setTicket(UUID.randomUUID().toString().replaceAll("-",""));
 
-        loginTicketRepository.save(ticket);
+        loginTicketRepository.saveAndFlush(ticket);
 
         return ticket.getTicket();
     }
@@ -119,8 +119,5 @@ public class EmployeeServiceImpl implements EmployeeService {
         return false;
     }
 
-    @Override
-    public String getEmployeeIdByTicket(String ticket) {
-        return loginTicketRepository.findEmployeeIdByTicket(ticket);
-    }
+
 }
