@@ -63,9 +63,11 @@ public class PayBackController {
         }
         // 2、如果是普通员工：管理员确认前可修改，否则不予修改
         if (employeeRole == 1) {
-            // 检查是否已确认
+            // 检查是否已确认 0: 未确认；1: 已确认
             PayBackRecord payBackRecord = payBackRecordService.getPayBackRecordByRecordId(recordId);
-            return !payBackRecord.isChecked;
+            if ( payBackRecord.isChecked.equals("0")){
+                return true;
+            }
         }
         return false;
     }
