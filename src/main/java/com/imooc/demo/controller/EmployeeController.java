@@ -72,7 +72,7 @@ public class EmployeeController {
                                                         @RequestParam("resource") Resource resource) {
         Resource resource1 = resourceService.getResourceByResourceId(resourceId);
         BeanUtils.copyProperties(resource, resource1);
-        Boolean flag = resourceService.saveResource(resource);
+        Boolean flag = resourceService.saveResource(resource1);
         if (flag) {
             return ResultVOUtil.success();
         } else {

@@ -27,5 +27,5 @@ public class PayBackRecord {
     /** 回款时间 **/
     public Date payBackTime;
     /** 是否已确认 0: 未确认；1: 已确认 **/
-    public String isChecked;
+    public Integer isChecked;
 }

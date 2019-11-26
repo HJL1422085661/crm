@@ -7,7 +7,7 @@ public interface PayBackRecordService {
 
     PayBackRecord getPayBackRecordByRecordId(String recordId);
 
-    public Boolean savePayBackRecord(PayBackRecord payBackRecord);
+    Boolean savePayBackRecord(PayBackRecord payBackRecord);
 
 
     }
