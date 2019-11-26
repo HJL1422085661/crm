@@ -45,8 +45,9 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     }
 
     @Override
-    public Page<PayBackRecord> findAllPayBackRecord(Pageable pageable) {
-        return payBackRecordRepository.findAllPayBackRecord(pageable);
+    public Page<PayBackRecord> findPayBackRecord(Pageable pageable) {
+        return payBackRecordRepository.findPayBackRecordsByRecordId("0", pageable);
+//        return null;
     }
 
     @Override
