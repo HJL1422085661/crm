@@ -1,7 +1,6 @@
 package com.imooc.demo.service.impl;
 
 import com.imooc.demo.modle.LoginTicket;
-import com.imooc.demo.modle.Resource;
 import com.imooc.demo.repository.EmployeeRepository;
 import com.imooc.demo.repository.LoginTicketRepository;
 import com.imooc.demo.service.EmployeeService;
@@ -10,8 +9,6 @@ import com.imooc.demo.utils.PassUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +36,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Map<String, Object> login(String employeeId, String passWord) {
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【用户登录】用户ID不能为空");
@@ -53,13 +50,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             return map;
         }
         Employee employee = employeeRepository.getEmployeeByEmployeeId(employeeId);
-        if(employee == null){
+        if (employee == null) {
             log.error("【用户登录】用户ID不存在");
             map.put("msg", "用户ID不存在");
             return map;
         }
         //验证密码
-        if(!PassUtil.MD5(passWord + employee.getSalt()).equals(employee.getPassWord())){
+        if (!PassUtil.MD5(passWord + employee.getSalt()).equals(employee.getPassWord())) {
             log.error("【用户登录】密码输入错误");
             map.put("msg", "用户密码错误");
             return map;
@@ -74,7 +71,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeByEmployeeId(String employeeId) {
-        return  employeeRepository.getEmployeeByEmployeeId(employeeId);
+        return employeeRepository.getEmployeeByEmployeeId(employeeId);
     }
 
     @Override
@@ -82,12 +79,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         LoginTicket ticket = new LoginTicket();
         ticket.setEmployeeId(employeeId);
         Date date = new Date();
-        date.setTime(date.getTime() + 1000*365*24);
+        date.setTime(date.getTime() + 1000 * 365 * 24);
         ticket.setExpired(date);
         ticket.setStatus(0);
-        ticket.setTicket(UUID.randomUUID().toString().replaceAll("-",""));
+        ticket.setTicket(UUID.randomUUID().toString().replaceAll("-", ""));
 
-        loginTicketRepository.save(ticket);
+        loginTicketRepository.saveAndFlush(ticket);
 
         return ticket.getTicket();
     }
@@ -102,8 +99,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Boolean saveEmployee(Employee employee) {
         Employee employee1 = employeeRepository.saveAndFlush(employee);
-        if(employee1 != null) return true;
-        else  return false;
+        if (employee1 != null) return true;
+        else return false;
     }
 
     @Override
@@ -114,13 +111,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId) {
-        if(employeeRepository.updateEmployeeRoleByEmployeeId(employeeRole, employeeId) != 0)
+        if (employeeRepository.updateEmployeeRoleByEmployeeId(employeeRole, employeeId) != 0)
             return true;
         return false;
     }
 
-    @Override
-    public String getEmployeeIdByTicket(String ticket) {
-        return loginTicketRepository.findEmployeeIdByTicket(ticket);
-    }
+
 }

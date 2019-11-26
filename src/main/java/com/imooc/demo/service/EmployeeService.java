@@ -20,6 +20,5 @@ public interface EmployeeService {
     Boolean saveEmployee(Employee employee);
     Boolean deleteEmployee(String employeeId);
     Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
-    String getEmployeeIdByTicket(String ticket);
 
 }

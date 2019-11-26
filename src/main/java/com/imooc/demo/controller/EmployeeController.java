@@ -34,7 +34,6 @@ public class EmployeeController {
     public ResourceService resourceService;
     @Autowired
     public EmployeeService employeeService;
-
     @Modifying
     @Transactional
     @PostMapping("/createResource")
@@ -63,19 +62,11 @@ public class EmployeeController {
                                                             @RequestParam("resource") Resource resource) {
         Resource resource1 = resourceService.getResourceByResourceId(resourceId);
         BeanUtils.copyProperties(resource, resource1);
-        /*Boolean flag = resourceService.saveResource(resource1);
+        Boolean flag = resourceService.saveResource(resource);
         if(flag){
             return ResultVOUtil.success();
         }else{
             log.error("【更新人才资源信息】发生错误");
-            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
-        }*/
-
-        try{
-            resourceService.saveResource(resource);
-            return ResultVOUtil.success();
-        }catch (Exception e){
-            log.error("人才数据库更新错误！");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
         }
     }
@@ -98,7 +89,6 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
         }
     }
-
     @PostMapping("/deleteResource")
     public ResultVO<Map<String, String>> deleteResource(@RequestParam("resourceId") String resourceId) {
         Boolean flag = resourceService.deleteResourceByResourceId(resourceId);
