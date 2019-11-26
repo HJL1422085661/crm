@@ -31,6 +31,7 @@ public class ManagerServiceImpl implements ManagerService {
         Employee employee = new Employee();
         employee.setEmployeeId(employeeId);
         employee.setSalt(UUID.randomUUID().toString().substring(0, 5));
+
         //对密码加密
         employee.setPassWord(PassUtil.MD5(passWord + employee.getSalt()));
         employee.setEmployRole(employeeRole);

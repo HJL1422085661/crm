@@ -3,6 +3,7 @@ package com.imooc.demo.service.impl;
 import com.imooc.demo.modle.Resource;
 import com.imooc.demo.repository.ResourceRepository;
 import com.imooc.demo.service.ResourceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
+@Slf4j
 public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
@@ -27,9 +29,13 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Boolean saveResource(Resource resource) {
-        Resource resource1 = resourceRepository.saveAndFlush(resource);
-        if(resource1 != null) return true;
-        else return false;
+        try{
+            resourceRepository.saveAndFlush(resource);
+            return true;
+        }catch (Exception e){
+            log.error("人才数据更新失败！");
+            return false;
+        }
     }
 
     @Override
