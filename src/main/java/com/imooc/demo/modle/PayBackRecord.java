@@ -26,4 +26,6 @@ public class PayBackRecord {
     public BigDecimal payBackAmount;
     /** 回款时间 **/
     public Date payBackTime;
+    /** 是否已确认 **/
+    public boolean isChecked;
 }

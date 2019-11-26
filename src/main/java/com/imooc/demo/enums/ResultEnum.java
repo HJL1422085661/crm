@@ -32,7 +32,10 @@ public enum ResultEnum {
     DELETE_RESOURCE_ERROR(21,"删除人才信息发生错误"),
     UPDATE_EMPLOYEE_ROLE_ERROR(22, "修改员工权限发生错误"),
     CREATE_PUBLIC_RESOURCE_ERROR(23, "创建共享人才发生错误"),
-    CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误");
+    CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误"),
+    CREATE_PAYBACKRECORD_ERROR(25, "创建回款记录发生错误"),
+    UPDATE_PAYBACKRECORD_ERROR(26, "更新回款记录发生错误"),
+    CREATE_BUSINESS_ERROR(27, "创建订单发生错误");
     private Integer code;
     private String message;
 

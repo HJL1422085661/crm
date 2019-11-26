@@ -12,6 +12,11 @@ import java.util.List;
  * @Version 1.0
  */
 public interface ResourceService {
+    /**
+     * 录入人才信息
+     **/
+    Boolean addResource(Resource resource);
+
     List<Resource> getResourceByEmployeeId(String employeeId);
     Boolean saveResource(Resource resource);
     Resource getResourceByResourceId(String resourceId);
