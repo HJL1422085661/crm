@@ -7,6 +7,7 @@ import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.LoginTicketService;
 import com.imooc.demo.service.ResourceService;
 import com.imooc.demo.utils.ResultVOUtil;
+import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,32 +104,33 @@ public class EmployeeController {
         }
     }
 
-    //解析token
-    public String parseToken( HttpServletRequest req){
-        String token = req.getHeader("Authorization").split(" ")[1];
-        if(token.equals("")) return "";
-        token = token.substring(1, token.length() - 1);
-        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        return employeeId;
-    }
 
     //分页显示私有客户信息
     @GetMapping("/getResourceList")
     public ResultVO<Map<String, String>> getResourceList(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                          @RequestParam(value = "size", defaultValue = "10") Integer size,
                                                          HttpServletRequest req) {
-        String employeeId = parseToken(req);
+        String token  = TokenUtil.parseToken(req);
+        if (token.equals("")){
+            log.error("【获取人才列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if(employeeId.equals("")) return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
-        System.out.println("ID:" + employeeId);
         if(StringUtils.isEmpty(employeeId)){
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         PageRequest request = PageRequest.of(page, size);
         Page<Resource> resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
-        System.out.println(resourcePage.getContent());
-        if(resourcePage.isEmpty()) return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
-        return ResultVOUtil.success(resourcePage.getContent());
+
+        if(resourcePage.isEmpty()){
+            return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
+        }else{
+            System.out.println(resourcePage.getContent());
+            return ResultVOUtil.success(resourcePage.getContent());
+        }
+
     }
     @PostMapping("/test")
     public String test(){

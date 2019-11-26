@@ -34,7 +34,21 @@ public enum ResultEnum {
     CREATE_PUBLIC_RESOURCE_ERROR(23, "创建共享人才发生错误"),
     CREATE_PUBLIC_BUSINESS_ERROR(24, "创建共享企业发生错误"),
     TOKEN_IS_EMPTY(25, "token不能为空"),
-    RESOURCE_LIST_EMPTY(26, "人才资源为空");
+    RESOURCE_LIST_EMPTY(26, "人才资源为空"),
+    CREATE_PAY_BACK_RECORD_ERROR(27, "创建回款记录发生错误"),
+    UPDATE_PAY_BACK_RECORD_ERROR(28, "修改回款记录发生错误"),
+    COMMON_EMPLOYEE_NO_RIGHT(29, "普通员工无权访问"),
+    SELECT_PAY_BACK_RECORD_PARAM_ERROR(30, "查看回款记录参数错误"),
+    PARSE_TIME_EXCEPTION(31, "日期格式转化发生异常"),
+
+
+
+
+
+
+
+
+    ;
     private Integer code;
     private String message;
 
