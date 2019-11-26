@@ -16,7 +16,7 @@ public interface PayBackRecordService {
     PayBackRecord getPayBackRecordByRecordId(String recordId);
     Boolean savePayBackRecord(PayBackRecord payBackRecord);
     Page<PayBackRecord> findPayBackRecordByEmployeeId(String employeeId, Pageable pageable);
-    Page<PayBackRecord> findAllPayBackRecord(Pageable pageable);
+    Page<PayBackRecord> findPayBackRecord(Pageable pageable);
     Page<PayBackRecord> findPayBackRecordByTime(Date startTime, Date endTime, Pageable pageable);
 
 

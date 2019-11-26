@@ -99,7 +99,7 @@ public class PayBackController {
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
         PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createTime" );
-        Page<PayBackRecord> payBackRecordPage = payBackRecordService.findAllPayBackRecord(request);
+        Page<PayBackRecord> payBackRecordPage = payBackRecordService.findPayBackRecord(request);
         System.out.println(payBackRecordPage.getContent());
         if(payBackRecordPage.isEmpty()){
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
