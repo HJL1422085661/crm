@@ -13,6 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @Version 1.0
  */
 public interface FollowRecordRepository extends JpaRepository<ResourceFollowRecord, String> {
-    Page<ResourceFollowRecord> getResourceFollowRecordByResourceId(String resourceId, Pageable pageable);
+    Page<ResourceFollowRecord> getResourceFollowRecordByResourceId(Integer resourceId, Pageable pageable);
 
 }

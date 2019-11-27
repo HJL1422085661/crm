@@ -1,9 +1,8 @@
 package com.imooc.demo.modle;
 
 import lombok.Data;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -13,19 +12,21 @@ import java.util.Date;
  */
 @Entity
 @Data
+@Table(name = "resource")
 public class Resource {
 
     /** 人才ID **/
     @Id
-    @Column(name = "resourceId")
-    public String resourceId;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "resourceId", nullable = false)
+    public Integer resourceId;
 
     /** 客户负责人ID **/
     @Column(name = "employeeId")
     public String employeeId;
     /** 录入客户时间 **/
-    @Column(name = "createTime")
-    public Date createTime;
+    @Column(name = "createDate")
+    public String createDate;
     /** 人才资源共享状态 **/
     @Column(name = "shareStatus")
     public String shareStatus;
@@ -42,8 +43,8 @@ public class Resource {
     @Column(name = "certificate")
     public String certificate;
     /** 到期时间 **/
-    @Column(name = "endTime")
-    public Date endTime;
+    @Column(name = "endDate")
+    public String endDate;
     /** 注册省份 **/
     @Column(name = "province")
     public String province;
@@ -62,9 +63,11 @@ public class Resource {
     /** 客户状态 **/
     @Column(name = "status")
     public Integer status;
-    /** 客户状态 **/
+    /** 员工姓名 **/
     @Column(name = "employeeName")
     public String employeeName;
-
+    /** 所在城市 **/
+    @Column(name = "city")
+    public String city;
 
 }

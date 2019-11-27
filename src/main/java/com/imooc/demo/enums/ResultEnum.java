@@ -42,6 +42,8 @@ public enum ResultEnum {
     PARSE_TIME_EXCEPTION(31, "日期格式转化发生异常"),
     RESOURCE_FOLLOW_RECORD_EMPTY(32, "人才跟进记录为空"),
     CREATE_FOLLOW_RECORD_ERROR(33, "创建人才跟进记录错误"),
+    MODIFY_DEL_RESOURCE_ERROR(34, "改删人才资源息错误"),
+    MODIFY_DEL_COMPANY_ERROR(35, "改删企业资源息错误"),
 
 
 

@@ -35,20 +35,23 @@ class EmployeeControllerTest {
 
         resource.setQq("1422123344");
         resource.setEmail("xxx.qq.com");
-        resource.setGender(1);
         resource.setPhone("13731345667");
         resource.setProvince("四川");
         resource.setInfo("London No,2 Lake Park");
         resource.setCertificate("四六级证书");
-        Date date = new Date();
-        resource.setCreateTime(date);
-        resource.setEndTime(date);
+        resource.setIdentify("12414135");
+        resource.setCreateDate("2019-11-20");
+        resource.setEndDate("2020-10-20");
+        resource.setShareStatus("private");
+        resource.setEmployeeName("test");
+//        resource.setCreateTime(date);
+//        resource.setEndTime(date);
 
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmdd");
 
         for (int i = 1; i < 20; i++) {
-            resource.setResourceId(String.valueOf(i));
             resource.setStatus((i % 4) + 1);
+            resource.setGender(i);
             resourceRepository.saveAndFlush(resource);
         }
 
@@ -68,5 +71,9 @@ class EmployeeControllerTest {
 
     @Test
     void getResourceList() {
+    }
+
+    @Test
+    void createResource1() {
     }
 }

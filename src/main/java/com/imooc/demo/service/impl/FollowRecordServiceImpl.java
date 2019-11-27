@@ -22,7 +22,7 @@ public class FollowRecordServiceImpl implements FollowRecordService {
     public FollowRecordRepository followRecordRepository;
 
     @Override
-    public Page<ResourceFollowRecord> getFollowRecordsByResourceId(String resourceId, Pageable pageable) {
+    public Page<ResourceFollowRecord> getFollowRecordsByResourceId(Integer resourceId, Pageable pageable) {
         return followRecordRepository.getResourceFollowRecordByResourceId(resourceId, pageable);
     }
 

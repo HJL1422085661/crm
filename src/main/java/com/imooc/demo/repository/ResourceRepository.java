@@ -16,17 +16,17 @@ import java.util.List;
  */
 public interface ResourceRepository extends JpaRepository<Resource, String> {
     List<Resource> getResourceListByEmployeeId(String employeeId);
-    Resource getResourceByResourceId(String resourceId);
-    Boolean deleteByResourceId(String resourceId);
+    Resource getResourceByResourceId(Integer resourceId);
+    Boolean deleteByResourceId(Integer resourceId);
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE resource SET shareStatus = ?1 ,employeeId = ?2 WHERE resourceId = ?3 ")
-    int updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, String resourceId);
+    int updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, Integer resourceId);
 
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE resource SET shareStatus = ?1 WHERE resourceId = ?2 ")
-    int updateShareStatusByResourceId(String shareStatus, String resourceId);
+    int updateShareStatusByResourceId(String shareStatus, Integer resourceId);
 
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
 }

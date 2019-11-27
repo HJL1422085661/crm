@@ -2,9 +2,7 @@ package com.imooc.demo.modle;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -13,22 +11,23 @@ import java.util.Date;
  * @Version 1.0
  */
 @Entity
-@Data
+@Data@Table(name = "company")
 public class Company {
 
     /** 公司ID **/
     @Id
-    @Column(name = "companyId")
-    public String companyId;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "companyId", nullable = false)
+    public Integer companyId;
     /** 公司名称 **/
     @Column(name = "companyName")
     public String companyName;
     /** 合同起始时间 **/
-    @Column(name = "createTime")
-    public Date createTime;
+    @Column(name = "startDate")
+    public String startDate;
     /** 合同截止时间 */
-    @Column(name = "endTime")
-    public Date endTime;
+    @Column(name = "expireDate")
+    public String expireDate;
     /** 职位 **/
     @Column(name = "occupation")
     public String occupation;

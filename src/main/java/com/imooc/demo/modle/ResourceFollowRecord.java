@@ -35,8 +35,8 @@ public class ResourceFollowRecord {
     @Column(name = "content")
     private String content;
     /** 创建日期 **/
-    @Column(name = "createTime", nullable = false)
-    private String createTime;
+    @Column(name = "createDate", nullable = false)
+    private String createDate;
     /** 人才跟进状态 **/
     @Column(name = "status")
     private Integer status;

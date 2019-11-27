@@ -11,6 +11,6 @@ import org.springframework.data.domain.Pageable;
  * @Version 1.0
  */
 public interface FollowRecordService {
-    Page<ResourceFollowRecord> getFollowRecordsByResourceId(String resourceId, Pageable pageable);
+    Page<ResourceFollowRecord> getFollowRecordsByResourceId(Integer resourceId, Pageable pageable);
     ResourceFollowRecord createResourceFollow(ResourceFollowRecord resourceFollowRecord);
 }
