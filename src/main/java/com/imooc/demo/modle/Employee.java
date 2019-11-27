@@ -34,8 +34,10 @@ public class Employee {
     @Column(name = "passWord", nullable = false)
     private String passWord;
     /** 员工性别 **/
-    private String sex;
+    @Column(name = "gender")
+    private Integer gender;
     /** 密码加密需要 **/
+    @Column(name = "salt" )
     private String salt;
 
 

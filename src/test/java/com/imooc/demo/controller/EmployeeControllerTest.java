@@ -33,7 +33,7 @@ class EmployeeControllerTest {
         resource.setResourceName("李四");
         resource.setShareStatus("private");
 
-        resource.setQQ("1422123344");
+        resource.setQq("1422123344");
         resource.setEmail("xxx.qq.com");
         resource.setGender(1);
         resource.setPhone("13731345667");

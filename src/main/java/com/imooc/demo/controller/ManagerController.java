@@ -55,7 +55,6 @@ public class ManagerController {
     @PostMapping ("/register")
     public ResultVO<Map<String, String>> register(@Valid EmployeeForm employeeForm, BindingResult bindingResult){
 
-        Map<String, String> map = new HashMap<>();
         if(bindingResult.hasErrors()){
             log.error("【】参数不正确， employeeForm={}", employeeForm);
             throw new CrmException(ResultEnum.PARAM_ERROR.getCode(), bindingResult.getFieldError().getDefaultMessage());
@@ -69,15 +68,14 @@ public class ManagerController {
             log.error("【注册用户】用户ID已存在");
             return ResultVOUtil.error(ResultEnum.USER_ID_EXIST);
         }
-
         try {
-            managerService.register(employeeForm.getEmployeeId(), employeeForm.getPassWord(), employeeForm.getEmployRole());
+            employee =  managerService.register(employeeForm.getEmployeeId(), employeeForm.getPassWord(), employeeForm.getEmployRole(), employeeForm.getGender());
         }catch (Exception e){
             log.error("【注册用户】注册发生异常");
             return ResultVOUtil.error(ResultEnum.REGISTER_EXCEPTION);
         }
 
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(employee);
     }
 
     /**

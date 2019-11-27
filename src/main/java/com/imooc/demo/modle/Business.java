@@ -41,7 +41,7 @@ public class Business {
     @Column(name = "companyCategory")
     public String companyCategory;
     /** 订单创建者 **/
-    @Column(name = "creatorId")
+    @Column(name = "creatorId", nullable = false)
     public String creatorId;
 
 }

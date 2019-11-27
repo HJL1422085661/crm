@@ -28,8 +28,14 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Boolean saveResource(Resource resource) {
         Resource resource1 = resourceRepository.saveAndFlush(resource);
-        if(resource1 != null) return true;
-        else return false;
+        if (resource1 == null) return false;
+        return true;
+    }
+
+    @Override
+    public Resource createResource(Resource resource) {
+        Resource resource1 = resourceRepository.saveAndFlush(resource);
+        return resource1;
     }
 
     @Override

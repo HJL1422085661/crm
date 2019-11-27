@@ -23,6 +23,10 @@ public class EmployeeForm {
     @NotEmpty(message = "密码必填")
     private String passWord;
 
+    /** 员工性別 **/
+    @NotNull(message = "性別必填")
+    private Integer gender;
+
     /** 员工角色 **/
     @NotNull(message = "角色必填")
     private Integer employRole = EmployeeRoleEnum.EMPLOYEE.getCode();

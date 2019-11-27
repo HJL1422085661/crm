@@ -16,8 +16,8 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "followRecord")
-public class FollowRecord {
+@Table(name = "companyfollowrecord")
+public class CompanyFollowRecord {
     /** 跟进记录ID **/
     @Id
     @Column(name = "id", nullable = false)

@@ -170,7 +170,6 @@ public class PayBackController {
         else{
 
         }
-
         System.out.println(payBackRecordPage.getContent());
         if(payBackRecordPage.isEmpty()){
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);

@@ -40,9 +40,8 @@ public enum ResultEnum {
     COMMON_EMPLOYEE_NO_RIGHT(29, "普通员工无权访问"),
     SELECT_PAY_BACK_RECORD_PARAM_ERROR(30, "查看回款记录参数错误"),
     PARSE_TIME_EXCEPTION(31, "日期格式转化发生异常"),
-
-
-
+    RESOURCE_FOLLOW_RECORD_EMPTY(32, "人才跟进记录为空"),
+    CREATE_FOLLOW_RECORD_ERROR(33, "创建人才跟进记录错误"),
 
 
 
