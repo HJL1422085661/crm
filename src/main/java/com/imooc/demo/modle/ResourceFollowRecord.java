@@ -30,7 +30,7 @@ public class ResourceFollowRecord {
     public String employeeName;
     /** 人才ID **/
     @Column(name = "resourceId", nullable = false)
-    private String resourceId;
+    private Integer resourceId;
     /** 跟进内容 **/
     @Column(name = "content")
     private String content;

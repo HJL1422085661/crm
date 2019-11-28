@@ -29,10 +29,7 @@ public class FollowRecordServiceImpl implements FollowRecordService {
     @Override
     public ResourceFollowRecord createResourceFollow(ResourceFollowRecord resourceFollowRecord) {
         try {
-            System.out.println("存储ing:" + resourceFollowRecord.toString());
-            ResourceFollowRecord resourceFollowRecord1 =  followRecordRepository.saveAndFlush(resourceFollowRecord);
-            System.out.println("存储后"+ resourceFollowRecord1.toString());
-            return resourceFollowRecord;
+            return  followRecordRepository.saveAndFlush(resourceFollowRecord);
         }catch (Exception e){
             log.error("【创建人才跟进信息】发生异常");
             return null;

@@ -4,7 +4,6 @@ import com.imooc.demo.modle.PayBackRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Date;
 
 /**
  * @Author emperor
@@ -13,11 +12,11 @@ import java.util.Date;
  */
 public interface PayBackRecordService {
 
-    PayBackRecord getPayBackRecordByRecordId(String recordId);
+    PayBackRecord getPayBackRecordByRecordId(Integer recordId);
     Boolean savePayBackRecord(PayBackRecord payBackRecord);
     Page<PayBackRecord> findPayBackRecordByEmployeeId(String employeeId, Pageable pageable);
     Page<PayBackRecord> findPayBackRecord(Pageable pageable);
-    Page<PayBackRecord> findPayBackRecordByTime(Date startTime, Date endTime, Pageable pageable);
+    Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable);
 
 
 }

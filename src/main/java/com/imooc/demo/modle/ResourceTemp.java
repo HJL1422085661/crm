@@ -28,35 +28,35 @@ public class ResourceTemp {
     /** 请求内容 0: 改, 1:删 **/
     @Column(name = "requestStatus", nullable = false)
     public Integer requestStatus;
-    /** 审批状态 0: 未审批, 1:已审批 **/
-    @Column(name = "checkStatus", nullable = false)
-    public Integer checkStatus;
-    /** 审批操作 **/
-    @Column(name = "action", nullable = false)
-    public String action;
+    /** 审批状态 0: 未审批, 1:已审批 2：同意 3:不同意 **/
+    @Column(name = "checkedStatus", nullable = false)
+    public Integer checkedStatus;
+    /** 人才ID **/
+    @Column(name = "resourceId", nullable = false)
+    public Integer resourceId;
     /** 客户负责人ID **/
-    @Column(name = "employeeId")
+    @Column(name = "employeeId", nullable = false)
     public String employeeId;
     /** 录入客户时间 **/
-    @Column(name = "createDate")
+    @Column(name = "createDate", nullable = false)
     public String createDate;
     /** 到期时间 **/
-    @Column(name = "endDate")
+    @Column(name = "endDate", nullable = false)
     public String endDate;
     /** 人才资源共享状态 **/
-    @Column(name = "shareStatus")
+    @Column(name = "shareStatus", nullable = false)
     public String shareStatus;
     /** 人才身份证号 **/
     @Column(name = "identify")
     public String identify;
     /** 客户姓名 **/
-    @Column(name = "resourceName")
+    @Column(name = "resourceName", nullable = false)
     public String resourceName;
     /** 客户手机号 **/
-    @Column(name = "phone")
+    @Column(name = "phone", nullable = false)
     public String phone;
     /** 证书 **/
-    @Column(name = "certificate")
+    @Column(name = "certificate", nullable = false)
     public String certificate;
     /** 注册省份 **/
     @Column(name = "province")

@@ -2,10 +2,7 @@ package com.imooc.demo.modle;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -20,8 +17,9 @@ import java.util.Date;
 public class PayBackRecord {
     /** 记录ID **/
     @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "recordId")
-    public String recordId;
+    public Integer recordId;
     /** 业务ID **/
     @Column(name = "businessId")
     public String businessId;
@@ -29,11 +27,11 @@ public class PayBackRecord {
     @Column(name = "payBackAmount")
     public BigDecimal payBackAmount;
     /** 回款记录创建时间 **/
-    @Column(name = "createTime")
-    public Date createTime;
+    @Column(name = "createDate")
+    public String createDate;
     /** 回款到账时间 **/
-    @Column(name = "endTime")
-    public Date endTime;
+    @Column(name = "payBackDate")
+    public String payBackDate;
     /** 是否已确认 **/
     @Column(name = "isChecked")
     public Integer isChecked;

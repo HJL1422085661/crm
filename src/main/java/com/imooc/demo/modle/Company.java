@@ -22,6 +22,14 @@ public class Company {
     /** 公司名称 **/
     @Column(name = "companyName")
     public String companyName;
+
+    /** 创建者 **/
+    @Column(name = "employeeId")
+    public String employeeId;
+    /** 员工姓名 **/
+    @Column(name = "employeeName")
+    public String employeeName;
+
     /** 合同起始时间 **/
     @Column(name = "startDate")
     public String startDate;
@@ -38,8 +46,8 @@ public class Company {
     @Column(name = "gender")
     public Integer gender;
     /**联系人手机号 **/
-    @Column(name = "iphoneNumber")
-    public String iphoneNumber;
+    @Column(name = "phoneNumber")
+    public String phoneNumber;
     /** 公司类型 **/
     @Column(name = "companyCategory")
     public String companyCategory;

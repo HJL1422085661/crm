@@ -8,7 +8,6 @@ package com.imooc.demo.controller;
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.PayBackRecord;
-import com.imooc.demo.modle.Resource;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.LoginTicketService;
 import com.imooc.demo.service.PayBackRecordService;
@@ -23,10 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 
@@ -62,7 +57,7 @@ public class PayBackController {
             log.error("【获取回款记录】employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<PayBackRecord> payBackRecordPage = payBackRecordService.findPayBackRecordByEmployeeId(employeeId, request);
         System.out.println(payBackRecordPage.getContent());
         if(payBackRecordPage.isEmpty()){
@@ -98,7 +93,7 @@ public class PayBackController {
             log.error("【获取所有回款记录】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
-        PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createTime" );
+        PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createDate" );
         Page<PayBackRecord> payBackRecordPage = payBackRecordService.findPayBackRecord(request);
         System.out.println(payBackRecordPage.getContent());
         if(payBackRecordPage.isEmpty()){
@@ -132,12 +127,12 @@ public class PayBackController {
             log.error("【混合查询获取回款记录】Token为空");
             return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
         }
-        String employeeId1 = loginTicketService.getEmployeeIdByTicket(token);
-        if(employeeId1.equals("")){
-            log.error("【混合查询获取回款记录】employeeId为空");
+        String adminId = loginTicketService.getEmployeeIdByTicket(token);
+        if(adminId.equals("")){
+            log.error("【混合查询获取回款记录】AdminID不存在");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if(employeeService.getEmployeeByEmployeeId(employeeId1).getEmployRole() != 2){
+        if(employeeService.getEmployeeByEmployeeId(adminId).getEmployRole() != 2){
             log.error("【混合查询获取回款记录】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -146,21 +141,21 @@ public class PayBackController {
             return ResultVOUtil.error(ResultEnum.SELECT_PAY_BACK_RECORD_PARAM_ERROR);
         }
 
-        PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createTime" );
+        PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createDate" );
         Page<PayBackRecord> payBackRecordPage = null;
-        Date start = null;
-        Date end = null;
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try{
-             start = format.parse(startTime);
-             end = format.parse(endTime);
-        }catch (ParseException  e){
-            log.error("【混合查询获取回款记录】时间解析发生异常" + e.getMessage());
-            return ResultVOUtil.error(ResultEnum.PARSE_TIME_EXCEPTION);
-        }
+//        Date start = null;
+//        Date end = null;
+//        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        try{
+//             start = format.parse(startTime);
+//             end = format.parse(endTime);
+//        }catch (ParseException  e){
+//            log.error("【混合查询获取回款记录】时间解析发生异常" + e.getMessage());
+//            return ResultVOUtil.error(ResultEnum.PARSE_TIME_EXCEPTION);
+//        }
         //只指定起始时间查询
         if(employeeId.equals("")){
-            payBackRecordPage  = payBackRecordService.findPayBackRecordByTime(start, end, request);
+            payBackRecordPage  = payBackRecordService.findPayBackRecordByTime(startTime, endTime, request);
         }
         //只指定员工employeeId查询
         else if(startTime == null){
@@ -178,19 +173,6 @@ public class PayBackController {
             return ResultVOUtil.success(payBackRecordPage.getContent());
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -224,7 +206,7 @@ public class PayBackController {
      * @return
      */
     @PostMapping("/isAllowedToUpdateRecord")
-    public boolean isAllowedToUpdateRecord(@RequestParam("recordId") String recordId,
+    public boolean isAllowedToUpdateRecord(@RequestParam("recordId") Integer recordId,
                                            @RequestParam("employeeRole") Integer employeeRole) {
         // 1、如果是管理员：可直接修改（1:"普通员工"; 2:"管理员"）
         if (employeeRole == 2) {
@@ -246,7 +228,7 @@ public class PayBackController {
      * @return
      */
     @PostMapping("/updatePayBackRecord")
-    public ResultVO<Map<String, String>> updatePayBackRecord(@RequestParam("recordId") String recordId,
+    public ResultVO<Map<String, String>> updatePayBackRecord(@RequestParam("recordId") Integer recordId,
                                                              @RequestParam("paybackrecord") PayBackRecord payBackRecord) {
 
         //首先获取数据库中对应的回款记录

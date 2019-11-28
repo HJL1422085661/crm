@@ -24,7 +24,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
      * @param recordId: 回款记录ID
      * @return
      */
-    public PayBackRecord getPayBackRecordByRecordId(String recordId) {
+    public PayBackRecord getPayBackRecordByRecordId(Integer recordId) {
         //TO
         return payBackRecordRepository.findById(recordId).get();
     }
@@ -51,7 +51,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     }
 
     @Override
-    public Page<PayBackRecord> findPayBackRecordByTime(Date startTime, Date endTime, Pageable pageable){
-        return payBackRecordRepository.findPayBackRecordsByCreateTimeBetween(startTime, endTime, pageable);
+    public Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable){
+        return payBackRecordRepository.findPayBackRecordsByCreateDateBetween(startTime, endTime, pageable);
     }
 }

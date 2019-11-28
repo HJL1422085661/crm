@@ -42,12 +42,16 @@ public enum ResultEnum {
     PARSE_TIME_EXCEPTION(31, "日期格式转化发生异常"),
     RESOURCE_FOLLOW_RECORD_EMPTY(32, "人才跟进记录为空"),
     CREATE_FOLLOW_RECORD_ERROR(33, "创建人才跟进记录错误"),
-    MODIFY_DEL_RESOURCE_ERROR(34, "改删人才资源息错误"),
-    MODIFY_DEL_COMPANY_ERROR(35, "改删企业资源息错误"),
-
-
-
-
+    UPDATE_RESOURCE_EXCEPTION(34, "更新人才资源信息发生异常"),
+    MODIFY_DEL_COMPANY_ERROR(35, "改删企业资源息发生错误"),
+    MODIFY_DEL_COMPANY_EXCEPTION(36, "改删企业资源息发生异常"),
+    MANAGER_UPDATE_RESOURCE_INFO_ERROR(37, "管理员更新人才资源信息发生错误"),
+    CREATE_COMPANY_ERROR(38, "创建公司信息发生错误"),
+    COMPANY_LIST_EMPTY(39, "公司资源列表为空"),
+    UPDATE_COMPANY_INFO_ERROR(40, "更新企业信息发生错误"),
+    UPDATE_COMPANY_INFO_EXCEPTION(41, "更新企业信息发生异常"),
+    DELETE_COMPANY_INFO_ERROR(42, "删除企业信息发生错误"),
+    DELETE_COMPANY_INFO_EXCEPTION(43, "删除企业信息发生异常"),
 
     ;
     private Integer code;

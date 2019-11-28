@@ -1,5 +1,6 @@
 package com.imooc.demo.controller;
 
+import com.imooc.demo.modle.Company;
 import com.imooc.demo.modle.Resource;
 import com.imooc.demo.repository.ResourceRepository;
 import com.imooc.demo.service.ResourceService;
@@ -75,5 +76,17 @@ class EmployeeControllerTest {
 
     @Test
     void createResource1() {
+    }
+
+    @Test
+    void createCompany() {
+        Company company = new Company();
+        company.setCompanyName("江西建筑集团有限公司");
+        company.setCompanyCategory("建筑公司");
+        company.setContactorName("胡总");
+        company.setPhoneNumber("12342536");
+        company.setEmployeeId("张三");
+        company.setGender(1);
+
     }
 }

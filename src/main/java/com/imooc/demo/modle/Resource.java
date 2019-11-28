@@ -1,9 +1,7 @@
 package com.imooc.demo.modle;
 
 import lombok.Data;
-
 import javax.persistence.*;
-import java.util.Date;
 
 /**
  * @Author emperor
@@ -60,7 +58,7 @@ public class Resource {
     /** 备注 **/
     @Column(name = "info")
     public String info;
-    /** 客户状态 **/
+    /** 客户状态（潜在客户、流失客户等） **/
     @Column(name = "status")
     public Integer status;
     /** 员工姓名 **/

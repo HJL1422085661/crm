@@ -25,21 +25,17 @@ public class CompanyTemp {
     @Column(name = "id", nullable = false)
     public Integer id;
 
-    /** 请求内容 0: 改, 1:删 **/
+     /** 请求内容 0: 改, 1:删 **/
     @Column(name = "requestStatus", nullable = false)
     public Integer requestStatus;
 
-    /**  审批状态 0: 未审批, 1:已审批  **/
-    @Column(name = "checkStatus", nullable = false)
-    public Integer checkStatus;
-
-    /** 审批操作 **/
-    @Column(name = "action", nullable = false)
-    public String action;
+    /** 审批状态 0: 未审批, 1:已审批 2：同意 3:不同意 **/
+    @Column(name = "checkedStatus", nullable = false)
+    public Integer checkedStatus;
 
     /** 公司ID **/
     @Column(name = "companyId")
-    public String companyId;
+    public Integer companyId;
     /** 公司名称 **/
     @Column(name = "companyName")
     public String companyName;
@@ -59,8 +55,8 @@ public class CompanyTemp {
     @Column(name = "gender")
     public Integer gender;
     /**联系人手机号 **/
-    @Column(name = "iphoneNumber")
-    public String iphoneNumber;
+    @Column(name = "phoneNumber")
+    public String phoneNumber;
     /** 公司类型 **/
     @Column(name = "companyCategory")
     public String companyCategory;
