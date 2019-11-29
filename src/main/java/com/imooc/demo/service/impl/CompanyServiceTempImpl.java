@@ -30,4 +30,15 @@ public class CompanyServiceTempImpl implements CompanyTempService {
         return companyTemp1;
     }
 
+    @Override
+    public Boolean saveCompanyTemp(CompanyTemp companyTemp) {
+        CompanyTemp companyTemp1 = companyTempRepository.saveAndFlush(companyTemp);
+        if (companyTemp1 == null) return false;
+        return true;
+    }
+
+    @Override
+    public CompanyTemp findCompanyTempById(Integer id) {
+        return companyTempRepository.findCompanyTempById(id);
+    }
 }

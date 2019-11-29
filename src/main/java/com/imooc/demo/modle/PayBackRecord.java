@@ -22,7 +22,7 @@ public class PayBackRecord {
     public Integer recordId;
     /** 业务ID **/
     @Column(name = "businessId")
-    public String businessId;
+    public Integer businessId;
     /** 回款金额 **/
     @Column(name = "payBackAmount")
     public BigDecimal payBackAmount;

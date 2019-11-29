@@ -14,8 +14,8 @@ public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, In
     Page<PayBackRecord> findPayBackRecordsByCreateDateBetween(String startTime, String endTime, Pageable pageable);
 
     @Query(nativeQuery = true, value = "select * FROM paybackrecord where recordId = ?1")
-    Page<PayBackRecord> findPayBackRecordsByRecordId(String recordId, Pageable pageable);
+    Page<PayBackRecord> findPayBackRecordsByRecordId(Integer recordId, Pageable pageable);
 
-
+    Page<PayBackRecord> findPayBackRecordsByCreateDateBetweenAndEmployeeId(String startTime, String endTime, String employeeId, Pageable pageable);
 }
 

@@ -38,14 +38,14 @@ public class PayBackController {
 
 
     /**
-     * 根据员工ID查看回款记录
+     * 根据员工ID查看回款记录(员工查询自己的回款记录|老板查看某个员工的回款记录)
      *
      * @param
      * @return
      */
     @PostMapping("/getPayBackRecordList")
     public ResultVO<Map<String, String>> getPayBackRecordList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                              @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                              @RequestParam(value = "size", defaultValue = "2") Integer size,
                                                              HttpServletRequest req) {
         String token  = TokenUtil.parseToken(req);
         if (token.equals("")){
@@ -70,7 +70,7 @@ public class PayBackController {
 
 
     /**
-     * 管理员查看回款记录
+     * 管理员查看所有的回款记录
      *
      * @param
      * @return
@@ -143,16 +143,6 @@ public class PayBackController {
 
         PageRequest request = PageRequest.of(page, size,Sort.Direction.DESC, "createDate" );
         Page<PayBackRecord> payBackRecordPage = null;
-//        Date start = null;
-//        Date end = null;
-//        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        try{
-//             start = format.parse(startTime);
-//             end = format.parse(endTime);
-//        }catch (ParseException  e){
-//            log.error("【混合查询获取回款记录】时间解析发生异常" + e.getMessage());
-//            return ResultVOUtil.error(ResultEnum.PARSE_TIME_EXCEPTION);
-//        }
         //只指定起始时间查询
         if(employeeId.equals("")){
             payBackRecordPage  = payBackRecordService.findPayBackRecordByTime(startTime, endTime, request);
@@ -163,7 +153,7 @@ public class PayBackController {
         }
         //指定员工ID以及起始日期查询
         else{
-
+            payBackRecordPage = payBackRecordService.findPayBackRecordByEmployeeIdAndTime(startTime, endTime, employeeId, request);
         }
         System.out.println(payBackRecordPage.getContent());
         if(payBackRecordPage.isEmpty()){
@@ -173,13 +163,6 @@ public class PayBackController {
             return ResultVOUtil.success(payBackRecordPage.getContent());
         }
     }
-
-
-
-
-
-
-
 
     /**
      * 新建回款记录

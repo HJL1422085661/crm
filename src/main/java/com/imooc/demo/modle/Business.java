@@ -1,10 +1,9 @@
 package com.imooc.demo.modle;
 
+import com.imooc.demo.enums.BusinessStatusRoleEnum;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -20,7 +19,8 @@ public class Business {
     /** 业务ID **/
     @Id
     @Column(name = "businessId")
-    public String businessId;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    public Integer businessId;
 
     /** 业务负责人ID **/
     @Column(name = "employeeId")
@@ -36,7 +36,7 @@ public class Business {
     public  String companyName;
     /** 订单状态 0 表示ing 1表示完成 **/
     @Column(name = "businessStatus")
-    public Integer businessStatus;
+    public Integer businessStatus =  BusinessStatusRoleEnum.PROCESSING.getCode();
     /** 公司类型 **/
     @Column(name = "companyCategory")
     public String companyCategory;

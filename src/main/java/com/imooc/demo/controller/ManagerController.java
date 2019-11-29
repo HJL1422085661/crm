@@ -1,28 +1,29 @@
 package com.imooc.demo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.imooc.demo.VO.ResultVO;
 
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.exception.CrmException;
 import com.imooc.demo.form.EmployeeForm;
-import com.imooc.demo.modle.Business;
-import com.imooc.demo.modle.Employee;
-import com.imooc.demo.modle.Resource;
-import com.imooc.demo.service.BusinessService;
-import com.imooc.demo.service.EmployeeService;
-import com.imooc.demo.service.ManagerService;
-import com.imooc.demo.service.ResourceService;
+import com.imooc.demo.modle.*;
+import com.imooc.demo.service.*;
 import com.imooc.demo.utils.ResultVOUtil;
+import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,14 @@ public class ManagerController {
     public BusinessService businessService;
     @Autowired
     public ResourceService resourceService;
+    @Autowired
+    public ResourceTempService resourceTempService;
+    @Autowired
+    public CompanyService companyService;
+    @Autowired
+    public CompanyTempService companyTempService;
+    @Autowired
+    public LoginTicketService loginTicketService;
 
     /**
      * manager注册employer, 注册成功返回ticket
@@ -182,12 +191,12 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
         }
     }
-//    @PostMapping("/deletePublicResource")
-//    public ResultVO<Map<String, String>> deletePublicResource(@RequestParam("resourceId") String resourceId){
-//
-//
-//    }
-    //共享企业库
+
+    /**
+     * 创建共享人才
+     * @param business
+     * @return
+     */
     @PostMapping("/createPublicBusiness")
     public ResultVO<Map<String, String>> createPublicBusiness(@RequestParam("business") Business business){
         Boolean flag = businessService.createPublicBusiness(business);
@@ -198,5 +207,221 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_BUSINESS_ERROR);
         }
     }
+
+    /**
+     * 管理员获取人才修改|删除代办事项
+     * @param checkedStatus  审批状态 0: 未审批, 1:已审批 2：同意 3:不同意
+     * @param page
+     * @param size
+     * @param req
+     * @return
+     */
+    @PostMapping("/getResourceCheckList")
+    public ResultVO<Map<String, String>> getResourceCheckList(@RequestBody  int checkedStatus,
+                                                              @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                              @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                              HttpServletRequest req){
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取人才资源审批|未审批列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取人才资源审批|未审批列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        if(employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2){
+            log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate" );
+        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatus(checkedStatus, request);
+
+        if(resourceTempPage.isEmpty()){
+            return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
+        }else{
+            System.out.println(resourceTempPage.getContent());
+            return ResultVOUtil.success(resourceTempPage.getContent());
+        }
+
+    }
+
+
+    /**
+     * 管理员获取人才修改|删除代办事项
+     * @param checkedStatus  审批状态 0: 未审批, 1:已审批 2：同意 3:不同意
+     * @param req
+     * @return
+     */
+    @PostMapping("/getCompanyCheckList")
+    public ResultVO<Map<String, String>> getCompanyCheckList(@RequestBody  int checkedStatus,
+                                                             @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                             @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                             HttpServletRequest req){
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取人才资源审批|未审批列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取人才资源审批|未审批列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        if(employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2){
+            log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate" );
+        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatus(checkedStatus, request);
+
+        if(resourceTempPage.isEmpty()){
+            return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
+        }else{
+            System.out.println(resourceTempPage.getContent());
+            return ResultVOUtil.success(resourceTempPage.getContent());
+        }
+
+
+
+    }
+
+
+    /** 待办事项 ·处理·部分程序 **/
+
+    /**
+     * 管理员审批人才修改|删除代办事项
+     * @param checkedStatus  审批状态 0: 未审批, 1:已审批 2：同意 3:不同意
+     * @param id 人才改删临时表ID
+     * @param req
+     * @return
+     */
+    @PostMapping("/checkResourceCheckList")
+    public ResultVO<Map<String, String>> checkResourceCheckList(@RequestBody  int id,
+                                                                @RequestBody  int checkedStatus,
+                                                                HttpServletRequest req){
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【管理员审批人才资源审批|未审批列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【管理员审批人才资源审批|未审批列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        if(employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2){
+            log.error("【管理员审批人才资源审批|未审批列表】普通员工无权查看所有回款记录");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        ResourceTemp resourceTemp = resourceTempService.findResourceTempById(id);
+        // 更新相应操作状态
+        resourceTemp.setCheckedStatus(checkedStatus);
+
+        Resource resource = null;
+        BeanUtils.copyProperties(resourceTemp, resource);
+        // 审批状态 0: 未审批,  1：同意 2: 不同意
+        if (checkedStatus == 1){
+            // 同意
+            if (resourceTemp.requestStatus == 0){
+                // 改
+                Boolean flag = resourceService.saveResource(resource);
+                if (flag) {
+                    return ResultVOUtil.success();
+                } else {
+                    return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+                }
+            } else if (resourceTemp.requestStatus == 1) {
+                // 删
+                Boolean flag = resourceService.deleteResourceByResourceId(resource.getResourceId());if (flag) {
+                    return ResultVOUtil.success();
+                } else {
+                    return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+                }
+
+            }
+            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+        } else if (checkedStatus == 2) {
+            // 不同意
+            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+        }
+        // 审批完成后，将临时表写回数据库
+        Boolean flag = resourceTempService.saveResourceTemp(resourceTemp);
+        if (flag) {
+            return ResultVOUtil.success();
+        } else {
+            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+        }
+
+
+    }
+ /**
+     * 管理员审批公司修改|删除代办事项
+     * @param checkedStatus  审批状态 0: 未审批, 1:已审批 2：同意 3:不同意
+     * @param id 公司改删临时表ID
+     * @param req
+     * @return
+     */
+    @PostMapping("/checkCompanyCheckList")
+    public ResultVO<Map<String, String>> checkCompanyCheckList(@RequestBody  int id,
+                                                                @RequestBody  int checkedStatus,
+                                                                HttpServletRequest req){
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【管理员审批公司资源审批|未审批列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【管理员审批公司资源审批|未审批列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        if(employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2){
+            log.error("【管理员审批公司资源审批|未审批列表】普通员工无权查看所有回款记录");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        CompanyTemp companyTemp = companyTempService.findCompanyTempById(id);
+        // 更新相应操作状态
+        companyTemp.setCheckedStatus(checkedStatus);
+
+        Company company = null;
+        BeanUtils.copyProperties(companyTemp, company);
+        // 审批状态 0: 未审批,  1：同意 2: 不同意
+        if (checkedStatus == 1){
+            // 同意
+            if (companyTemp.requestStatus == 0){
+                // 改
+                Boolean flag = companyService.saveCompany(company);
+                if (flag) {
+                    return ResultVOUtil.success();
+                } else {
+                    return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+                }
+            } else if (companyTemp.requestStatus == 1) {
+                // 删
+                Boolean flag = companyService.deleteCompanyByCompanyId(company.getCompanyId());if (flag) {
+                    return ResultVOUtil.success();
+                } else {
+                    return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+                }
+
+            }
+            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+        } else if (checkedStatus == 2) {
+            // 不同意
+            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+        }
+        // 审批完成后，将临时表写回数据库
+        Boolean flag = companyTempService.saveCompanyTemp(companyTemp);
+        if (flag) {
+            return ResultVOUtil.success();
+        } else {
+            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
+        }
+
+
+    }
+
 
 }

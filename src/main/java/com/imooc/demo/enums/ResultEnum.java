@@ -52,6 +52,23 @@ public enum ResultEnum {
     UPDATE_COMPANY_INFO_EXCEPTION(41, "更新企业信息发生异常"),
     DELETE_COMPANY_INFO_ERROR(42, "删除企业信息发生错误"),
     DELETE_COMPANY_INFO_EXCEPTION(43, "删除企业信息发生异常"),
+    RESOURCE_TEMP_LIST_EMPTY(44, "人才管理代办事项为空"),
+    UPDATE_RESOURCE_TEMP_ERROR(45, "更新人才临时表错误"),
+    CHECK_SUCCESS(46, "审批成功"),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     ;
     private Integer code;

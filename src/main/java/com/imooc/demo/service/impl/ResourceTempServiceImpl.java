@@ -10,6 +10,8 @@ import com.imooc.demo.repository.ResourceTempRepository;
 import com.imooc.demo.service.ResourceTempService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +21,13 @@ public class ResourceTempServiceImpl implements ResourceTempService {
 
     @Autowired
     public ResourceTempRepository resourceTempRepository;
+
+    @Override
+    public Boolean saveResourceTemp(ResourceTemp resourceTemp) {
+        ResourceTemp resourceTemp1 = resourceTempRepository.saveAndFlush(resourceTemp);
+        if (resourceTemp1 == null) return false;
+        return true;
+    }
 
     @Override
     public ResourceTemp createResourceTemp(ResourceTemp resourceTemp) {
@@ -33,4 +42,13 @@ public class ResourceTempServiceImpl implements ResourceTempService {
         return resourceTemp1;
     }
 
+    @Override
+    public Page<ResourceTemp> findResourceTempByCheckedStatus(Integer checkedStatus, Pageable pageable) {
+        return resourceTempRepository.findResourceTempByCheckedStatus(checkedStatus, pageable);
+    }
+
+    @Override
+    public ResourceTemp findResourceTempById(Integer id) {
+        return resourceTempRepository.findResourceTempById(id);
+    }
 }

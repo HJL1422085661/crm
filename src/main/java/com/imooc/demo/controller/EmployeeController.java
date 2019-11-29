@@ -7,6 +7,7 @@ import com.imooc.demo.service.*;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.crypto.hash.Hash;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -116,10 +117,12 @@ public class EmployeeController {
 
 
     //分页显示私有客户信息
-    @GetMapping("/getResourceList")
-    public ResultVO<Map<String, String>> getResourceList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
+    @PostMapping("/getResourceList")
+    public ResultVO<Map<String, String>> getResourceList(@RequestBody HashMap map,
                                                          HttpServletRequest req) {
+
+        Integer page = Integer.parseInt(map.get("page").toString());
+        Integer size = Integer.parseInt(map.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
 
         System.out.println("token is:" + token);
@@ -146,17 +149,15 @@ public class EmployeeController {
 
     /**
      * 获取人才跟进记录
-     *
      * @param map
-     * @param page
-     * @param size
      * @return
      */
     @PostMapping("/getResourceFollows")
-    public ResultVO<Map<String, String>> getResourceFollows(@RequestBody HashMap map,
-                                                            @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResultVO<Map<String, String>> getResourceFollows(@RequestBody HashMap map) {
+
         Integer resourceId = Integer.parseInt(map.get("resourceId").toString());
+        Integer page = Integer.parseInt(map.get("page").toString());
+        Integer size = Integer.parseInt(map.get("pageSize").toString());
 
         System.out.println("resourceId:" + resourceId);
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
@@ -426,15 +427,16 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Company company1 = companyService.createCompany(company);
-        if(company1 == null){
+        if (company1 == null) {
             return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_ERROR);
         }
         return ResultVOUtil.error(company1);
     }
+
     @GetMapping("/getCompanyList")
     public ResultVO<Map<String, String>> getCompanyList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                         HttpServletRequest req) {
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                        HttpServletRequest req) {
         String token = TokenUtil.parseToken(req);
 
         System.out.println("token is:" + token);
@@ -457,6 +459,7 @@ public class EmployeeController {
         }
 
     }
+
     @PostMapping("/test")
     public String test() {
         return "hello world";

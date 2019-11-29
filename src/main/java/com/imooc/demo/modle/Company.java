@@ -30,6 +30,9 @@ public class Company {
     @Column(name = "employeeName")
     public String employeeName;
 
+    /** 客户状态（潜在客户、流失客户等） **/
+    @Column(name = "status")
+    public Integer status;
     /** 合同起始时间 **/
     @Column(name = "startDate")
     public String startDate;
@@ -48,7 +51,17 @@ public class Company {
     /**联系人手机号 **/
     @Column(name = "phoneNumber")
     public String phoneNumber;
+    /** 联系人邮箱 **/
+    @Column(name = "email")
+    public String email;
     /** 公司类型 **/
     @Column(name = "companyCategory")
     public String companyCategory;
+       /** 备注 **/
+    @Column(name = "info")
+    public String info;
+    /** 注册省份 **/
+    @Column(name = "province")
+    public String province;
+
 }

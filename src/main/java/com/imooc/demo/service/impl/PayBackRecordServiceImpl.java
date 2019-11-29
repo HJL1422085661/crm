@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 
 @Service
 @Slf4j
@@ -31,7 +30,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
 
     public Boolean savePayBackRecord(PayBackRecord payBackRecord) {
         try {
-            PayBackRecord payBackRecord1 = payBackRecordRepository.saveAndFlush(payBackRecord);
+            payBackRecordRepository.saveAndFlush(payBackRecord);
         }catch (Exception e){
             log.error("【保存回款记录】失败");
             return false;
@@ -46,12 +45,16 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
 
     @Override
     public Page<PayBackRecord> findPayBackRecord(Pageable pageable) {
-        return payBackRecordRepository.findPayBackRecordsByRecordId("0", pageable);
-//        return null;
+        return payBackRecordRepository.findAll(pageable);
     }
 
     @Override
     public Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable){
         return payBackRecordRepository.findPayBackRecordsByCreateDateBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<PayBackRecord> findPayBackRecordByEmployeeIdAndTime(String startTime, String endTime, String employeeId, Pageable pageable) {
+        return payBackRecordRepository.findPayBackRecordsByCreateDateBetweenAndEmployeeId(startTime, endTime, employeeId, pageable);
     }
 }

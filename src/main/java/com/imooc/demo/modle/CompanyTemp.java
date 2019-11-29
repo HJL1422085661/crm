@@ -29,7 +29,7 @@ public class CompanyTemp {
     @Column(name = "requestStatus", nullable = false)
     public Integer requestStatus;
 
-    /** 审批状态 0: 未审批, 1:已审批 2：同意 3:不同意 **/
+    /** 审批状态 0: 未审批,  1：同意 2: 不同意 **/
     @Column(name = "checkedStatus", nullable = false)
     public Integer checkedStatus;
 
