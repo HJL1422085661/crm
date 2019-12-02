@@ -56,7 +56,7 @@ public class Company {
     public String email;
     /** 公司类型 **/
     @Column(name = "companyCategory")
-    public String companyCategory;
+    public Integer companyCategory;
        /** 备注 **/
     @Column(name = "info")
     public String info;

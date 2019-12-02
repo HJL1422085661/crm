@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -44,9 +45,11 @@ public class PayBackController {
      * @return
      */
     @PostMapping("/getPayBackRecordList")
-    public ResultVO<Map<String, String>> getPayBackRecordList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                              @RequestParam(value = "size", defaultValue = "2") Integer size,
-                                                             HttpServletRequest req) {
+    public ResultVO<Map<String, String>> getPayBackRecordList(@RequestBody HashMap map,
+                                                              HttpServletRequest req) {
+        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer size = Integer.parseInt(map.get("pageSize").toString());
+
         String token  = TokenUtil.parseToken(req);
         if (token.equals("")){
             log.error("【获取回款记录】Token为空");

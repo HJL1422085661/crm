@@ -25,7 +25,7 @@ public class ResourceFollowRecord {
     /** 员工ID **/
     @Column(name = "employeeId", nullable = false)
     public String employeeId;
-    /** 员工ID **/
+    /** 员工姓名 **/
     @Column(name = "employeeName", nullable = false)
     public String employeeName;
     /** 人才ID **/

@@ -6,8 +6,8 @@ import com.imooc.demo.modle.*;
 import com.imooc.demo.service.*;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.crypto.hash.Hash;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,13 +42,15 @@ public class EmployeeController {
     @Autowired
     public LoginTicketService loginTicketService;
     @Autowired
-    public FollowRecordService followRecordService;
+    public ResourceFollowRecordService resourceFollowRecordService;
     @Autowired
     public ResourceTempService resourceTempService;
     @Autowired
     public CompanyTempService companyTempService;
     @Autowired
     public CompanyService companyService;
+    @Autowired
+    public CompanyFollowRecordService companyFollowRecordService;
 
     /**
      * 创建人才资源
@@ -63,7 +65,7 @@ public class EmployeeController {
     public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
                                                         HttpServletRequest request) {
 
-        resource.setShareStatus("private");
+        resource.setShareStatus(2);
         //封装时间参数
         Date createDate = new Date();
         SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
@@ -121,34 +123,37 @@ public class EmployeeController {
     public ResultVO<Map<String, String>> getResourceList(@RequestBody HashMap map,
                                                          HttpServletRequest req) {
 
-        Integer page = Integer.parseInt(map.get("page").toString());
+        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
 
+        System.out.println(page + "," + size);
         System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取人才列表】Token为空");
             return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        if (employeeId.equals("")) return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        System.out.println("id:" + employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        PageRequest request = PageRequest.of(page, size);
+
+        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<Resource> resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
         if (resourcePage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
         } else {
             System.out.println(resourcePage.getContent());
-            return ResultVOUtil.success(resourcePage.getContent());
+            return ResultVOUtil.success(resourcePage);
         }
 
     }
 
     /**
      * 获取人才跟进记录
+     *
      * @param map
      * @return
      */
@@ -161,12 +166,11 @@ public class EmployeeController {
 
         System.out.println("resourceId:" + resourceId);
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
-        Page<ResourceFollowRecord> resourceFollowRecords = followRecordService.getFollowRecordsByResourceId(resourceId, request);
+        Page<ResourceFollowRecord> resourceFollowRecords = resourceFollowRecordService.getFollowRecordsByResourceId(resourceId, request);
         if (resourceFollowRecords.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_FOLLOW_RECORD_EMPTY);
         } else {
-            System.out.println(resourceFollowRecords.getContent());
-            return ResultVOUtil.success(resourceFollowRecords.getContent());
+            return ResultVOUtil.success(resourceFollowRecords);
         }
     }
 
@@ -193,12 +197,12 @@ public class EmployeeController {
         }
         resourceFollowRecord.setEmployeeId(employeeId);
         resourceFollowRecord.setEmployeeName(employee.getEmployeeName());
-        ResourceFollowRecord followRecord = followRecordService.createResourceFollow(resourceFollowRecord);
+        ResourceFollowRecord followRecord = resourceFollowRecordService.createResourceFollow(resourceFollowRecord);
         if (followRecord != null) {
             return ResultVOUtil.success(resourceFollowRecord);
         } else {
             log.error("【创建人才跟进信息】失败");
-            return ResultVOUtil.error(ResultEnum.CREATE_FOLLOW_RECORD_ERROR);
+            return ResultVOUtil.error(ResultEnum.CREATE_RESOURCE_FOLLOW_RECORD_ERROR);
         }
 
     }
@@ -227,8 +231,16 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        ResourceTemp createResource = null;
+        ResourceTemp resourceTemp = new ResourceTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
+            //管理员直接同意修改，并写一条记录存到temp表中
+            BeanUtils.copyProperties(resource, resourceTemp);
+            resourceTemp.setRequestStatus(1);
+            Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
+            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
+
             Boolean flag = resourceService.saveResource(resource);
             if (flag) {
                 return ResultVOUtil.success();
@@ -236,15 +248,24 @@ public class EmployeeController {
                 return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
             }
         }
-        ResourceTemp createResource = null;
-        ResourceTemp resourceTemp = null;
+
         BeanUtils.copyProperties(resource, resourceTemp);
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         resourceTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
         resourceTemp.setRequestStatus(0);
         try {
-            createResource = resourceTempService.createResourceTemp(resourceTemp);
+            //去临时表中查找是否存在该resource未审批的记录，如果存在，覆盖
+            ResourceTemp databaseResourceTemp = resourceTempService.findResourceTempByResourceIdAndCheckedStatus(resourceTemp.getResourceId(), 0);
+            //如果上一条记录不为空，则需要更新
+            if(databaseResourceTemp != null){
+                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
+                createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
+            }
+            //如果不存在对该resource尚未审批的记录，则新插入一条记录到ResourceTemp表
+            else{
+                createResource = resourceTempService.createResourceTemp(resourceTemp);
+            }
             if (createResource == null) {
                 log.error("【修改人才信息】创建临时表发生错误");
                 return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
@@ -253,7 +274,7 @@ public class EmployeeController {
             log.error("【修改人才信息】创建临时表发生异常");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_EXCEPTION);
         }
-        return ResultVOUtil.success(createResource);
+        return ResultVOUtil.success();
     }
 
     /**
@@ -279,8 +300,16 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        ResourceTemp createResource = null;
+        ResourceTemp resourceTemp = new ResourceTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
+            //管理员直接同意修改，并写一条记录存到temp表中
+            BeanUtils.copyProperties(resource, resourceTemp);
+            resourceTemp.setRequestStatus(1);
+            Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
+            if (!isSuccess) return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
+
             Boolean flag = resourceService.deleteResourceByResourceId(resource.resourceId);
             if (flag) {
                 return ResultVOUtil.success();
@@ -288,15 +317,23 @@ public class EmployeeController {
                 return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
             }
         }
-        ResourceTemp createResource = null;
-        ResourceTemp resourceTemp = null;
+
         BeanUtils.copyProperties(resource, resourceTemp);
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         resourceTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
         resourceTemp.setRequestStatus(1);
         try {
-            createResource = resourceTempService.createResourceTemp(resourceTemp);
+            // 先在数据库中找是否有未审批记录
+            ResourceTemp databaseResourceTemp = resourceTempService.findResourceTempByResourceIdAndCheckedStatus(resourceTemp.getResourceId(), 0);
+            if (databaseResourceTemp != null) {
+                // 如果有：直接覆盖
+                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
+                createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
+            }else {
+                // 否则新建一条记录
+                createResource = resourceTempService.createResourceTemp(resourceTemp);
+            }
             if (createResource == null) {
                 log.error("【删除人才信息】创建临时表发生错误");
                 return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
@@ -305,7 +342,7 @@ public class EmployeeController {
             log.error("【删除人才信息】创建临时表发生异常");
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_EXCEPTION);
         }
-        return ResultVOUtil.success(createResource);
+        return ResultVOUtil.success();
     }
 
     /**
@@ -331,8 +368,16 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        CompanyTemp createCompany = null;
+        CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
+            //管理员直接同意修改，并写一条记录存到temp表中
+            BeanUtils.copyProperties(company, companyTemp);
+            companyTemp.setRequestStatus(1);
+            Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
+            if (!isSuccess)  return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_COMPANY_INFO_ERROR);
+
             Boolean flag = companyService.saveCompany(company);
             if (flag) {
                 return ResultVOUtil.success();
@@ -340,15 +385,24 @@ public class EmployeeController {
                 return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_ERROR);
             }
         }
-        CompanyTemp createCompany = null;
-        CompanyTemp companyTemp = null;
+
         BeanUtils.copyProperties(company, companyTemp);
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         companyTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
         companyTemp.setRequestStatus(0);
         try {
-            createCompany = companyTempService.createCompanyTemp(companyTemp);
+            // 找到数据库中未批准的记录
+            CompanyTemp databaseCompanyTemp = companyTempService.findCompanyTempByCompanyIdAndCheckedStatus(companyTemp.getCompanyId(), 0);
+            if (databaseCompanyTemp != null) {
+                // 如果数据库在有：覆盖
+                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp);
+                createCompany = companyTempService.createCompanyTemp(databaseCompanyTemp);
+            }else {
+                // 在数据库中新建一个记录
+                createCompany = companyTempService.createCompanyTemp(companyTemp);
+
+            }
             if (createCompany == null) {
                 log.error("【修改企业信息】创建临时表发生错误");
                 return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_ERROR);
@@ -357,7 +411,7 @@ public class EmployeeController {
             log.error("【修改企业信息】创建临时表发生异常");
             return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_EXCEPTION);
         }
-        return ResultVOUtil.success(createCompany);
+        return ResultVOUtil.success();
     }
 
     /**
@@ -383,8 +437,16 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        CompanyTemp createCompany = null;
+        CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
+            //管理员直接同意修改，并写一条记录存到temp表中
+            BeanUtils.copyProperties(company, companyTemp);
+            companyTemp.setRequestStatus(1);
+            Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
+            if (!isSuccess)  return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
+
             Boolean flag = companyService.deleteCompanyByCompanyId(company.companyId);
             if (flag) {
                 return ResultVOUtil.success();
@@ -392,15 +454,23 @@ public class EmployeeController {
                 return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
             }
         }
-        CompanyTemp createCompany = null;
-        CompanyTemp companyTemp = null;
+
         BeanUtils.copyProperties(company, companyTemp);
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         companyTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
         companyTemp.setRequestStatus(1);
         try {
-            createCompany = companyTempService.createCompanyTemp(companyTemp);
+            // 先在数据库中找是否有未审批申请
+            CompanyTemp databaseCompanyTemp = companyTempService.findCompanyTempByCompanyIdAndCheckedStatus(companyTemp.getCompanyId(), 0);
+            if (databaseCompanyTemp != null) {
+                // 如果有：直接覆盖
+                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp);
+                createCompany = companyTempService.createCompanyTemp(databaseCompanyTemp);
+            } else {
+                // 否则新建一条记录
+                createCompany = companyTempService.createCompanyTemp(companyTemp);
+            }
             if (createCompany == null) {
                 log.error("【删除企业信息】创建临时表发生错误");
                 return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
@@ -409,7 +479,7 @@ public class EmployeeController {
             log.error("【删除企业信息】创建临时表发生异常");
             return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_EXCEPTION);
         }
-        return ResultVOUtil.success(createCompany);
+        return ResultVOUtil.success();
     }
 
     @PostMapping("/createCompany")
@@ -426,6 +496,7 @@ public class EmployeeController {
             log.error("【创建公司资源信息】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
+        company.setEmployeeId(employeeId);
         Company company1 = companyService.createCompany(company);
         if (company1 == null) {
             return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_ERROR);
@@ -433,13 +504,13 @@ public class EmployeeController {
         return ResultVOUtil.error(company1);
     }
 
-    @GetMapping("/getCompanyList")
-    public ResultVO<Map<String, String>> getCompanyList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                        HttpServletRequest req) {
+    @PostMapping("/getCompanyList")
+    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map,HttpServletRequest req) {
+        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer size = Integer.parseInt(map.get("pageSize").toString());
+
         String token = TokenUtil.parseToken(req);
 
-        System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取公司列表】Token为空");
             return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
@@ -455,7 +526,65 @@ public class EmployeeController {
             return ResultVOUtil.success(ResultEnum.COMPANY_LIST_EMPTY);
         } else {
             System.out.println(companyPage.getContent());
-            return ResultVOUtil.success(companyPage.getContent());
+            return ResultVOUtil.success(companyPage);
+        }
+
+    }
+
+    /**
+     * 获取人才跟进记录
+     *
+     * @param map
+     * @return
+     */
+    @PostMapping("/getCompanyFollows")
+    public ResultVO<Map<String, String>> getCompanyFollows(@RequestBody HashMap map) {
+
+
+        Integer companyId = Integer.parseInt(map.get("companyId").toString());
+        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer size = Integer.parseInt(map.get("pageSize").toString());
+
+        System.out.println("companyId:" + companyId);
+        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
+
+
+        Page<CompanyFollowRecord> companyFollowRecordPage = companyFollowRecordService.getCompanyFollowRecordByCompanyId(companyId, request);
+        if (companyFollowRecordPage.isEmpty()) {
+            return ResultVOUtil.success(ResultEnum.COMPANY_FOLLOW_RECORD_EMPTY);
+        } else {
+            return ResultVOUtil.success(companyFollowRecordPage);
+        }
+    }
+
+    /**
+     * 创建公司跟进记录
+     * @param companyFollowRecord
+     * @param request
+     * @return
+     */
+    @PostMapping("/createCompanyFollow")
+    public ResultVO<Map<String, String>> createCompanyFollow(@RequestBody CompanyFollowRecord companyFollowRecord,
+                                                              HttpServletRequest request) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【创建公司跟进信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【创建公司跟进信息】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        companyFollowRecord.setEmployeeId(employeeId);
+        companyFollowRecord.setEmployeeName(employee.getEmployeeName());
+        CompanyFollowRecord createFollowRecord = companyFollowRecordService.createCompanyFollowRecord(companyFollowRecord);
+        if (createFollowRecord != null) {
+            return ResultVOUtil.success(createFollowRecord);
+        } else {
+            log.error("【创建公司跟进信息】失败");
+            return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_FOLLOW_RECORD_ERROR);
         }
 
     }

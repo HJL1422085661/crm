@@ -41,4 +41,9 @@ public class CompanyServiceTempImpl implements CompanyTempService {
     public CompanyTemp findCompanyTempById(Integer id) {
         return companyTempRepository.findCompanyTempById(id);
     }
+
+    @Override
+    public CompanyTemp findCompanyTempByCompanyIdAndCheckedStatus(Integer companyId, Integer checkedStatus) {
+        return companyTempRepository.findCompanyTempByCompanyIdAndCheckedStatus(companyId, checkedStatus);
+    }
 }

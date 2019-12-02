@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class ResourceTempServiceImpl implements ResourceTempService {
@@ -50,5 +52,10 @@ public class ResourceTempServiceImpl implements ResourceTempService {
     @Override
     public ResourceTemp findResourceTempById(Integer id) {
         return resourceTempRepository.findResourceTempById(id);
+    }
+
+    @Override
+    public ResourceTemp findResourceTempByResourceIdAndCheckedStatus(Integer resourceId, Integer checkedStatus) {
+        return  resourceTempRepository.findResourceTempByResourceIdAndCheckedStatus(resourceId, checkedStatus);
     }
 }

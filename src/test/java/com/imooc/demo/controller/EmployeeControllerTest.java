@@ -32,7 +32,7 @@ class EmployeeControllerTest {
 
         resource.setEmployeeId("3");
         resource.setResourceName("李四");
-        resource.setShareStatus("private");
+        resource.setShareStatus(2);
 
         resource.setQq("1422123344");
         resource.setEmail("xxx.qq.com");
@@ -43,7 +43,6 @@ class EmployeeControllerTest {
         resource.setIdentify("12414135");
         resource.setCreateDate("2019-11-20");
         resource.setEndDate("2020-10-20");
-        resource.setShareStatus("private");
         resource.setEmployeeName("test");
 //        resource.setCreateTime(date);
 //        resource.setEndTime(date);
@@ -82,7 +81,7 @@ class EmployeeControllerTest {
     void createCompany() {
         Company company = new Company();
         company.setCompanyName("江西建筑集团有限公司");
-        company.setCompanyCategory("建筑公司");
+        company.setCompanyCategory(2);
         company.setContactorName("胡总");
         company.setPhoneNumber("12342536");
         company.setEmployeeId("张三");

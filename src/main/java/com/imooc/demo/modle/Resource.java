@@ -25,9 +25,9 @@ public class Resource {
     /** 录入客户时间 **/
     @Column(name = "createDate")
     public String createDate;
-    /** 人才资源共享状态 **/
+    /** 人才资源共享状态  1 公有  2 私有**/
     @Column(name = "shareStatus")
-    public String shareStatus;
+    public Integer shareStatus;
     /** 人才身份证号 **/
     @Column(name = "identify")
     public String identify;

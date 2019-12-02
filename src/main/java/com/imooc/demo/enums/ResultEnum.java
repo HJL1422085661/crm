@@ -41,7 +41,7 @@ public enum ResultEnum {
     SELECT_PAY_BACK_RECORD_PARAM_ERROR(30, "查看回款记录参数错误"),
     PARSE_TIME_EXCEPTION(31, "日期格式转化发生异常"),
     RESOURCE_FOLLOW_RECORD_EMPTY(32, "人才跟进记录为空"),
-    CREATE_FOLLOW_RECORD_ERROR(33, "创建人才跟进记录错误"),
+    CREATE_RESOURCE_FOLLOW_RECORD_ERROR(33, "创建人才跟进记录错误"),
     UPDATE_RESOURCE_EXCEPTION(34, "更新人才资源信息发生异常"),
     MODIFY_DEL_COMPANY_ERROR(35, "改删企业资源息发生错误"),
     MODIFY_DEL_COMPANY_EXCEPTION(36, "改删企业资源息发生异常"),
@@ -55,8 +55,16 @@ public enum ResultEnum {
     RESOURCE_TEMP_LIST_EMPTY(44, "人才管理代办事项为空"),
     UPDATE_RESOURCE_TEMP_ERROR(45, "更新人才临时表错误"),
     CHECK_SUCCESS(46, "审批成功"),
-
-
+    COMPANY_FOLLOW_RECORD_EMPTY(47, "公司跟进记录为空"),
+    CREATE_COMPANY_FOLLOW_RECORD_ERROR(48, "创建企业跟进记录错误"),
+    UPDATE_RESOURCE_SUCCESS(49, "更新人才成功"),
+    DELETE_RESOURCE_SUCCESS(50, "删除人才成功"),
+    UPDATE_COMPANY_SUCCESS(51, "更新公司成功"),
+    UPDATE_COMPANY_ERROR(52, "更新公司失败"),
+    DELETE_COMPANY_SUCCESS(53, "删除公司成功"),
+    DELETE_COMPANY_ERROR(54, "删除公司失败"),
+    MANAGER_DELETE_COMPANY_INFO_ERROR(55, "管理员删除公司失败"),
+    MANAGER_UPDATE_COMPANY_INFO_ERROR(56, "管理员修改公司失败"),
 
 
 

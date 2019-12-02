@@ -27,10 +27,10 @@ public class Business {
     public String employeeId;
     /** 人才ID **/
     @Column(name = "resourceId")
-    public String resourceId;
+    public Integer resourceId;
     /** 成交时间 **/
     @Column(name = "createTime")
-    public Date createTime;
+    public String createTime;
     /** 公司名称 **/
     @Column(name = "companyName")
     public  String companyName;
@@ -39,7 +39,7 @@ public class Business {
     public Integer businessStatus =  BusinessStatusRoleEnum.PROCESSING.getCode();
     /** 公司类型 **/
     @Column(name = "companyCategory")
-    public String companyCategory;
+    public Integer companyCategory;
     /** 订单创建者 **/
     @Column(name = "creatorId", nullable = false)
     public String creatorId;

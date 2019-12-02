@@ -45,7 +45,7 @@ public class ResourceTemp {
     public String endDate;
     /** 人才资源共享状态 **/
     @Column(name = "shareStatus", nullable = false)
-    public String shareStatus;
+    public Integer shareStatus;
     /** 人才身份证号 **/
     @Column(name = "identify")
     public String identify;

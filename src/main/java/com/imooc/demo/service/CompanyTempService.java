@@ -9,5 +9,7 @@ public interface CompanyTempService {
 
     CompanyTemp findCompanyTempById(Integer id);
 
+    CompanyTemp findCompanyTempByCompanyIdAndCheckedStatus(Integer companyId, Integer checkedStatus);
+
 
 }
