@@ -6,13 +6,14 @@ import com.imooc.demo.modle.*;
 import com.imooc.demo.service.*;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author emperor
@@ -237,13 +236,19 @@ public class EmployeeController {
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(resource, resourceTemp);
-            resourceTemp.setRequestStatus(1);
+            resourceTemp.setRequestStatus(0);
+            //老板的话直接设置同意
+            resourceTemp.setCheckedStatus(1);
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
 
-            Boolean flag = resourceService.saveResource(resource);
-            if (flag) {
-                return ResultVOUtil.success();
+//            Boolean flag = resourceService.saveResource(resource);
+            Resource returnResource = resourceService.createResource(resource);
+            Map<String, Object> map = new HashMap<>();
+            if (returnResource != null) {
+                map.put("resource", returnResource);
+                map.put("employeeRole", 2);
+                return ResultVOUtil.success(map);
             } else {
                 return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
             }
@@ -258,12 +263,12 @@ public class EmployeeController {
             //去临时表中查找是否存在该resource未审批的记录，如果存在，覆盖
             ResourceTemp databaseResourceTemp = resourceTempService.findResourceTempByResourceIdAndCheckedStatus(resourceTemp.getResourceId(), 0);
             //如果上一条记录不为空，则需要更新
-            if(databaseResourceTemp != null){
+            if (databaseResourceTemp != null) {
                 BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
                 createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
             }
             //如果不存在对该resource尚未审批的记录，则新插入一条记录到ResourceTemp表
-            else{
+            else {
                 createResource = resourceTempService.createResourceTemp(resourceTemp);
             }
             if (createResource == null) {
@@ -307,12 +312,15 @@ public class EmployeeController {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(resource, resourceTemp);
             resourceTemp.setRequestStatus(1);
+            resourceTemp.setCheckedStatus(1);
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
 
             Boolean flag = resourceService.deleteResourceByResourceId(resource.resourceId);
+            Map<String, Integer>map = new HashMap<>();
             if (flag) {
-                return ResultVOUtil.success();
+                map.put("employeeRole", 2);
+                return ResultVOUtil.success(map);
             } else {
                 return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
             }
@@ -330,7 +338,7 @@ public class EmployeeController {
                 // 如果有：直接覆盖
                 BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
                 createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
-            }else {
+            } else {
                 // 否则新建一条记录
                 createResource = resourceTempService.createResourceTemp(resourceTemp);
             }
@@ -374,13 +382,18 @@ public class EmployeeController {
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(company, companyTemp);
-            companyTemp.setRequestStatus(1);
-            Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
-            if (!isSuccess)  return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_COMPANY_INFO_ERROR);
+            companyTemp.setRequestStatus(0);
+            companyTemp.setCheckedStatus(1);
 
-            Boolean flag = companyService.saveCompany(company);
-            if (flag) {
-                return ResultVOUtil.success();
+            Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
+            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_COMPANY_INFO_ERROR);
+
+            Company returnCompany = companyService.createCompany(company);
+            Map<String, Object> map = new HashMap<>();
+            if (returnCompany != null) {
+                map.put("employeeRole", 2);
+                map.put("company", returnCompany);
+                return ResultVOUtil.success(map);
             } else {
                 return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_ERROR);
             }
@@ -398,7 +411,7 @@ public class EmployeeController {
                 // 如果数据库在有：覆盖
                 BeanUtils.copyProperties(companyTemp, databaseCompanyTemp);
                 createCompany = companyTempService.createCompanyTemp(databaseCompanyTemp);
-            }else {
+            } else {
                 // 在数据库中新建一个记录
                 createCompany = companyTempService.createCompanyTemp(companyTemp);
 
@@ -444,12 +457,15 @@ public class EmployeeController {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(company, companyTemp);
             companyTemp.setRequestStatus(1);
+            companyTemp.setCheckedStatus(1);
             Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
-            if (!isSuccess)  return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
+            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
 
             Boolean flag = companyService.deleteCompanyByCompanyId(company.companyId);
+            Map<String, Integer> map = new HashMap<>();
             if (flag) {
-                return ResultVOUtil.success();
+                map.put("employeeRole", 2);
+                return ResultVOUtil.success(map);
             } else {
                 return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
             }
@@ -505,7 +521,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/getCompanyList")
-    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map,HttpServletRequest req) {
+    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map, HttpServletRequest req) {
         Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
@@ -559,13 +575,14 @@ public class EmployeeController {
 
     /**
      * 创建公司跟进记录
+     *
      * @param companyFollowRecord
      * @param request
      * @return
      */
     @PostMapping("/createCompanyFollow")
     public ResultVO<Map<String, String>> createCompanyFollow(@RequestBody CompanyFollowRecord companyFollowRecord,
-                                                              HttpServletRequest request) {
+                                                             HttpServletRequest request) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建公司跟进信息】Token为空");
