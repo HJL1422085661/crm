@@ -10,5 +10,6 @@ public interface CompanyService {
     Page<Company> findCompanyByEmployeeId(String employeeId, Pageable pageable);
     Boolean deleteCompanyByCompanyId(Integer companyId);
     Boolean saveCompany(Company company);
+    Company getCompanyByCompanyId(Integer companyId);
 
 }

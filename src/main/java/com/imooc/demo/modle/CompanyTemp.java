@@ -28,7 +28,6 @@ public class CompanyTemp {
      /** 请求内容 0: 改, 1:删 **/
     @Column(name = "requestStatus", nullable = false)
     public Integer requestStatus;
-
     /** 审批状态 0: 未审批,  1：同意 2: 不同意 **/
     @Column(name = "checkedStatus", nullable = false)
     public Integer checkedStatus;
@@ -59,5 +58,5 @@ public class CompanyTemp {
     public String phoneNumber;
     /** 公司类型 **/
     @Column(name = "companyCategory")
-    public String companyCategory;
+    public Integer companyCategory;
 }

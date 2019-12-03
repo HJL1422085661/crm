@@ -31,6 +31,7 @@ public class ResourceTemp {
     /** 审批状态 0: 未审批,  1：同意 2: 不同意 **/
     @Column(name = "checkedStatus", nullable = false)
     public Integer checkedStatus;
+
     /** 人才ID **/
     @Column(name = "resourceId", nullable = false)
     public Integer resourceId;

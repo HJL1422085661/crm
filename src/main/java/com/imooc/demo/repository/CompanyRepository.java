@@ -9,4 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CompanyRepository extends JpaRepository<Company, Integer> {
     Page<Company> findCompanyByEmployeeId(String employeeId, Pageable pageable);
     Boolean deleteCompanyByCompanyId(Integer companyId);
+    Company getCompanyByCompanyId(Integer companyId);
 }

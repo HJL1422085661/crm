@@ -1,5 +1,6 @@
 package com.imooc.demo.controller;
 
+import com.google.gson.internal.$Gson$Types;
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.*;
@@ -8,6 +9,8 @@ import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -235,7 +238,7 @@ public class EmployeeController {
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
-            BeanUtils.copyProperties(resource, resourceTemp);
+            BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
             resourceTemp.setRequestStatus(0);
             //老板的话直接设置同意
             resourceTemp.setCheckedStatus(1);
@@ -254,7 +257,7 @@ public class EmployeeController {
             }
         }
 
-        BeanUtils.copyProperties(resource, resourceTemp);
+        BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         resourceTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
@@ -264,7 +267,7 @@ public class EmployeeController {
             ResourceTemp databaseResourceTemp = resourceTempService.findResourceTempByResourceIdAndCheckedStatus(resourceTemp.getResourceId(), 0);
             //如果上一条记录不为空，则需要更新
             if (databaseResourceTemp != null) {
-                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
+                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp, getNullPropertyNames(resourceTemp));
                 createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
             }
             //如果不存在对该resource尚未审批的记录，则新插入一条记录到ResourceTemp表
@@ -285,15 +288,17 @@ public class EmployeeController {
     /**
      * 删除客户信息(需要经过老板审批)
      *
-     * @param resource
+     * @param paramMap: resourceId
      * @param request
      * @return
      */
     @Modifying
     @Transactional
     @PostMapping("/deleteResource")
-    public ResultVO<Map<String, String>> deleteResource(@RequestBody Resource resource,
+    public ResultVO<Map<String, String>> deleteResource(@RequestBody HashMap paramMap,
                                                         HttpServletRequest request) {
+        Integer resourceId = Integer.parseInt(paramMap.get("resourceId").toString());
+
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除人才信息】Token为空");
@@ -305,19 +310,23 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
-        ResourceTemp createResource = null;
+        ResourceTemp createResource = new ResourceTemp();
+
+        // 通过resourceId从数据库中取到对应的resource
+        Resource resource = resourceService.getResourceByResourceId(resourceId);
+
         ResourceTemp resourceTemp = new ResourceTemp();
-        //如果是老板则直接操作，不需要审批,但是需要记录操作?
+        //如果是老板则直接操作，不需要审批,但是需要记录操作
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
-            BeanUtils.copyProperties(resource, resourceTemp);
+            BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
             resourceTemp.setRequestStatus(1);
             resourceTemp.setCheckedStatus(1);
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
 
             Boolean flag = resourceService.deleteResourceByResourceId(resource.resourceId);
-            Map<String, Integer>map = new HashMap<>();
+            Map<String, Integer> map = new HashMap<>();
             if (flag) {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
@@ -326,7 +335,7 @@ public class EmployeeController {
             }
         }
 
-        BeanUtils.copyProperties(resource, resourceTemp);
+        BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         resourceTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
@@ -336,7 +345,7 @@ public class EmployeeController {
             ResourceTemp databaseResourceTemp = resourceTempService.findResourceTempByResourceIdAndCheckedStatus(resourceTemp.getResourceId(), 0);
             if (databaseResourceTemp != null) {
                 // 如果有：直接覆盖
-                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp);
+                BeanUtils.copyProperties(resourceTemp, databaseResourceTemp, getNullPropertyNames(resourceTemp));
                 createResource = resourceTempService.createResourceTemp(databaseResourceTemp);
             } else {
                 // 否则新建一条记录
@@ -381,7 +390,7 @@ public class EmployeeController {
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
-            BeanUtils.copyProperties(company, companyTemp);
+            BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
             companyTemp.setRequestStatus(0);
             companyTemp.setCheckedStatus(1);
 
@@ -399,7 +408,7 @@ public class EmployeeController {
             }
         }
 
-        BeanUtils.copyProperties(company, companyTemp);
+        BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         companyTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
@@ -409,7 +418,7 @@ public class EmployeeController {
             CompanyTemp databaseCompanyTemp = companyTempService.findCompanyTempByCompanyIdAndCheckedStatus(companyTemp.getCompanyId(), 0);
             if (databaseCompanyTemp != null) {
                 // 如果数据库在有：覆盖
-                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp);
+                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp, getNullPropertyNames(companyTemp));
                 createCompany = companyTempService.createCompanyTemp(databaseCompanyTemp);
             } else {
                 // 在数据库中新建一个记录
@@ -430,15 +439,18 @@ public class EmployeeController {
     /**
      * 删除企业信息(需要经过老板审批)
      *
-     * @param company
+     * @param paramMap: companyId
      * @param request
      * @return
      */
     @Modifying
     @Transactional
     @PostMapping("/deleteCompany")
-    public ResultVO<Map<String, String>> deleteCompany(@RequestBody Company company,
+    public ResultVO<Map<String, String>> deleteCompany(@RequestBody HashMap paramMap,
                                                        HttpServletRequest request) {
+        Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
+        Company company = companyService.getCompanyByCompanyId(companyId);
+
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除企业信息】Token为空");
@@ -450,12 +462,12 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
-        CompanyTemp createCompany = null;
+        CompanyTemp createCompanyTmp = new CompanyTemp();
         CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
-            BeanUtils.copyProperties(company, companyTemp);
+            BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
             companyTemp.setRequestStatus(1);
             companyTemp.setCheckedStatus(1);
             Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
@@ -471,7 +483,7 @@ public class EmployeeController {
             }
         }
 
-        BeanUtils.copyProperties(company, companyTemp);
+        BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
         // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
         companyTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
@@ -481,13 +493,13 @@ public class EmployeeController {
             CompanyTemp databaseCompanyTemp = companyTempService.findCompanyTempByCompanyIdAndCheckedStatus(companyTemp.getCompanyId(), 0);
             if (databaseCompanyTemp != null) {
                 // 如果有：直接覆盖
-                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp);
-                createCompany = companyTempService.createCompanyTemp(databaseCompanyTemp);
+                BeanUtils.copyProperties(companyTemp, databaseCompanyTemp, getNullPropertyNames(companyTemp));
+                createCompanyTmp = companyTempService.createCompanyTemp(databaseCompanyTemp);
             } else {
                 // 否则新建一条记录
-                createCompany = companyTempService.createCompanyTemp(companyTemp);
+                createCompanyTmp = companyTempService.createCompanyTemp(companyTemp);
             }
-            if (createCompany == null) {
+            if (createCompanyTmp == null) {
                 log.error("【删除企业信息】创建临时表发生错误");
                 return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
             }
@@ -609,6 +621,22 @@ public class EmployeeController {
     @PostMapping("/test")
     public String test() {
         return "hello world";
+    }
+
+    /**
+     * 用于复制时忽略null值
+     */
+    public static String[] getNullPropertyNames(Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<String>();
+        for (java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 
 }

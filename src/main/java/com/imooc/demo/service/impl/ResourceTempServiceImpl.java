@@ -37,7 +37,7 @@ public class ResourceTempServiceImpl implements ResourceTempService {
         ResourceTemp resourceTemp1;
         try {
             resourceTemp1 = resourceTempRepository.saveAndFlush(resourceTemp);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【创建人才资源（改删）】发生异常");
             return null;
         }
@@ -56,6 +56,6 @@ public class ResourceTempServiceImpl implements ResourceTempService {
 
     @Override
     public ResourceTemp findResourceTempByResourceIdAndCheckedStatus(Integer resourceId, Integer checkedStatus) {
-        return  resourceTempRepository.findResourceTempByResourceIdAndCheckedStatus(resourceId, checkedStatus);
+        return resourceTempRepository.findResourceTempByResourceIdAndCheckedStatus(resourceId, checkedStatus);
     }
 }

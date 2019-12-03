@@ -46,4 +46,9 @@ public class CompanyServiceImpl implements CompanyService {
         if (company1 == null) return false;
         return true;
     }
+
+    @Override
+    public Company getCompanyByCompanyId(Integer companyId) {
+        return companyRepository.getCompanyByCompanyId(companyId);
+    }
 }
