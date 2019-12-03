@@ -53,8 +53,8 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Boolean deleteResourceByResourceId(Integer resourceId) {
-        return resourceRepository.deleteByResourceId(resourceId);
+    public Integer deleteResourceByResourceId(Integer resourceId) {
+        return resourceRepository.deleteResourceByResourceId(resourceId);
     }
 
     @Override

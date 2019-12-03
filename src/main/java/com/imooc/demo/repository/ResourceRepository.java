@@ -17,7 +17,7 @@ import java.util.List;
 public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     List<Resource> getResourceListByEmployeeId(String employeeId);
     Resource getResourceByResourceId(Integer resourceId);
-    Boolean deleteByResourceId(Integer resourceId);
+    Integer deleteResourceByResourceId(Integer resourceId);
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE resource SET shareStatus = ?1 ,employeeId = ?2 WHERE resourceId = ?3 ")

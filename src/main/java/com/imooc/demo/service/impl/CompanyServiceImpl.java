@@ -36,7 +36,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public Boolean deleteCompanyByCompanyId(Integer companyId) {
+    public Integer deleteCompanyByCompanyId(Integer companyId) {
         return companyRepository.deleteCompanyByCompanyId(companyId);
     }
 

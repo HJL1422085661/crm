@@ -325,9 +325,9 @@ public class EmployeeController {
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
 
-            Boolean flag = resourceService.deleteResourceByResourceId(resource.resourceId);
+            Integer flag = resourceService.deleteResourceByResourceId(resource.resourceId);
             Map<String, Integer> map = new HashMap<>();
-            if (flag) {
+            if (flag != 0) {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
             } else {
@@ -473,9 +473,9 @@ public class EmployeeController {
             Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
             if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
 
-            Boolean flag = companyService.deleteCompanyByCompanyId(company.companyId);
+            Integer flag = companyService.deleteCompanyByCompanyId(company.companyId);
             Map<String, Integer> map = new HashMap<>();
-            if (flag) {
+            if (flag != 0) {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
             } else {

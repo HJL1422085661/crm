@@ -16,7 +16,7 @@ public interface ResourceService {
     Boolean saveResource(Resource resource);
     Resource createResource(Resource resource);
     Resource getResourceByResourceId(Integer resourceId);
-    Boolean deleteResourceByResourceId(Integer resourceId);
+    Integer deleteResourceByResourceId(Integer resourceId);
     Boolean updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, Integer resourceId);
     Boolean updateShareStatusByResourceId(String shareStatus, Integer resourceId);
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);

@@ -104,7 +104,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Boolean deleteEmployee(String employeeId) {
+    public Integer deleteEmployee(String employeeId) {
         return employeeRepository.deleteByEmployeeId(employeeId);
     }
 

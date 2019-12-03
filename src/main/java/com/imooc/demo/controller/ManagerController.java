@@ -344,8 +344,8 @@ public class ManagerController {
                 else return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
             } else if (resourceTemp.requestStatus == 1) {
                 // 删
-                Boolean flag = resourceService.deleteResourceByResourceId(resource.getResourceId());
-                if (flag) return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_SUCCESS);
+                Integer flag = resourceService.deleteResourceByResourceId(resource.getResourceId());
+                if (flag != 0) return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_SUCCESS);
                 else return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
             }
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
@@ -409,8 +409,8 @@ public class ManagerController {
                 }
             } else if (companyTemp.requestStatus == 1) {
                 // 删
-                Boolean flag = companyService.deleteCompanyByCompanyId(company.getCompanyId());
-                if (flag) {
+                Integer flag = companyService.deleteCompanyByCompanyId(company.getCompanyId());
+                if (flag!=0) {
                     return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
                 } else {
                     return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_ERROR);
