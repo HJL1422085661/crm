@@ -12,7 +12,7 @@ public interface ResourceTempService {
 
     ResourceTemp createResourceTemp(ResourceTemp resourceTemp);
 
-    Page<ResourceTemp> findResourceTempByCheckedStatus(Integer checkedStatus, Pageable pageable);
+    Page<ResourceTemp> findResourceTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
 
     ResourceTemp findResourceTempById(Integer id);
 

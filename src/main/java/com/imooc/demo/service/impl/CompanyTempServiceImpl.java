@@ -9,11 +9,13 @@ import com.imooc.demo.repository.CompanyTempRepository;
 import com.imooc.demo.service.CompanyTempService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class CompanyServiceTempImpl implements CompanyTempService {
+public class CompanyTempServiceImpl implements CompanyTempService {
     @Autowired
     public CompanyTempRepository companyTempRepository;
 
@@ -45,5 +47,10 @@ public class CompanyServiceTempImpl implements CompanyTempService {
     @Override
     public CompanyTemp findCompanyTempByCompanyIdAndCheckedStatus(Integer companyId, Integer checkedStatus) {
         return companyTempRepository.findCompanyTempByCompanyIdAndCheckedStatus(companyId, checkedStatus);
+    }
+
+    @Override
+    public Page<CompanyTemp> findCompanyTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable) {
+        return companyTempRepository.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, pageable);
     }
 }

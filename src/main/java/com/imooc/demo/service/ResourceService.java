@@ -20,4 +20,5 @@ public interface ResourceService {
     Boolean updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, Integer resourceId);
     Boolean updateShareStatusByResourceId(String shareStatus, Integer resourceId);
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
+    Page<Resource> findAllResource(Pageable pageable);
 }

@@ -65,6 +65,8 @@ public enum ResultEnum {
     DELETE_COMPANY_ERROR(54, "删除公司失败"),
     MANAGER_DELETE_COMPANY_INFO_ERROR(55, "管理员删除公司失败"),
     MANAGER_UPDATE_COMPANY_INFO_ERROR(56, "管理员修改公司失败"),
+    REJECT_UPDATE_SUCCESS(57, "管理员审批（拒绝修改）成功"),
+    REJECT_DELETE_SUCCESS(58, "管理员审批（拒绝删除）成功"),
 
 
 

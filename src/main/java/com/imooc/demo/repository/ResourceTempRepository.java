@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface ResourceTempRepository  extends JpaRepository<ResourceTemp, Integer> {
-    Page<ResourceTemp> findResourceTempByCheckedStatus(Integer checkedStatus, Pageable pageable);
+    Page<ResourceTemp> findResourceTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
     ResourceTemp findResourceTempById(Integer resourceTempId);
     ResourceTemp findResourceTempByResourceIdAndCheckedStatus(Integer resourceId, Integer checkedStatus);
 

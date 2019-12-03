@@ -143,7 +143,13 @@ public class EmployeeController {
         }
 
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
-        Page<Resource> resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
+        Page<Resource> resourcePage = null;
+        // 管理员能看到所有客户
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2){
+            resourcePage = resourceService.findAllResource(request);
+        }
+        else { resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);}
+
         if (resourcePage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
         } else {
@@ -529,7 +535,7 @@ public class EmployeeController {
         if (company1 == null) {
             return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_ERROR);
         }
-        return ResultVOUtil.error(company1);
+        return ResultVOUtil.success(company1);
     }
 
     @PostMapping("/getCompanyList")
@@ -549,7 +555,13 @@ public class EmployeeController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "startDate");
-        Page<Company> companyPage = companyService.findCompanyByEmployeeId(employeeId, request);
+        Page<Company> companyPage = null;
+        // 管理员能看到所有客户
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2){
+             companyPage = companyService.findAllCompany(request);
+        }
+        else { companyPage = companyService.findCompanyByEmployeeId(employeeId, request);}
+
         if (companyPage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.COMPANY_LIST_EMPTY);
         } else {

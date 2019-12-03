@@ -51,4 +51,9 @@ public class CompanyServiceImpl implements CompanyService {
     public Company getCompanyByCompanyId(Integer companyId) {
         return companyRepository.getCompanyByCompanyId(companyId);
     }
+
+    @Override
+    public Page<Company> findAllCompany(Pageable pageable) {
+        return companyRepository.findAll(pageable);
+    }
 }

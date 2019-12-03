@@ -44,10 +44,6 @@ public class ResourceTempServiceImpl implements ResourceTempService {
         return resourceTemp1;
     }
 
-    @Override
-    public Page<ResourceTemp> findResourceTempByCheckedStatus(Integer checkedStatus, Pageable pageable) {
-        return resourceTempRepository.findResourceTempByCheckedStatus(checkedStatus, pageable);
-    }
 
     @Override
     public ResourceTemp findResourceTempById(Integer id) {
@@ -57,5 +53,10 @@ public class ResourceTempServiceImpl implements ResourceTempService {
     @Override
     public ResourceTemp findResourceTempByResourceIdAndCheckedStatus(Integer resourceId, Integer checkedStatus) {
         return resourceTempRepository.findResourceTempByResourceIdAndCheckedStatus(resourceId, checkedStatus);
+    }
+
+    @Override
+    public Page<ResourceTemp> findResourceTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable) {
+        return resourceTempRepository.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, pageable);
     }
 }

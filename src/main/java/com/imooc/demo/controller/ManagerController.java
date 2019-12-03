@@ -226,7 +226,8 @@ public class ManagerController {
     public ResultVO<Map<String, String>> getResourceCheckList(@RequestBody HashMap map,
                                                               HttpServletRequest req) {
         Integer checkedStatus = Integer.parseInt(map.get("checkedStatus").toString());
-        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer requestStatus = Integer.parseInt(map.get("requestStatus").toString());
+        Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
@@ -242,11 +243,15 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
-        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatus(checkedStatus, request);
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
+        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus,requestStatus, request);
 
-        if (resourceTempPage.isEmpty()) {
-            return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
+        if (resourceTempPage.getContent().isEmpty()) {
+            if (page > 1) {
+                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "createDate");
+                resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus,requestStatus, request);
+                return ResultVOUtil.success(resourceTempPage);
+            } else return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
         } else {
             System.out.println(resourceTempPage.getContent());
             return ResultVOUtil.success(resourceTempPage);
@@ -266,7 +271,8 @@ public class ManagerController {
     public ResultVO<Map<String, String>> getCompanyCheckList(@RequestBody HashMap map,
                                                              HttpServletRequest req) {
         Integer checkedStatus = Integer.parseInt(map.get("checkedStatus").toString());
-        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer requestStatus = Integer.parseInt(map.get("requestStatus").toString());
+        Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
@@ -282,14 +288,19 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
-        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatus(checkedStatus, request);
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
+        Page<CompanyTemp> companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
 
-        if (resourceTempPage.isEmpty()) {
-            return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
+        if (companyTempPage.getContent().isEmpty()) {
+            if (page > 1) {
+                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "createDate");
+                companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
+                return ResultVOUtil.success(companyTempPage);
+            } else
+                return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
         } else {
-            System.out.println(resourceTempPage.getContent());
-            return ResultVOUtil.success(resourceTempPage);
+            System.out.println(companyTempPage.getContent());
+            return ResultVOUtil.success(companyTempPage);
         }
 
 
@@ -351,7 +362,9 @@ public class ManagerController {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else if (checkedStatus == 2) {
             // 不同意
-            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+            if (resourceTemp.requestStatus == 0) return ResultVOUtil.success(ResultEnum.REJECT_UPDATE_SUCCESS);
+            if (resourceTemp.requestStatus == 1) return ResultVOUtil.success(ResultEnum.REJECT_DELETE_SUCCESS);
+            return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         }
@@ -410,7 +423,7 @@ public class ManagerController {
             } else if (companyTemp.requestStatus == 1) {
                 // 删
                 Integer flag = companyService.deleteCompanyByCompanyId(company.getCompanyId());
-                if (flag!=0) {
+                if (flag != 0) {
                     return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
                 } else {
                     return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_ERROR);
@@ -420,7 +433,9 @@ public class ManagerController {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else if (checkedStatus == 2) {
             // 不同意
-            return ResultVOUtil.success(ResultEnum.CHECK_SUCCESS);
+            if  (companyTemp.requestStatus == 0) return ResultVOUtil.success(ResultEnum.REJECT_UPDATE_SUCCESS);
+            if  (companyTemp.requestStatus == 1) return ResultVOUtil.success(ResultEnum.REJECT_DELETE_SUCCESS);
+            return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         }

@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,6 +54,8 @@ public class ResourceServiceImpl implements ResourceService {
         return resourceRepository.getResourceByResourceId(resourceId);
     }
 
+    @Modifying
+    @Transactional
     @Override
     public Integer deleteResourceByResourceId(Integer resourceId) {
         return resourceRepository.deleteResourceByResourceId(resourceId);
@@ -74,5 +78,10 @@ public class ResourceServiceImpl implements ResourceService {
     public Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable) {
 
         return resourceRepository.findResourceByEmployeeId(employeeId, pageable);
+    }
+
+    @Override
+    public Page<Resource> findAllResource(Pageable pageable) {
+        return resourceRepository.findAll(pageable);
     }
 }

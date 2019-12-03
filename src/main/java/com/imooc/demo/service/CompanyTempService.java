@@ -1,6 +1,9 @@
 package com.imooc.demo.service;
 
 import com.imooc.demo.modle.CompanyTemp;
+import com.imooc.demo.modle.ResourceTemp;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CompanyTempService {
     Boolean saveCompanyTemp(CompanyTemp companyTemp);
@@ -11,5 +14,6 @@ public interface CompanyTempService {
 
     CompanyTemp findCompanyTempByCompanyIdAndCheckedStatus(Integer companyId, Integer checkedStatus);
 
+    Page<CompanyTemp> findCompanyTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
 
 }
