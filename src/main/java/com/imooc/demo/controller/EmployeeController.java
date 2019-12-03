@@ -579,8 +579,6 @@ public class EmployeeController {
      */
     @PostMapping("/getCompanyFollows")
     public ResultVO<Map<String, String>> getCompanyFollows(@RequestBody HashMap map) {
-
-
         Integer companyId = Integer.parseInt(map.get("companyId").toString());
         Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());

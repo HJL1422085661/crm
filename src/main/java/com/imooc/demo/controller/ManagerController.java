@@ -288,12 +288,12 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
-        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
         Page<CompanyTemp> companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
 
         if (companyTempPage.getContent().isEmpty()) {
             if (page > 1) {
-                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "createDate");
+                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "startDate");
                 companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
                 return ResultVOUtil.success(companyTempPage);
             } else
@@ -302,7 +302,6 @@ public class ManagerController {
             System.out.println(companyTempPage.getContent());
             return ResultVOUtil.success(companyTempPage);
         }
-
 
     }
 
@@ -407,7 +406,7 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_TEMP_ERROR);
         }
 
-        Company company = null;
+        Company company = new Company();
         BeanUtils.copyProperties(companyTemp, company);
         // 审批状态 0: 未审批,  1：同意 2: 不同意
         if (checkedStatus == 1) {
@@ -479,7 +478,6 @@ public class ManagerController {
         } else {
             return ResultVOUtil.error(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR);
         }
-
     }
 
 

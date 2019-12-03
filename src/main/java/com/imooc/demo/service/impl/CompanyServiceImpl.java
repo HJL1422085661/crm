@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -35,6 +37,8 @@ public class CompanyServiceImpl implements CompanyService {
         return  companyRepository.findCompanyByEmployeeId(employeeId, pageable);
     }
 
+    @Modifying
+    @Transactional
     @Override
     public Integer deleteCompanyByCompanyId(Integer companyId) {
         return companyRepository.deleteCompanyByCompanyId(companyId);

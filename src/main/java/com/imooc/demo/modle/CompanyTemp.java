@@ -32,6 +32,12 @@ public class CompanyTemp {
     @Column(name = "checkedStatus", nullable = false)
     public Integer checkedStatus;
 
+    /** 创建者 **/
+    @Column(name = "employeeId")
+    public String employeeId;
+    /** 员工姓名 **/
+    @Column(name = "employeeName")
+    public String employeeName;
     /** 公司ID **/
     @Column(name = "companyId")
     public Integer companyId;
