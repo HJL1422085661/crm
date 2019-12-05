@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @Slf4j
@@ -56,5 +58,15 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     @Override
     public Page<PayBackRecord> findPayBackRecordByEmployeeIdAndTime(String startTime, String endTime, String employeeId, Pageable pageable) {
         return payBackRecordRepository.findPayBackRecordsByCreateDateBetweenAndEmployeeId(startTime, endTime, employeeId, pageable);
+    }
+
+    @Override
+    public List<PayBackRecord> findAllPayBackRecordByBusinessId(String businessId) {
+        return payBackRecordRepository.findAllByBusinessId(businessId);
+    }
+
+    @Override
+    public Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable) {
+        return payBackRecordRepository.findPayBackRecordByEmployeeIdAndBusinessType(employeeId, businessType, pageable);
     }
 }

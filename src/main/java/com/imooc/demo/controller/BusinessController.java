@@ -5,6 +5,7 @@ import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.*;
 import com.imooc.demo.repository.ResourceRepository;
 import com.imooc.demo.service.*;
+import com.imooc.demo.utils.KeyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +87,7 @@ public class BusinessController {
                 // 普通员工看到自己的订单
                 resourceBusinessPage = resourceBusinessService.findResourceBusinessByEmployeeId(employeeId, request);
             }
+
             map.put("businessList", resourceBusinessPage);
             map.put("orderType", ResultEnum.GET_RESOURCE_BUSINESS_SUCCESS);
             return ResultVOUtil.success(map);
@@ -107,6 +109,7 @@ public class BusinessController {
             for (CompanyBusiness companyBusinessTemp : companyBusinessPage.getContent()) {
                 CompanyBusinessDTO companyBusinessDTO = new CompanyBusinessDTO();
                 BeanUtils.copyProperties(companyBusinessTemp, companyBusinessDTO, getNullPropertyNames(companyBusinessTemp));
+                companyBusinessDTO.setBusinessId(KeyUtil.createID());
                 String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
                 String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
                 List<Map<String, String>> resourceListTemp = new ArrayList<>();
@@ -122,6 +125,8 @@ public class BusinessController {
             }
             map.put("businessList", companyBusinessDTOList);
             map.put("orderType", ResultEnum.GET_COMPANY_BUSINESS_SUCCESS);
+            map.put("totalPages", companyBusinessPage.getTotalPages());
+            map.put("page", companyBusinessPage.getPageable().getPageNumber());
             return ResultVOUtil.success(map);
         }
     }
@@ -147,6 +152,8 @@ public class BusinessController {
             log.error("【创建人才订单】该人才不存在");
             return ResultVOUtil.error(ResultEnum.RESOURCE_NOT_EXIST);
         }
+        // 生成订单ID
+        resourceBusiness.setBusinessId(KeyUtil.createID());
         //因为人才是和employeeId绑定的
         resourceBusiness.setEmployeeId(resource.getEmployeeId());
         resourceBusiness.setEmployeeName(resource.getEmployeeName());
@@ -207,9 +214,6 @@ public class BusinessController {
             log.error("【创建公司订单】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-
-        // 生成订单ID
-        String businessId = UUID.randomUUID().toString().replaceAll("-", "");
         // 提取属性
         String info = paramMap.get("info").toString();
         String createDate = paramMap.get("createDate").toString();
@@ -222,14 +226,16 @@ public class BusinessController {
         String resourceIdString = resourceIdList.substring(1, resourceIdList.length() - 1);
         String[] resourceIdTemp = resourceIdString.split(",");
         String resourceNameString = "";
+
         // 设置属性
         CompanyBusiness createBusiness = new CompanyBusiness();
-        createBusiness.setBusinessId(businessId);
         createBusiness.setCompanyId(companyId);
         createBusiness.setInfo(info);
         createBusiness.setCreateDate(createDate);
         createBusiness.setOrderPaySum(orderPaySum);
         createBusiness.setEmployeeId(employeeId);
+        // 生成订单ID
+        createBusiness.setBusinessId(KeyUtil.createID());
         Company company = companyService.getCompanyByCompanyId(companyId);
         if (company == null) {
             log.error("【创建公司订单】该公司不存在");

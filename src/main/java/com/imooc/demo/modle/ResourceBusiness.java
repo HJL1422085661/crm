@@ -15,11 +15,15 @@ import java.math.BigDecimal;
 @Data
 @Table(name="resourcebusiness")
 public class ResourceBusiness {
-    /** 人才订单ID **/
+    /** ID **/
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     public Integer id;
+
+    /** 人才订单ID **/
+    @Column(name = "businessId")
+    public String businessId;
 
     /** 人才ID **/
     @Column(name = "resourceId", nullable = false)

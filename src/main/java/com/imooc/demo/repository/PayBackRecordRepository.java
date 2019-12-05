@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 
 
 public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, Integer> {
@@ -17,5 +18,7 @@ public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, In
     Page<PayBackRecord> findPayBackRecordsByRecordId(Integer recordId, Pageable pageable);
 
     Page<PayBackRecord> findPayBackRecordsByCreateDateBetweenAndEmployeeId(String startTime, String endTime, String employeeId, Pageable pageable);
+    List<PayBackRecord> findAllByBusinessId(String businessId);
+    Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
 }
 

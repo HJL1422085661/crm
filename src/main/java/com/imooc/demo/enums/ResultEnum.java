@@ -77,7 +77,10 @@ public enum ResultEnum {
     GET_RESOURCE_BUSINESS_SUCCESS(66, "获取人才订单成功"),
     GET_COMPANY_BUSINESS_SUCCESS(67, "获取公司订单成功"),
     COMPANY_NOT_EXIST(68, "创建公司订单该公司不存在"),
-
+    CREATE_RESOURCE_BUSINESS__PAYBACK_ERROR(69, "创建人才订单回款发生错误"),
+    PAYBACK_RECORD_NOT_EXIST(70, "回款记录为空"),
+    RESOURCE_PAYBACK_LIST_EMPTY(71, "人才订单回款为空"),
+    COMPANY_PAYBACK_LIST_EMPTY(72, "公司订单回款为空"),
 
 
 

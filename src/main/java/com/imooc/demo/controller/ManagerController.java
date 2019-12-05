@@ -530,45 +530,45 @@ public class ManagerController {
         }
     }
 
-
-    /**
-     * 管理员审批回款代办事项
-     * 修改表中对应项：isChecked 是否已确认（ 0: 未确认, 1:已确认 ）
-     * TODO: isChecked是否还有其他状态？？？
-     *
-     * @param recordId 回款记录表ID
-     * @param req
-     * @return
-     */
-    @PostMapping("/checkPayBackList")
-    public ResultVO<Map<String, String>> checkPayBackList(@RequestBody int recordId,
-                                                          @RequestBody int checkedStatus,
-                                                          HttpServletRequest req) {
-        String token = TokenUtil.parseToken(req);
-        if (token.equals("")) {
-            log.error("【管理员审批回款代办事项】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
-        }
-        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        if (StringUtils.isEmpty(employeeId)) {
-            log.error("【管理员审批回款代办事项】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
-        }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
-            log.error("【管理员审批回款代办事项】普通员工无权限");
-            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
-        }
-        PayBackRecord payBackRecord = payBackRecordService.getPayBackRecordByRecordId(recordId);
-        // 更新回款操作状态
-        payBackRecord.setIsChecked(checkedStatus);
-        // 写回数据库
-        Boolean flag = payBackRecordService.savePayBackRecord(payBackRecord);
-        if (flag) {
-            return ResultVOUtil.success();
-        } else {
-            return ResultVOUtil.error(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR);
-        }
-    }
+//
+//    /**
+//     * 管理员审批回款代办事项
+//     * 修改表中对应项：isChecked 是否已确认（ 0: 未确认, 1:已确认 ）
+//     * TODO: isChecked是否还有其他状态？？？
+//     *
+//     * @param recordId 回款记录表ID
+//     * @param req
+//     * @return
+//     */
+//    @PostMapping("/checkPayBackList")
+//    public ResultVO<Map<String, String>> checkPayBackList(@RequestBody int recordId,
+//                                                          @RequestBody int checkedStatus,
+//                                                          HttpServletRequest req) {
+//        String token = TokenUtil.parseToken(req);
+//        if (token.equals("")) {
+//            log.error("【管理员审批回款代办事项】Token为空");
+//            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+//        }
+//        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+//        if (StringUtils.isEmpty(employeeId)) {
+//            log.error("【管理员审批回款代办事项】 employeeId为空");
+//            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+//        }
+//        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+//            log.error("【管理员审批回款代办事项】普通员工无权限");
+//            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+//        }
+//        PayBackRecord payBackRecord = payBackRecordService.getPayBackRecordByRecordId(recordId);
+//        // 更新回款操作状态
+//        payBackRecord.setIsChecked(checkedStatus);
+//        // 写回数据库
+//        Boolean flag = payBackRecordService.savePayBackRecord(payBackRecord);
+//        if (flag) {
+//            return ResultVOUtil.success();
+//        } else {
+//            return ResultVOUtil.error(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR);
+//        }
+//    }
 
 
 }

@@ -27,7 +27,7 @@ class PayBackControllerTest {
     @Test
     void createPayBackRecord() {
         PayBackRecord payBackRecord = new PayBackRecord();
-        payBackRecord.setBusinessId(1);
+        payBackRecord.setBusinessId("1");
 
 
     }

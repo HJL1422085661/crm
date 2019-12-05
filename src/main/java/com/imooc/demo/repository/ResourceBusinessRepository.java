@@ -18,4 +18,5 @@ public interface ResourceBusinessRepository extends JpaRepository<ResourceBusine
     ResourceBusiness getResourceBusinessById(Integer id);
     Page<ResourceBusiness> findResourceBusinessByEmployeeId(String employeeId, Pageable pageable);
     Page<ResourceBusiness> findAll(Pageable pageable);
+    ResourceBusiness findResourceBusinessByBusinessId(String businessId);
 }

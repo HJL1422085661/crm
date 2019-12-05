@@ -46,4 +46,9 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     public Page<ResourceBusiness> findAllResourceBusinessPageable(Pageable pageable) {
         return resourceBusinessRepository.findAll(pageable);
     }
+
+    @Override
+    public ResourceBusiness findResourceBusinessByBusinessId(String businessId) {
+        return resourceBusinessRepository.findResourceBusinessByBusinessId(businessId);
+    }
 }
