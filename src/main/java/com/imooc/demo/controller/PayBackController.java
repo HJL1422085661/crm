@@ -106,6 +106,40 @@ public class PayBackController {
 
 
     /**
+     * 根据订单ID查看回款详情
+     *
+     * @param paramMap
+     * @param req
+     * @return
+     */
+    @PostMapping("/getPayBackRecordDetailByBusinessId")
+    public ResultVO<Map<String, String>> getPayBackRecordDetailByBusinessId(@RequestBody HashMap paramMap,
+                                                                            HttpServletRequest req) {
+        String businessId = paramMap.get("businessId").toString();
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取回款记录】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (employeeId.equals("")) {
+            log.error("【获取回款记录】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        // 取最新的回款记录
+        List<PayBackRecord> payBackRecordList = payBackRecordService.findAllPayBackRecordByBusinessId(businessId);
+        if (payBackRecordList.size() == 0) {
+            return ResultVOUtil.success(ResultEnum.PAYBACK_RECORD_NOT_EXIST);
+        }
+        PayBackRecord lastPayBackRecord = payBackRecordList.get(payBackRecordList.size() - 1);
+        BigDecimal progressRatio = (lastPayBackRecord.getOrderPaySum().subtract(lastPayBackRecord.getOwePay())).divide(lastPayBackRecord.getOrderPaySum());
+        Map<String, Object> map = new HashMap<>();
+        map.put("businessDetail", lastPayBackRecord);
+        map.put("progressRatio", progressRatio);
+        return ResultVOUtil.success(map);
+    }
+
+    /**
      * 根据订单ID查看回款记录
      *
      * @param paramMap
@@ -131,12 +165,12 @@ public class PayBackController {
             return ResultVOUtil.success(ResultEnum.PAYBACK_RECORD_NOT_EXIST);
         }
         return ResultVOUtil.success(payBackRecordList);
-
     }
 
     /**
      * 根据员工ID和订单类型取相应的回款记录
      * 1表示人才订单 2表示公司订单
+     *
      * @param paramMap
      * @param req
      * @return
@@ -151,11 +185,11 @@ public class PayBackController {
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "recordDate");
         Page<PayBackRecord> payBackRecordPage = payBackRecordService.findPayBackRecordByEmployeeIdAndBusinessType(employeeId, businessType, request);
         if (payBackRecordPage.isEmpty()) {
-            if(businessType == 1)  return ResultVOUtil.success(ResultEnum.RESOURCE_PAYBACK_LIST_EMPTY);
+            if (businessType == 1) return ResultVOUtil.success(ResultEnum.RESOURCE_PAYBACK_LIST_EMPTY);
             else return ResultVOUtil.success(ResultEnum.COMPANY_PAYBACK_LIST_EMPTY);
         } else {
-                System.out.println(payBackRecordPage.getContent());
-                return ResultVOUtil.success(payBackRecordPage);
+            System.out.println(payBackRecordPage.getContent());
+            return ResultVOUtil.success(payBackRecordPage);
         }
     }
 
