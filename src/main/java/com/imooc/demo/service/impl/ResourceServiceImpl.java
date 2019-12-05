@@ -81,7 +81,17 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Page<Resource> findAllResource(Pageable pageable) {
+    public Page<Resource> findAllResourcePageable(Pageable pageable) {
         return resourceRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Resource> findResourceByshareStatus(Integer shareStatus) {
+        return resourceRepository.findResourceByShareStatus(shareStatus);
+    }
+
+    @Override
+    public List<Resource> findAllResource() {
+        return resourceRepository.findAll();
     }
 }

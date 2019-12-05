@@ -67,11 +67,16 @@ public enum ResultEnum {
     MANAGER_UPDATE_COMPANY_INFO_ERROR(56, "管理员修改公司失败"),
     REJECT_UPDATE_SUCCESS(57, "管理员审批（拒绝修改）成功"),
     REJECT_DELETE_SUCCESS(58, "管理员审批（拒绝删除）成功"),
-
-
-
-
-
+    CREATE_RESOURCE_BUSINESS_ERROR(59, "创建人才订单失败"),
+    RESOURCE_NOT_EXIST(60, "人才不存在"),
+    CREATE_COMPANY_BUSINESS_ERROR(61, "创建公司订单失败"),
+    DELETE_RESOURCE_BUSINESS_ERROR(62, "删除人才订单失败"),
+    DELETE_COMPANY_BUSINESS_ERROR(63, "删除公司订单失败"),
+    RESOURCE_BUSINESS_NOT_EXIST(64, "人才订单不存在"),
+    BUSINESS_BUSINESS_NOT_EXIST(65, "公司订单不存在"),
+    GET_RESOURCE_BUSINESS_SUCCESS(66, "获取人才订单成功"),
+    GET_COMPANY_BUSINESS_SUCCESS(67, "获取公司订单成功"),
+    COMPANY_NOT_EXIST(68, "创建公司订单该公司不存在"),
 
 
 

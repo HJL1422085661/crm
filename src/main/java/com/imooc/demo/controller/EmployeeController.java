@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
+
 /**
  * @Author emperor
  * @Date 2019/10/21 10:15
@@ -145,10 +147,11 @@ public class EmployeeController {
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<Resource> resourcePage = null;
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2){
-            resourcePage = resourceService.findAllResource(request);
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+            resourcePage = resourceService.findAllResourcePageable(request);
+        } else {
+            resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
         }
-        else { resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);}
 
         if (resourcePage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
@@ -156,6 +159,55 @@ public class EmployeeController {
             System.out.println(resourcePage.getContent());
             return ResultVOUtil.success(resourcePage);
         }
+
+    }
+
+
+    /**
+     * 获取人才姓名及ID
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("/getResourceNames")
+    public ResultVO<Map<String, String>> getResourceNames(HttpServletRequest req) {
+
+        String token = TokenUtil.parseToken(req);
+
+        System.out.println("token is:" + token);
+        if (token.equals("")) {
+            log.error("【获取人才列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        System.out.println("id:" + employeeId);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取人才列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+
+        List<Resource> privateResourceList = new ArrayList<>();
+        // 管理员能看到所有客户
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+            privateResourceList = resourceService.findAllResource();
+        } else {
+            privateResourceList = resourceService.getResourceByEmployeeId(employeeId);
+            //1表示共有 2表示私有
+            List<Resource> publicResourceList = resourceService.findResourceByshareStatus(1);
+            for (Resource resource : publicResourceList)
+                privateResourceList.add(resource);
+        }
+        //考虑下要不要排序
+
+        //封装成只要ID ResourceName lambda表达式 java 11
+        List<Object> resourceList = new ArrayList<>();
+        for (Resource resource : privateResourceList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("resourceId", resource.getResourceId());
+            map.put("resourceName", resource.getResourceName());
+            resourceList.add(map);
+        }
+        return ResultVOUtil.success(resourceList);
 
     }
 
@@ -241,7 +293,7 @@ public class EmployeeController {
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         ResourceTemp createResource = null;
         ResourceTemp resourceTemp = new ResourceTemp();
-        //如果是老板则直接操作，不需要审批,但是需要记录操作?
+        //如果是老板则直接操作，不需要审批,但是需要记录操作
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
@@ -557,10 +609,11 @@ public class EmployeeController {
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "startDate");
         Page<Company> companyPage = null;
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2){
-             companyPage = companyService.findAllCompany(request);
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+            companyPage = companyService.findAllCompanyPageable(request);
+        } else {
+            companyPage = companyService.findCompanyByEmployeeId(employeeId, request);
         }
-        else { companyPage = companyService.findCompanyByEmployeeId(employeeId, request);}
 
         if (companyPage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.COMPANY_LIST_EMPTY);
@@ -580,11 +633,11 @@ public class EmployeeController {
     @PostMapping("/getCompanyFollows")
     public ResultVO<Map<String, String>> getCompanyFollows(@RequestBody HashMap map) {
         Integer companyId = Integer.parseInt(map.get("companyId").toString());
-        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+        Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
         System.out.println("companyId:" + companyId);
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
 
 
         Page<CompanyFollowRecord> companyFollowRecordPage = companyFollowRecordService.getCompanyFollowRecordByCompanyId(companyId, request);
@@ -628,25 +681,58 @@ public class EmployeeController {
 
     }
 
+    /**
+     * 获取公司姓名及ID
+     *
+     * @param req
+     * @return
+     */
+    @GetMapping("/getCompanyNames")
+    public ResultVO<Map<String, String>> getCompanyNames(HttpServletRequest req) {
+
+        String token = TokenUtil.parseToken(req);
+
+        System.out.println("token is:" + token);
+        if (token.equals("")) {
+            log.error("【获取公司列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        System.out.println("id:" + employeeId);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取公司列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+
+        List<Company> privateCompanyList = new ArrayList<>();
+        // 管理员能看到所有客户
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+            privateCompanyList = companyService.findAllCompany();
+        } else {
+            privateCompanyList = companyService.getCompanyByEmployeeId(employeeId);
+            //1表示共有 2表示私有
+            List<Company> publicCompanyList = companyService.findCompanyByShareStatus(1);
+            for (Company company : publicCompanyList)
+                privateCompanyList.add(company);
+        }
+        //封装成只要ID ResourceName lambda表达式 java 11
+//        Map<String, Object> companyMap = new HashMap<>();
+        List<Object> companyList = new ArrayList<>();
+        for (Company company : privateCompanyList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("companyId", company.getCompanyId());
+            map.put("companyName", company.getCompanyName());
+            companyList.add(map);
+        }
+        return ResultVOUtil.success(companyList);
+
+    }
+
+
     @PostMapping("/test")
     public String test() {
         return "hello world";
     }
 
-    /**
-     * 用于复制时忽略null值
-     */
-    public static String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<String>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) emptyNames.add(pd.getName());
-        }
-        String[] result = new String[emptyNames.size()];
-        return emptyNames.toArray(result);
-    }
 
 }

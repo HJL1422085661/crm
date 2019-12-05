@@ -16,6 +16,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class CompanyServiceImpl implements CompanyService {
@@ -57,7 +59,22 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public Page<Company> findAllCompany(Pageable pageable) {
+    public Page<Company> findAllCompanyPageable(Pageable pageable) {
         return companyRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Company> findAllCompany() {
+        return companyRepository.findAll();
+    }
+
+    @Override
+    public List<Company> getCompanyByEmployeeId(String employeeId) {
+        return companyRepository.findCompanyByEmployeeId(employeeId);
+    }
+
+    @Override
+    public List<Company> findCompanyByShareStatus(Integer shareStatus) {
+        return companyRepository.findCompanyByShareStatus(shareStatus);
     }
 }

@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
+
 /**
  * @Author emperor
  * @Date 2019/11/18 14:29
@@ -42,8 +44,6 @@ public class ManagerController {
     public ManagerService managerService;
     @Autowired
     public EmployeeService employeeService;
-    @Autowired
-    public BusinessService businessService;
     @Autowired
     public ResourceService resourceService;
     @Autowired
@@ -124,96 +124,186 @@ public class ManagerController {
     /**
      * 删除员工
      *
-     * @param employeeId
+     * @param
      * @return
      */
-    @Modifying
-    @Transactional
-    @PostMapping("/deleteEmployee")
-    public ResultVO<Map<String, String>> deleteEmployee(@RequestParam("employeeId") String employeeId) {
-
-        //Todo
-        /*先查询该用户是否存在进行的订单，如果该用户存在进行中的订单，则需要转让该订单给其他人
-            该用户的客户资源需要变为公有
-         */
-        List<Business> businessList = businessService.getBusinessByEmployeeId(employeeId);
-        boolean flag = false;
-        //查询与该用户有关的订单是否存在ing状态的
-        for (Business business : businessList) {
-            if (business.getBusinessStatus() == 0) {
-                flag = true;
-                break;
-            }
-        }
-        //如果该用户存在正在进行的订单,则不能删除
-        if (flag) {
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_DELETE);
-        }
-        //获取该用户的人才库，修改人才状态为公共public
-        List<Resource> resourceList = resourceService.getResourceByEmployeeId(employeeId);
-        for (Resource resource : resourceList) {
-            //公有人才的员工ID设为老板的ID（老板的ID固定为0）
-            Boolean tag = resourceService.updateShareStatusAndEmployeeIdByResourceId("public", "0", resource.getResourceId());
-            if (!tag) {
-                log.error("【设置人才到公有库】发生错误");
-                return ResultVOUtil.error(ResultEnum.SET_RESOURCE_PUBLIC_ERROR);
-            }
-        }
-        try {
-            employeeService.deleteEmployee(employeeId);
-        } catch (Exception e) {
-            log.error("【删除员工】发生异常" + e.getMessage());
-            return ResultVOUtil.error(ResultEnum.DELETE_EMPLOYEE_EXCEPTION);
-        }
-
-        return ResultVOUtil.success();
-    }
+//    @Modifying
+//    @Transactional
+//    @PostMapping("/deleteEmployee")
+//    public ResultVO<Map<String, String>> deleteEmployee(@RequestParam("employeeId") String employeeId) {
+//
+//        //Todo
+//        /*先查询该用户是否存在进行的订单，如果该用户存在进行中的订单，则需要转让该订单给其他人
+//            该用户的客户资源需要变为公有
+//         */
+//        List<Business> businessList = businessService.getBusinessByEmployeeId(employeeId);
+//        boolean flag = false;
+//        //查询与该用户有关的订单是否存在ing状态的
+//        for (Business business : businessList) {
+//            if (business.getBusinessStatus() == 0) {
+//                flag = true;
+//                break;
+//            }
+//        }
+//        //如果该用户存在正在进行的订单,则不能删除
+//        if (flag) {
+//            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_DELETE);
+//        }
+//        //获取该用户的人才库，修改人才状态为公共public
+//        List<Resource> resourceList = resourceService.getResourceByEmployeeId(employeeId);
+//        for (Resource resource : resourceList) {
+//            //公有人才的员工ID设为老板的ID（老板的ID固定为0）
+//            Boolean tag = resourceService.updateShareStatusAndEmployeeIdByResourceId("public", "0", resource.getResourceId());
+//            if (!tag) {
+//                log.error("【设置人才到公有库】发生错误");
+//                return ResultVOUtil.error(ResultEnum.SET_RESOURCE_PUBLIC_ERROR);
+//            }
+//        }
+//        try {
+//            employeeService.deleteEmployee(employeeId);
+//        } catch (Exception e) {
+//            log.error("【删除员工】发生异常" + e.getMessage());
+//            return ResultVOUtil.error(ResultEnum.DELETE_EMPLOYEE_EXCEPTION);
+//        }
+//
+//        return ResultVOUtil.success();
+//    }
 
     // 创建共享人才库
     @PostMapping("/createPublicEmployee")
-    public ResultVO<Map<String, String>> createPublicResource(@RequestParam("resource") Resource resource) {
-        //设置人才状态
-        resource.setShareStatus(1);
-        Boolean flag = resourceService.saveResource(resource);
-        if (flag) {
-            return ResultVOUtil.success();
+    public ResultVO<Map<String, String>> createPublicResource(@RequestBody Resource resource,
+                                                              HttpServletRequest request) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【创建公有人才信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【创建公有人才信息】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        // 只有管理员才可以创建公有人才
+        if (employee.getEmployRole() != 2) {
+            return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
+        }
+
+        //设置人才状态 1:私有，2：公有
+        resource.setShareStatus(2);
+        Resource returnResource = resourceService.createResource(resource);
+        Map<String, Object> map = new HashMap<>();
+        if (returnResource != null) {
+            map.put("resource", returnResource);
+            map.put("employeeRole", 2);
+            return ResultVOUtil.success(map);
         } else {
-            log.error("【创建共享人才】发生错误");
+            log.error("【创建公有人才信息】发生错误");
             return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
         }
     }
 
-    // 修改共享人才库
+
+    /**
+     * 修改共享人才库
+     *
+     * @param resource
+     * @param request
+     * @return
+     */
     @PostMapping("/updatePublicEmployee")
-    public ResultVO<Map<String, String>> updatePublicResource(@RequestParam("resource") Resource resource) {
-        //首先获取数据库中的人才对象
-        Resource resource1 = resourceService.getResourceByResourceId(resource.getResourceId());
-        //TODO
-        BeanUtils.copyProperties(resource1, resource);
-        Boolean flag = resourceService.saveResource(resource);
-        if (flag) {
-            return ResultVOUtil.success();
-        } else {
-            log.error("【修改共享人才】发生错误");
-            return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
+    public ResultVO<Map<String, String>> updatePublicResource(@RequestBody Resource resource,
+                                                              HttpServletRequest request) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【修改公有人才信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
         }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【修改公有人才信息】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        // 管理员才可以修改公有人才
+        if (employee.getEmployRole() != 2) {
+            return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
+        }
+        //首先获取数据库中的人才对象
+        ResourceTemp resourceTemp = new ResourceTemp();
+        //管理员直接同意修改，并写一条记录存到temp表中
+        BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
+        resourceTemp.setRequestStatus(0);
+        //老板的话直接设置同意
+        resourceTemp.setCheckedStatus(1);
+        Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
+        if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
+
+        // 将修改后的人才信息存入数据库
+        Resource returnResource = resourceService.createResource(resource);
+        Map<String, Object> map = new HashMap<>();
+        if (returnResource != null) {
+            map.put("resource", returnResource);
+            map.put("employeeRole", 2);
+            return ResultVOUtil.success(map);
+        } else {
+            log.error("【修改公有人才信息】发生错误");
+            return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
+        }
+
     }
 
-//    /**
-//     * 创建共享人才
-//     * @param business
-//     * @return
-//     */
-//    @PostMapping("/createPublicBusiness")
-//    public ResultVO<Map<String, String>> createPublicBusiness(@RequestParam("business") Business business){
-//        Boolean flag = businessService.createPublicBusiness(business);
-//        if(flag){
-//            return ResultVOUtil.success();
-//        }else {
-//            log.error("【创建共享企业】发生错误");
-//            return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_BUSINESS_ERROR);
-//        }
-//    }
+    /**
+     * 删除共享人才库
+     *
+     * @param paramMap
+     * @param request
+     * @return
+     */
+    @PostMapping("/deletePublicResource")
+    public ResultVO<Map<String, String>> deletePublicResource(@RequestBody HashMap paramMap,
+                                                              HttpServletRequest request) {
+        Integer publicResourceId = Integer.parseInt(paramMap.get("resourceId").toString());
+
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【删除公有人才信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【删除公有人才信息】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        // 管理员才可以删除公有人才
+        if (employee.getEmployRole() != 2) {
+            return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
+        }
+
+        //首先获取数据库中的人才对象
+        Resource publicResource = resourceService.getResourceByResourceId(publicResourceId);
+        ResourceTemp resourceTemp = new ResourceTemp();
+        //管理员直接同意修改，并写一条记录存到temp表中
+        BeanUtils.copyProperties(publicResource, resourceTemp, getNullPropertyNames(publicResource));
+        resourceTemp.setRequestStatus(1);
+        //老板的话直接设置同意
+        resourceTemp.setCheckedStatus(1);
+        Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
+        if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
+
+        // 删除公有人才
+        Integer flag = resourceService.deleteResourceByResourceId(publicResourceId);
+        Map<String, Object> map = new HashMap<>();
+        if (flag != 0) {
+            map.put("employeeRole", 2);
+            return ResultVOUtil.success(map);
+        } else {
+            log.error("【删除公有人才信息】发生错误");
+            return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
+        }
+
+    }
 
     /**
      * 管理员获取人才修改|删除代办事项
@@ -244,12 +334,12 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
-        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus,requestStatus, request);
+        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
 
         if (resourceTempPage.getContent().isEmpty()) {
             if (page > 1) {
                 request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "createDate");
-                resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus,requestStatus, request);
+                resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
                 return ResultVOUtil.success(resourceTempPage);
             } else return ResultVOUtil.success(ResultEnum.RESOURCE_TEMP_LIST_EMPTY);
         } else {
@@ -432,8 +522,8 @@ public class ManagerController {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else if (checkedStatus == 2) {
             // 不同意
-            if  (companyTemp.requestStatus == 0) return ResultVOUtil.success(ResultEnum.REJECT_UPDATE_SUCCESS);
-            if  (companyTemp.requestStatus == 1) return ResultVOUtil.success(ResultEnum.REJECT_DELETE_SUCCESS);
+            if (companyTemp.requestStatus == 0) return ResultVOUtil.success(ResultEnum.REJECT_UPDATE_SUCCESS);
+            if (companyTemp.requestStatus == 1) return ResultVOUtil.success(ResultEnum.REJECT_DELETE_SUCCESS);
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);
         } else {
             return ResultVOUtil.success(ResultEnum.PARAM_ERROR);

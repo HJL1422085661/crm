@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import redis.clients.jedis.util.RedisOutputStream;
+
 import java.util.List;
 
 /**
@@ -29,4 +31,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     int updateShareStatusByResourceId(String shareStatus, Integer resourceId);
 
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
+
+    List<Resource> findResourceByShareStatus(Integer shareStatus);
 }

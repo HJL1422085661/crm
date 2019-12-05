@@ -65,4 +65,10 @@ public class CompanyTemp {
     /** 公司类型 **/
     @Column(name = "companyCategory")
     public Integer companyCategory;
+    /** 公司资源共享状态  1 公有  2 私有**/
+    @Column(name = "shareStatus")
+    public Integer shareStatus;
+    /** 客户状态（潜在客户、流失客户等） **/
+    @Column(name = "status")
+    public Integer status;
 }
