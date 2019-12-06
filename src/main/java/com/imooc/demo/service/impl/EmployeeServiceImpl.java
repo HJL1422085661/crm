@@ -116,5 +116,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         return false;
     }
 
-
+    @Override
+    public Employee createEmployee(Employee employee) {
+        return employeeRepository.saveAndFlush(employee);
+    }
 }

@@ -37,9 +37,11 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
         return companyBusinessRepository.getCompanyBusinessById(id);
     }
 
+    @Modifying
+    @Transactional
     @Override
-    public Integer deleteCompanyBusinessById(Integer id) {
-        return companyBusinessRepository.deleteCompanyBusinessById(id);
+    public Integer deleteCompanyBusinessByBusinessId(String businessId) {
+        return companyBusinessRepository.deleteCompanyBusinessByBusinessId(businessId);
     }
 
     @Override
@@ -50,5 +52,10 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
     @Override
     public Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId, Pageable pageable) {
         return companyBusinessRepository.findCompanyBusinessByEmployeeId(employeeId, pageable);
+    }
+
+    @Override
+    public CompanyBusiness getCompanyBusinessByBusinessId(String businessId) {
+        return companyBusinessRepository.getCompanyBusinessByBusinessId(businessId);
     }
 }

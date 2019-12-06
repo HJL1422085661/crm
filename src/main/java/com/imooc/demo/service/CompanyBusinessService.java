@@ -16,7 +16,9 @@ public interface CompanyBusinessService {
 
     CompanyBusiness createCompanyBusiness(CompanyBusiness companyBusiness);
 
-    Integer deleteCompanyBusinessById(Integer id);
+    CompanyBusiness getCompanyBusinessByBusinessId(String businessId);
+
+    Integer deleteCompanyBusinessByBusinessId(String businessId);
 
     Page<CompanyBusiness> findAllCompanyBusinessPageable(Pageable pageable);
 

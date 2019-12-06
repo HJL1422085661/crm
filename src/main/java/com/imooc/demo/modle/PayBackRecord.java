@@ -6,11 +6,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- * @Author emperor
- * @Date 2019/11/20 13:19
- * @Version 1.0
- */
+
 @Entity
 @Data
 @Table(name="paybackrecord")
@@ -24,6 +20,9 @@ public class PayBackRecord {
     /** 提成给谁 **/
     @Column(name = "employeeId")
     public String employeeId;
+    /** 提成给谁 **/
+    @Column(name = "employeeName")
+    public String employeeName;
 
      /** 回款相应订单ID（哪个订单的回款） **/
     @Column(name = "businessId")
@@ -38,9 +37,16 @@ public class PayBackRecord {
     /** 欠款金额 **/
     @Column(name = "owePay")
     public BigDecimal owePay;
-    /** 回款金额 **/
+    /** 已回款金额 **/
     @Column(name = "backPay")
     public BigDecimal backPay;
+
+    /** 最后回款金额 **/
+    @Column(name = "laterBackPay")
+    public BigDecimal laterBackPay;
+    /** 最后回款时间 **/
+    @Column(name = "laterBackDate")
+    public String laterBackDate;
 
     /** 回款次数 **/
     @Column(name = "backTimes")

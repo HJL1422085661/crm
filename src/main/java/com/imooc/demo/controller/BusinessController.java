@@ -109,7 +109,7 @@ public class BusinessController {
             for (CompanyBusiness companyBusinessTemp : companyBusinessPage.getContent()) {
                 CompanyBusinessDTO companyBusinessDTO = new CompanyBusinessDTO();
                 BeanUtils.copyProperties(companyBusinessTemp, companyBusinessDTO, getNullPropertyNames(companyBusinessTemp));
-                companyBusinessDTO.setBusinessId(KeyUtil.createID());
+                //companyBusinessDTO.setBusinessId(KeyUtil.createID());
                 String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
                 String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
                 List<Map<String, String>> resourceListTemp = new ArrayList<>();
@@ -173,27 +173,8 @@ public class BusinessController {
         return ResultVOUtil.success();
     }
 
-    @PostMapping("/deleteResourceBusiness")
-    public ResultVO<Map<Integer, String>> deleteResourceBusiness(@RequestBody HashMap paramMap,
-                                                                 HttpServletRequest request) {
-
-        Integer resourceBusinessId = Integer.parseInt(paramMap.get("id").toString());
-        String token = TokenUtil.parseToken(request);
-        if (token.equals("")) {
-            log.error("【删除人才订单】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
-        }
-        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        if (StringUtils.isEmpty(employeeId)) {
-            log.error("【删除人才订单】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
-        }
-        ResourceBusiness dataBaseResourceBusiness = resourceBusinessService.getResourceBusinessById(resourceBusinessId);
-        if (dataBaseResourceBusiness == null) {
-            log.error("【删除人才订单】该订单不存在");
-            return ResultVOUtil.error(ResultEnum.RESOURCE_BUSINESS_NOT_EXIST);
-        }
-        Integer flag = resourceBusinessService.deleteResourceBusinessById(resourceBusinessId);
+    public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId) {
+        Integer flag = resourceBusinessService.deleteResourceBusinessByBusinessId(resourceBusinessId);
         if (flag == 0) {
             log.error("【删除人才订单】发生错误");
             return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR);
@@ -264,11 +245,11 @@ public class BusinessController {
         return ResultVOUtil.success();
     }
 
-    @PostMapping("/deleteCompanyBusiness")
-    public ResultVO<Map<Integer, String>> deleteCompanyBusiness(@RequestBody HashMap paramMap,
-                                                                HttpServletRequest request) {
-
-        Integer companyBusinessId = Integer.parseInt(paramMap.get("id").toString());
+    @PostMapping("/deleteBusiness")
+    public ResultVO<Map<Integer, String>> deleteBusiness(@RequestBody HashMap paramMap,
+                                                         HttpServletRequest request) {
+        String businessId = paramMap.get("businessId").toString();
+        Integer businessType = Integer.parseInt(paramMap.get("orderType").toString());
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除公司订单】Token为空");
@@ -279,12 +260,25 @@ public class BusinessController {
             log.error("【删除公司订单】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        CompanyBusiness dataBaseCompanyBusiness = companyBusinessService.getCompanyBusinessById(companyBusinessId);
+        if (businessType == 1) {
+            // 删除人才订单
+            return deleteResourceBusiness(businessId);
+        } else if (businessType == 2) {
+            // 删除公司订单
+            return deleteCompanyBusiness(businessId);
+        } else {
+            log.error("【删除订单】发生错误");
+            return ResultVOUtil.error(ResultEnum.DELETE_BUSINESS_ERROR);
+        }
+    }
+
+    public ResultVO<Map<Integer, String>> deleteCompanyBusiness(String companyBusinessId) {
+        CompanyBusiness dataBaseCompanyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(companyBusinessId);
         if (dataBaseCompanyBusiness == null) {
             log.error("【删除公司订单】该订单不存在");
             return ResultVOUtil.error(ResultEnum.RESOURCE_BUSINESS_NOT_EXIST);
         }
-        Integer flag = companyBusinessService.deleteCompanyBusinessById(companyBusinessId);
+        Integer flag = companyBusinessService.deleteCompanyBusinessByBusinessId(companyBusinessId);
         if (flag == 0) {
             log.error("【删除公司订单】发生错误");
             return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_BUSINESS_ERROR);

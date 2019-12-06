@@ -16,6 +16,7 @@ import java.util.List;
 public interface CompanyBusinessRepository extends JpaRepository<CompanyBusiness, Integer> {
     List<CompanyBusiness> getCompanyBusinessByEmployeeId(String employeeId);
     CompanyBusiness getCompanyBusinessById(Integer id);
-    Integer deleteCompanyBusinessById(Integer id);
+    CompanyBusiness getCompanyBusinessByBusinessId(String businessId);
+    Integer deleteCompanyBusinessByBusinessId(String businessId);
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId,  Pageable pageable);
 }

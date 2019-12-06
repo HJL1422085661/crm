@@ -18,6 +18,7 @@ public interface EmployeeService {
     String addLoginTicket(String employeeId);
     void logout(String ticket);
     Boolean saveEmployee(Employee employee);
+    Employee createEmployee(Employee employee);
     Integer deleteEmployee(String employeeId);
     Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
 

@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
@@ -27,14 +29,16 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
         }
     }
 
+    @Modifying
+    @Transactional
     @Override
-    public Integer deleteResourceBusinessById(Integer id) {
-        return resourceBusinessRepository.deleteResourceBusinessById(id);
+    public Integer deleteResourceBusinessByBusinessId(String  businessId) {
+        return resourceBusinessRepository.deleteResourceBusinessByBusinessId(businessId);
     }
 
     @Override
-    public ResourceBusiness getResourceBusinessById(Integer id) {
-        return resourceBusinessRepository.getResourceBusinessById(id);
+    public ResourceBusiness getResourceBusinessByBusinessId(String  businessId) {
+        return resourceBusinessRepository.getResourceBusinessByBusinessId(businessId);
     }
 
     @Override

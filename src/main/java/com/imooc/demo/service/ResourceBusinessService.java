@@ -7,9 +7,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface ResourceBusinessService {
 
-    ResourceBusiness getResourceBusinessById(Integer id);
+    ResourceBusiness getResourceBusinessByBusinessId(String businessId);
     ResourceBusiness createResourceBusiness(ResourceBusiness resourceBusiness);
-    Integer deleteResourceBusinessById(Integer id);
+    Integer deleteResourceBusinessByBusinessId(String businessId);
     Page<ResourceBusiness> findResourceBusinessByEmployeeId(String employeeId, Pageable pageable);
     Page<ResourceBusiness> findAllResourceBusinessPageable(Pageable pageable);
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);

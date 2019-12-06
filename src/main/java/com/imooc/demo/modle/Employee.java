@@ -28,8 +28,8 @@ public class Employee {
     @Column(name = "employeeRole", nullable = false)
     private Integer employRole = EmployeeRoleEnum.EMPLOYEE.getCode();
     /** 员工手机号 **/
-    @Column(name = "iphoneNumber")
-    private String iphoneNumber;
+    @Column(name = "phoneNumber")
+    private String phoneNumber;
     /** 员工密码 **/
     @Column(name = "passWord", nullable = false)
     private String passWord;
@@ -39,6 +39,9 @@ public class Employee {
     /** 密码加密需要 **/
     @Column(name = "salt" )
     private String salt;
+    /** 员工邮箱号 **/
+    @Column(name = "email")
+    private String email;
 
 
 

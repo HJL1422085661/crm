@@ -6,16 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-/**
- * @ Author: yangfan
- * @ Date: 2019/12/2
- * @ Version: 1.0
- */
 
 
 public interface ResourceBusinessRepository extends JpaRepository<ResourceBusiness, Integer> {
-    Integer deleteResourceBusinessById(Integer id);
-    ResourceBusiness getResourceBusinessById(Integer id);
+
+    Integer deleteResourceBusinessByBusinessId(String businessId);
+    ResourceBusiness getResourceBusinessByBusinessId(String businessId);
     Page<ResourceBusiness> findResourceBusinessByEmployeeId(String employeeId, Pageable pageable);
     Page<ResourceBusiness> findAll(Pageable pageable);
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);
