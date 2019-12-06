@@ -81,7 +81,7 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.USER_ID_EXIST);
         }
         try {
-            employee = managerService.register(employeeForm.getEmployeeId(), employeeForm.getPassWord(), employeeForm.getEmployRole(), employeeForm.getGender());
+            employee = managerService.register(employeeForm.getEmployeeId(), employeeForm.getPassWord(), employeeForm.getEmployeeRole(), employeeForm.getGender());
         } catch (Exception e) {
             log.error("【注册用户】注册发生异常");
             return ResultVOUtil.error(ResultEnum.REGISTER_EXCEPTION);

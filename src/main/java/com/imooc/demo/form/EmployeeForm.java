@@ -6,11 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-/**
- * @Author emperor
- * @Date 2019/10/21 10:35
- * @Version 1.0
- */
+
 @Data
 public class EmployeeForm {
 
@@ -29,6 +25,6 @@ public class EmployeeForm {
 
     /** 员工角色 **/
     @NotNull(message = "角色必填")
-    private Integer employRole = EmployeeRoleEnum.EMPLOYEE.getCode();
+    private Integer employeeRole = EmployeeRoleEnum.EMPLOYEE.getCode();
 
 }
