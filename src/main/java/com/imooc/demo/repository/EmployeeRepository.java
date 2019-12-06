@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @Author emperor
  * @Date 2019/10/21 9:51
@@ -18,6 +20,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
     Employee getEmployeeByEmployeeIdAndPassWord(String employeeId, String passWord);
     Employee getEmployeeByEmployeeId(String employeeId);
     Integer deleteByEmployeeId(String employeeId);
+
+    List<Employee> findAll();
 
     @Transactional
     @Modifying

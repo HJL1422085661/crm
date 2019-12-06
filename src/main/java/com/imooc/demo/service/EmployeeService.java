@@ -2,6 +2,7 @@ package com.imooc.demo.service;
 
 import com.imooc.demo.modle.Employee;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,5 +22,5 @@ public interface EmployeeService {
     Employee createEmployee(Employee employee);
     Integer deleteEmployee(String employeeId);
     Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
-
+    List<Employee> findAllEmployee();
 }

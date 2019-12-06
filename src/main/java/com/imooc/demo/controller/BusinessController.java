@@ -115,7 +115,6 @@ public class BusinessController {
                 List<Map<String, String>> resourceListTemp = new ArrayList<>();
                 for (int i = 0; i < resourceIdList.length; i++) {
                     Map<String, String> resourceTemp = new HashMap<>();
-
                     resourceTemp.put("resourceId", resourceIdList[i]);
                     resourceTemp.put("resourceName", resourceNameList[i]);
                     resourceListTemp.add(resourceTemp);

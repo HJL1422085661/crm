@@ -14,10 +14,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @Author emperor
@@ -119,5 +116,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Employee createEmployee(Employee employee) {
         return employeeRepository.saveAndFlush(employee);
+    }
+
+    @Override
+    public List<Employee> findAllEmployee() {
+        return employeeRepository.findAll();
     }
 }

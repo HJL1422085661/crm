@@ -86,6 +86,8 @@ public class EmployeeController {
             log.error("【创建人才资源】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
+        Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
+        resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
         resource.setEmployeeId(employeeId);
 
         Resource createResource = null;
@@ -293,6 +295,9 @@ public class EmployeeController {
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         ResourceTemp createResource = null;
         ResourceTemp resourceTemp = new ResourceTemp();
+        // 前台只传了employeeId，要自己封装employeeName属性
+        Employee employeeNew = employeeService.getEmployeeByEmployeeId(resource.getEmployeeId());
+        resource.setEmployeeName(employeeNew.getEmployeeName());
         //如果是老板则直接操作，不需要审批,但是需要记录操作
         if (employee.getEmployRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中

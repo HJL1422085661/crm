@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +203,36 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
         }
     }
+
+    @GetMapping("/getEmployeeList")
+    public ResultVO<Map<String, String>> getEmployeeList(HttpServletRequest request){
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【获取员工列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取员工列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        if (employee.getEmployRole() != 2) {
+            log.error("【获取员工列表】普通员工无权限访问所有员工");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        // 取得所有员工
+        List<Employee> employeeList = employeeService.findAllEmployee();
+        List<Map<String, String>> employeeListTemp = new ArrayList<>();
+        for (Employee employeeIdx : employeeList) {
+            Map<String, String> employeeTemp = new HashMap<>();
+            employeeTemp.put("employeeId", employeeIdx.getEmployeeId());
+            employeeTemp.put("employeeName", employeeIdx.getEmployeeName());
+            employeeListTemp.add(employeeTemp);
+        }
+        return ResultVOUtil.success(employeeListTemp);
+    }
+
 
 
     /**
