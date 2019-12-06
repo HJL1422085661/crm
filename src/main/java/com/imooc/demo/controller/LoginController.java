@@ -117,7 +117,12 @@ public class LoginController {
             if (returnEmployee == null) {
                 log.error("【修改个人信息】发生错误");
                 return ResultVOUtil.error(ResultEnum.SAVE_PERSONAL_INFO_ERROR);
-            } else return ResultVOUtil.success(returnEmployee);
+            } else {
+                // 先把employee密码信息等删除再返回
+                returnEmployee.setPassWord("");
+                returnEmployee.setSalt("");
+                return ResultVOUtil.success(returnEmployee);
+            }
         } catch (Exception e) {
             log.error("【修改个人信息】发生异常");
             return ResultVOUtil.error(ResultEnum.SAVE_PERSONAL_INFO_EXCEPTION);
