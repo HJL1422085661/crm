@@ -3,6 +3,7 @@ package com.imooc.demo.form;
 import com.imooc.demo.enums.EmployeeRoleEnum;
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -15,14 +16,13 @@ public class EmployeeForm {
     @NotEmpty(message = "用户ID必填")
     private String employeeId;
     /** 员工登录密码 **/
-    @NotEmpty(message = "密码必填")
-    private String passWord;
+//    @NotNull(message = "密码必填")
+    private String passWord = "123456";
 
     /** 员工名 **/
     @NotEmpty(message = "用户名必填")
     private String employeeName;
     /** 员工性別 **/
-    @NotNull(message = "性別必填")
     private Integer gender;
     /** 员工名 **/
     @NotEmpty(message = "手机号必填")
@@ -33,6 +33,10 @@ public class EmployeeForm {
     private Integer employeeRole;
 
     /** 员工所属经理ID **/
-    @NotNull(message = "所属经理必填")
+    @NotNull(message = "所属经理ID必填")
     private String employeeManagerId;
+
+    /** 员工email **/
+    private String email;
+
 }

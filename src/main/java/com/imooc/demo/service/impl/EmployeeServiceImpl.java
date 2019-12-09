@@ -122,4 +122,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> findAllEmployee() {
         return employeeRepository.findAll();
     }
+
+    @Override
+    public List<Employee> findEmployeeByEmployeeRole(Integer role) {
+        return employeeRepository.findEmployeeByEmployeeRole(role);
+    }
+
+    @Override
+    public List<Employee> findEmployeeByManagerId(String managerId) {
+        return employeeRepository.findEmployeeByEmployeeManagerId(managerId);
+    }
+
+    @Override
+    public Boolean existsByPhoneNumber(String phoneNumber) {
+        return employeeRepository.existsByPhoneNumber(phoneNumber);
+    }
 }

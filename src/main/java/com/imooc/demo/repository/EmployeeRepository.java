@@ -23,6 +23,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
 
     List<Employee> findAll();
 
+    List<Employee> findEmployeeByEmployeeRole(Integer employeeRole);
+
+    List<Employee> findEmployeeByEmployeeManagerId(String employeeManagerId);
+
+    Boolean existsByPhoneNumber(String phoneNumber);
+
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE employee SET employeeRole = ?1  WHERE employeeId = ?2 ")

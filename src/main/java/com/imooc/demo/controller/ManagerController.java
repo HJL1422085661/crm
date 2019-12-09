@@ -32,11 +32,6 @@ import java.util.Map;
 
 import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
 
-/**
- * @Author emperor
- * @Date 2019/11/18 14:29
- * @Version 1.0
- */
 
 @RestController
 @RequestMapping("/manager")
@@ -62,29 +57,61 @@ public class ManagerController {
 
     /**
      * manager注册employer, 注册成功返回ticket
+     * 创建新员工（管理员才可以操作）
+     *
      *
      * @param employeeForm
      * @param bindingResult
      * @return
      */
-    @PostMapping("/register")
-    public ResultVO<Map<String, String>> register(@Valid EmployeeForm employeeForm, BindingResult bindingResult) {
+    @PostMapping("/createEmployee")
+    public ResultVO<Map<String, String>> createEmployee(@Valid @RequestBody EmployeeForm employeeForm, BindingResult bindingResult,
+                                                  HttpServletRequest request) {
+        // 验证信息
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【创建新员工】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String databseEmployeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(databseEmployeeId)) {
+            log.error("【创建新员工】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee databaseEmployee = employeeService.getEmployeeByEmployeeId(databseEmployeeId);
+        if (databaseEmployee.getEmployeeRole() != 2) {
+            log.error("【创建新员工】普通员工无权创建新员工");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
 
         if (bindingResult.hasErrors()) {
-            log.error("【】参数不正确， employeeForm={}", employeeForm);
+            log.error("【参数不正确】 employeeForm={}", employeeForm);
             throw new CrmException(ResultEnum.PARAM_ERROR.getCode(), bindingResult.getFieldError().getDefaultMessage());
         }
         if (employeeForm.getPassWord().length() < 6) {
             log.error("【注册用户】用户密码长度小于6位");
             return ResultVOUtil.error(ResultEnum.PASSWORD_LENGTH_SHORT);
         }
-        Employee employee = managerService.getManagerByEmployeeId(employeeForm.getEmployeeId());
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeForm.getEmployeeId());
         if (employee != null) {
             log.error("【注册用户】用户ID已存在");
             return ResultVOUtil.error(ResultEnum.USER_ID_EXIST);
         }
+        Boolean phoneExist = employeeService.existsByPhoneNumber(employeeForm.getPhoneNumber());
+        if (phoneExist) {
+            log.error("【注册用户】电话号码已存在");
+            return ResultVOUtil.error(ResultEnum.USER_PHONE_EXIST);
+        }
+
         Employee createEmployee = new Employee();
         BeanUtils.copyProperties(employeeForm, createEmployee, getNullPropertyNames(employeeForm));
+        // 封装所属经理名称
+        Employee manager = employeeService.getEmployeeByEmployeeId(employeeForm.getEmployeeManagerId());
+        if (manager == null) {
+            log.error("【创建新员工】manager不存在");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        createEmployee.setEmployeeManagerName(manager.getEmployeeName());
         try {
             employee = managerService.register(createEmployee);
         } catch (Exception e) {
@@ -96,16 +123,15 @@ public class ManagerController {
     }
 
 
+
     /**
-     * 修改员工权限和所属经理（重要信息，管理员才可以操作）
+     * 修改员工信息（重要信息，管理员才可以操作）
      *
      * @param paramMap
      * @return
      */
-    @Modifying
-    @Transactional
-    @PostMapping("/updateEmployeeRoleAndManager")
-    public ResultVO<Map<String, String>> updateEmployeeRole(@RequestBody HashMap paramMap,
+    @PostMapping("/updateEmployeeManager")
+    public ResultVO<Map<String, String>> updateEmployeeManager(@RequestBody Employee paramMap,
                                                             HttpServletRequest request) {
         // 验证信息
         String token = TokenUtil.parseToken(request);
@@ -113,22 +139,20 @@ public class ManagerController {
             log.error("【修改员工权限】Token为空");
             return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
         }
-        String databseEmployeeId = loginTicketService.getEmployeeIdByTicket(token);
-        if (StringUtils.isEmpty(databseEmployeeId)) {
+        String databaseEmployeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(databaseEmployeeId)) {
             log.error("【修改员工权限】employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        Employee databaseEmployee = employeeService.getEmployeeByEmployeeId(databseEmployeeId);
+        Employee databaseEmployee = employeeService.getEmployeeByEmployeeId(databaseEmployeeId);
         if (databaseEmployee.getEmployeeRole() != 2) {
             log.error("【修改员工权限】普通员工无权限访问所有员工");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
 
         // 解析参数
-        String employeeId = paramMap.get("employeeId").toString();
-        Integer employeeRole = Integer.parseInt(paramMap.get("employeeRole").toString());
-        String employeeManagerId = paramMap.get("employeeManagerId").toString();
-        String employeeManagerName = paramMap.get("employeeManagerName").toString();
+        String employeeId = paramMap.getEmployeeId();
+        String employeeManagerId = paramMap.getEmployeeManagerId();
 
         // 从数据库取出待修改员工
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
@@ -138,13 +162,18 @@ public class ManagerController {
         }
         try {
             // 更新员工角色和所属经理
-            employee.setEmployeeRole(employeeRole);
-            employee.setEmployeeManagerId(employeeManagerId);
-            employee.setEmployeeManagerName(employeeManagerName);
+            BeanUtils.copyProperties(paramMap, employee, BeanCopyUtil.getNullPropertyNames(paramMap));
+            Employee manager = employeeService.getEmployeeByEmployeeId(employeeManagerId);
+            if (manager == null) {
+                log.error("【修改员工权限】该员工不存在");
+                return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            }
+            employee.setEmployeeManagerName(manager.getEmployeeName());
             // 写回数据库
             Boolean flag = employeeService.saveEmployee(employee);
             if (!flag) {
                 log.error("【修改员工权限】发生错误");
+
                 return ResultVOUtil.error(ResultEnum.UPDATE_EMPLOYEE_ROLE_ERROR);
             }
         } catch (Exception e) {
@@ -155,13 +184,50 @@ public class ManagerController {
     }
 
     /**
+     * 获取个人信息(外部接口API)
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/getEmployeeDetail")
+    public ResultVO<Map<String, String>> getEmployeeDetail(@RequestBody HashMap paramMap,
+                                                           HttpServletRequest request) {
+        String queryEmployeeId = paramMap.get("employeeId").toString();
+
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【获取个人信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取个人信息】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+
+        Employee employee = employeeService.getEmployeeByEmployeeId(queryEmployeeId);
+        if (employee == null) {
+            log.error("【获取个人信息】该员工不存在");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("employeeId", employee.getEmployeeId());
+        map.put("employeeRole", employee.getEmployeeRole().toString());
+        map.put("employeeName", employee.getEmployeeName());
+        map.put("employeePhone", employee.getPhoneNumber());
+        map.put("employeeEmail", employee.getEmail());
+        map.put("supEmployeeName", employee.getEmployeeManagerName());
+        map.put("supEmployeeId", employee.getEmployeeManagerId());
+
+        return ResultVOUtil.success(map);
+    }
+
+    /**
      * 修改员工信息（一般信息，自己可以修改）
      *
      * @param employee
      * @return
      */
-    @Modifying
-    @Transactional
     @PostMapping("/updateEmployee")
     public ResultVO<Map<String, String>> updateEmployee(@RequestBody Employee employee,
                                                         HttpServletRequest request) {
@@ -279,6 +345,79 @@ public class ManagerController {
             log.error("【创建公有人才信息】发生错误");
             return ResultVOUtil.error(ResultEnum.CREATE_PUBLIC_RESOURCE_ERROR);
         }
+    }
+
+    @GetMapping("/getEmployeeTree")
+    public ResultVO<Map<String, String>> getEmployeeTree(HttpServletRequest request) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【获取员工Tree】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取员工Tree】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        if (employee == null) {
+            log.error("【获取员工Tree】 employee为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        if (employee.getEmployeeRole() != 2) {
+            log.error("【获取员工Tree】普通员工无权限访问所有员工");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        // 取得所有管理员
+        List<Employee> managerList = employeeService.findEmployeeByEmployeeRole(2);
+        List<Map<String, Object>> trees = new ArrayList<>();
+        // 遍历所有manager
+        for (Employee manager : managerList) {
+            Map<String, Object> managerBranch = new HashMap<>();
+            managerBranch.put("employeeId", manager.getEmployeeId());
+            managerBranch.put("employeeName", manager.getEmployeeName());
+            // 遍历当前manager所有下属员工
+            List<Map<String, String>> team = new ArrayList<>();
+            List<Employee> myEmployee = employeeService.findEmployeeByManagerId(manager.getEmployeeId());
+            for (Employee employeeTemp : myEmployee) {
+                Map<String, String> myEmployeeTemp = new HashMap<>();
+                myEmployeeTemp.put("employeeId", employeeTemp.getEmployeeId());
+                myEmployeeTemp.put("employeeName", employeeTemp.getEmployeeName());
+                team.add(myEmployeeTemp);
+            }
+            managerBranch.put("team", team);
+            trees.add(managerBranch);
+        }
+        return ResultVOUtil.success(trees);
+    }
+
+    @GetMapping("/getManagerEmployeeList")
+    public ResultVO<Map<String, String>> getManagerEmployeeList(HttpServletRequest request) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【获取员工列表】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取员工列表】 employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        if (employee.getEmployeeRole() != 2) {
+            log.error("【获取员工列表】普通员工无权限访问所有员工");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
+        // 取得所有管理员
+        List<Employee> employeeList = employeeService.findEmployeeByEmployeeRole(2);
+        List<Map<String, String>> employeeListTemp = new ArrayList<>();
+        for (Employee employeeIdx : employeeList) {
+            Map<String, String> employeeTemp = new HashMap<>();
+            employeeTemp.put("employeeId", employeeIdx.getEmployeeId());
+            employeeTemp.put("employeeName", employeeIdx.getEmployeeName());
+            employeeListTemp.add(employeeTemp);
+        }
+        return ResultVOUtil.success(employeeListTemp);
     }
 
     @GetMapping("/getEmployeeList")

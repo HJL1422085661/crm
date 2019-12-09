@@ -84,7 +84,8 @@ public enum ResultEnum {
     COMPANY_RESOURCE_NOT_EXIST(73, "没有该人才订单"),
     COMPANY_BUSINESS_NOT_EXIST(74, "没有该公司订单"),
     DELETE_BUSINESS_ERROR(75, "删除订单错误"),
-    SAVE_PERSONAL_INFO_ERROR(76, "保存个人信息发生错误")
+    SAVE_PERSONAL_INFO_ERROR(76, "保存个人信息发生错误"),
+    USER_PHONE_EXIST(77, "手机号已存在")
 
 
 
