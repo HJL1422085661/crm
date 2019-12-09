@@ -19,7 +19,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
     //通过员工ID和密码查询用户
     Employee getEmployeeByEmployeeIdAndPassWord(String employeeId, String passWord);
     Employee getEmployeeByEmployeeId(String employeeId);
-    Integer deleteByEmployeeId(String employeeId);
+    Integer deleteEmployeeByEmployeeId(String employeeId);
 
     List<Employee> findAll();
 

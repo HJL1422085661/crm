@@ -33,7 +33,7 @@ public class EmployeeForm {
     private Integer employeeRole;
 
     /** 员工所属经理ID **/
-    @NotNull(message = "所属经理ID必填")
+//    @NotNull(message = "所属经理ID必填")
     private String employeeManagerId;
 
     /** 员工email **/

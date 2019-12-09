@@ -20,7 +20,7 @@ public interface EmployeeService {
     void logout(String ticket);
     Boolean saveEmployee(Employee employee);
     Employee createEmployee(Employee employee);
-    Integer deleteEmployee(String employeeId);
+    Integer deleteEmployeeByEmployeeId(String employeeId);
     Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
     List<Employee> findAllEmployee();
     List<Employee> findEmployeeByEmployeeRole(Integer role);

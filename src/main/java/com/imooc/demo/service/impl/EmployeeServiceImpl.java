@@ -9,6 +9,7 @@ import com.imooc.demo.utils.PassUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,9 +101,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         else return false;
     }
 
+    @Modifying
+    @Transactional
     @Override
-    public Integer deleteEmployee(String employeeId) {
-        return employeeRepository.deleteByEmployeeId(employeeId);
+    public Integer deleteEmployeeByEmployeeId(String employeeId) {
+        return employeeRepository.deleteEmployeeByEmployeeId(employeeId);
     }
 
     @Override
