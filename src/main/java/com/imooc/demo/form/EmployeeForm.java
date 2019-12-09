@@ -11,20 +11,28 @@ import javax.validation.constraints.NotNull;
 public class EmployeeForm {
 
 
-    /** 员工用户ID **/
+    /** 员工(登录账号)ID **/
     @NotEmpty(message = "用户ID必填")
     private String employeeId;
-
-    /** 员工密码 **/
+    /** 员工登录密码 **/
     @NotEmpty(message = "密码必填")
     private String passWord;
 
+    /** 员工名 **/
+    @NotEmpty(message = "用户名必填")
+    private String employeeName;
     /** 员工性別 **/
     @NotNull(message = "性別必填")
     private Integer gender;
+    /** 员工名 **/
+    @NotEmpty(message = "手机号必填")
+    private String phoneNumber;
 
     /** 员工角色 **/
     @NotNull(message = "角色必填")
-    private Integer employeeRole = EmployeeRoleEnum.EMPLOYEE.getCode();
+    private Integer employeeRole;
 
+    /** 员工所属经理ID **/
+    @NotNull(message = "所属经理必填")
+    private String employeeManagerId;
 }

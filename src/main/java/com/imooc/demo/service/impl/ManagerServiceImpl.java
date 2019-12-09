@@ -27,14 +27,10 @@ public class ManagerServiceImpl implements ManagerService {
 
 
     @Override
-    public Employee register(String employeeId, String passWord, Integer employeeRole, Integer gender){
-        Employee employee = new Employee();
-        employee.setEmployeeId(employeeId);
-        employee.setGender(gender);
+    public Employee register(Employee employee){
         employee.setSalt(UUID.randomUUID().toString().substring(0, 5));
         //对密码加密
-        employee.setPassWord(PassUtil.MD5(passWord + employee.getSalt()));
-        employee.setEmployRole(employeeRole);
+        employee.setPassWord(PassUtil.MD5(employee.getPassWord() + employee.getSalt()));
 
        return managerRepository.saveAndFlush(employee);
     }

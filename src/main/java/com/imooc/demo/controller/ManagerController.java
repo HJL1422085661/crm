@@ -7,8 +7,10 @@ import com.imooc.demo.exception.CrmException;
 import com.imooc.demo.form.EmployeeForm;
 import com.imooc.demo.modle.*;
 import com.imooc.demo.service.*;
+import com.imooc.demo.utils.BeanCopyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
+import javafx.util.converter.IntegerStringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +83,10 @@ public class ManagerController {
             log.error("【注册用户】用户ID已存在");
             return ResultVOUtil.error(ResultEnum.USER_ID_EXIST);
         }
+        Employee createEmployee = new Employee();
+        BeanUtils.copyProperties(employeeForm, createEmployee, getNullPropertyNames(employeeForm));
         try {
-            employee = managerService.register(employeeForm.getEmployeeId(), employeeForm.getPassWord(), employeeForm.getEmployeeRole(), employeeForm.getGender());
+            employee = managerService.register(createEmployee);
         } catch (Exception e) {
             log.error("【注册用户】注册发生异常");
             return ResultVOUtil.error(ResultEnum.REGISTER_EXCEPTION);
@@ -91,32 +95,105 @@ public class ManagerController {
         return ResultVOUtil.success(employee);
     }
 
+
     /**
-     * 修改员工权限
+     * 修改员工权限和所属经理（重要信息，管理员才可以操作）
      *
-     * @param employeeId
-     * @param employeeRole
+     * @param paramMap
      * @return
      */
     @Modifying
     @Transactional
-    @PostMapping("/updateEmployeeRole")
-    public ResultVO<Map<String, String>> updateEmployeeRole(@RequestParam("employeeId") String employeeId,
-                                                            @RequestParam("employeeRole") Integer employeeRole) {
+    @PostMapping("/updateEmployeeRoleAndManager")
+    public ResultVO<Map<String, String>> updateEmployeeRole(@RequestBody HashMap paramMap,
+                                                            HttpServletRequest request) {
+        // 验证信息
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【修改员工权限】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String databseEmployeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(databseEmployeeId)) {
+            log.error("【修改员工权限】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        Employee databaseEmployee = employeeService.getEmployeeByEmployeeId(databseEmployeeId);
+        if (databaseEmployee.getEmployeeRole() != 2) {
+            log.error("【修改员工权限】普通员工无权限访问所有员工");
+            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+        }
 
+        // 解析参数
+        String employeeId = paramMap.get("employeeId").toString();
+        Integer employeeRole = Integer.parseInt(paramMap.get("employeeRole").toString());
+        String employeeManagerId = paramMap.get("employeeManagerId").toString();
+        String employeeManagerName = paramMap.get("employeeManagerName").toString();
+
+        // 从数据库取出待修改员工
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         if (employee == null) {
             log.error("【修改员工权限】该员工不存在");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         try {
-            Boolean flag = employeeService.updateEmployeeRoleByEmployeeId(employeeRole, employeeId);
+            // 更新员工角色和所属经理
+            employee.setEmployeeRole(employeeRole);
+            employee.setEmployeeManagerId(employeeManagerId);
+            employee.setEmployeeManagerName(employeeManagerName);
+            // 写回数据库
+            Boolean flag = employeeService.saveEmployee(employee);
             if (!flag) {
                 log.error("【修改员工权限】发生错误");
                 return ResultVOUtil.error(ResultEnum.UPDATE_EMPLOYEE_ROLE_ERROR);
             }
         } catch (Exception e) {
             log.error("【修改员工权限】修改员工发生异常");
+            return ResultVOUtil.error(ResultEnum.UPDATE_EMPLOYEE_EXCEPTION);
+        }
+        return ResultVOUtil.success();
+    }
+
+    /**
+     * 修改员工信息（一般信息，自己可以修改）
+     *
+     * @param employee
+     * @return
+     */
+    @Modifying
+    @Transactional
+    @PostMapping("/updateEmployee")
+    public ResultVO<Map<String, String>> updateEmployee(@RequestBody Employee employee,
+                                                        HttpServletRequest request) {
+        // 验证信息
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【修改员工信息】Token为空");
+            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+        }
+        String databseEmployeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(databseEmployeeId)) {
+            log.error("【修改员工信息】employeeId为空");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+        // 从数据库取出待修改员工
+        Employee databaseEmployee = employeeService.getEmployeeByEmployeeId(databseEmployeeId);
+        if (databaseEmployee == null) {
+            log.error("【修改员工信息】该员工不存在");
+            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+        }
+
+        try {
+            // 更新员工信息
+            BeanUtils.copyProperties(employee, databaseEmployee, BeanCopyUtil.getNullPropertyNames(employee));
+            // 写回数据库
+            Boolean flag = employeeService.saveEmployee(employee);
+            if (!flag) {
+                log.error("【修改员工信息】发生错误");
+                return ResultVOUtil.error(ResultEnum.UPDATE_EMPLOYEE_ROLE_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("【修改员工信息】修改员工发生异常");
             return ResultVOUtil.error(ResultEnum.UPDATE_EMPLOYEE_EXCEPTION);
         }
         return ResultVOUtil.success();
@@ -186,7 +263,7 @@ public class ManagerController {
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         // 只有管理员才可以创建公有人才
-        if (employee.getEmployRole() != 2) {
+        if (employee.getEmployeeRole() != 2) {
             return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
         }
 
@@ -205,7 +282,7 @@ public class ManagerController {
     }
 
     @GetMapping("/getEmployeeList")
-    public ResultVO<Map<String, String>> getEmployeeList(HttpServletRequest request){
+    public ResultVO<Map<String, String>> getEmployeeList(HttpServletRequest request) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【获取员工列表】Token为空");
@@ -217,7 +294,7 @@ public class ManagerController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
-        if (employee.getEmployRole() != 2) {
+        if (employee.getEmployeeRole() != 2) {
             log.error("【获取员工列表】普通员工无权限访问所有员工");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -232,7 +309,6 @@ public class ManagerController {
         }
         return ResultVOUtil.success(employeeListTemp);
     }
-
 
 
     /**
@@ -257,7 +333,7 @@ public class ManagerController {
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         // 管理员才可以修改公有人才
-        if (employee.getEmployRole() != 2) {
+        if (employee.getEmployeeRole() != 2) {
             return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
         }
         //首先获取数据库中的人才对象
@@ -308,7 +384,7 @@ public class ManagerController {
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         // 管理员才可以删除公有人才
-        if (employee.getEmployRole() != 2) {
+        if (employee.getEmployeeRole() != 2) {
             return ResultVOUtil.error(ResultEnum.USER_IDENTIFY_ERROR);
         }
 
@@ -360,7 +436,7 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -405,7 +481,7 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -451,7 +527,7 @@ public class ManagerController {
             log.error("【管理员审批人才资源审批|未审批列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【管理员审批人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -513,7 +589,7 @@ public class ManagerController {
             log.error("【管理员审批公司资源审批|未审批列表】 employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【管理员审批公司资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }

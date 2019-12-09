@@ -9,6 +9,6 @@ import com.imooc.demo.modle.Employee;
  * @Version 1.0
  */
 public interface ManagerService {
-    Employee register(String employeeId, String passWord, Integer employeeRole, Integer gender);
+    Employee register(Employee employee);
     Employee getManagerByEmployeeId(String employeeId);
 }

@@ -149,7 +149,7 @@ public class EmployeeController {
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<Resource> resourcePage = null;
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             resourcePage = resourceService.findAllResourcePageable(request);
         } else {
             resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
@@ -190,7 +190,7 @@ public class EmployeeController {
 
         List<Resource> privateResourceList = new ArrayList<>();
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             privateResourceList = resourceService.findAllResource();
         } else {
             privateResourceList = resourceService.getResourceByEmployeeId(employeeId);
@@ -299,7 +299,7 @@ public class EmployeeController {
         Employee employeeNew = employeeService.getEmployeeByEmployeeId(resource.getEmployeeId());
         resource.setEmployeeName(employeeNew.getEmployeeName());
         //如果是老板则直接操作，不需要审批,但是需要记录操作
-        if (employee.getEmployRole() == 2) {
+        if (employee.getEmployeeRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
             resourceTemp.setRequestStatus(0);
@@ -380,7 +380,7 @@ public class EmployeeController {
 
         ResourceTemp resourceTemp = new ResourceTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作
-        if (employee.getEmployRole() == 2) {
+        if (employee.getEmployeeRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
             resourceTemp.setRequestStatus(1);
@@ -451,7 +451,7 @@ public class EmployeeController {
         CompanyTemp createCompany = null;
         CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
-        if (employee.getEmployRole() == 2) {
+        if (employee.getEmployeeRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
             companyTemp.setRequestStatus(0);
@@ -528,7 +528,7 @@ public class EmployeeController {
         CompanyTemp createCompanyTmp = new CompanyTemp();
         CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
-        if (employee.getEmployRole() == 2) {
+        if (employee.getEmployeeRole() == 2) {
             //管理员直接同意修改，并写一条记录存到temp表中
             BeanUtils.copyProperties(company, companyTemp, getNullPropertyNames(company));
             companyTemp.setRequestStatus(1);
@@ -614,7 +614,7 @@ public class EmployeeController {
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "startDate");
         Page<Company> companyPage = null;
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             companyPage = companyService.findAllCompanyPageable(request);
         } else {
             companyPage = companyService.findCompanyByEmployeeId(employeeId, request);
@@ -711,7 +711,7 @@ public class EmployeeController {
 
         List<Company> privateCompanyList = new ArrayList<>();
         // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() == 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             privateCompanyList = companyService.findAllCompany();
         } else {
             privateCompanyList = companyService.getCompanyByEmployeeId(employeeId);

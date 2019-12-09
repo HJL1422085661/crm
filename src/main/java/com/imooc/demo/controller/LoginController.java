@@ -76,7 +76,7 @@ public class LoginController {
         map.put("token", token);
         map.put("user_name", employee.getEmployeeName());
         map.put("user_Id", employee.getEmployeeId());
-        map.put("user_role", employee.getEmployRole().toString());
+        map.put("user_role", employee.getEmployeeRole().toString());
         map.put("user_phonenumber", employee.getPhoneNumber());
         map.put("user_email", employee.getEmail());
 
@@ -106,7 +106,7 @@ public class LoginController {
         map.put("token", token);
         map.put("user_name", employee.getEmployeeName());
         map.put("user_Id", employee.getEmployeeId());
-        map.put("user_role", employee.getEmployRole().toString());
+        map.put("user_role", employee.getEmployeeRole().toString());
         map.put("user_phonenumber", employee.getPhoneNumber());
         map.put("user_email", employee.getEmail());
 
@@ -136,10 +136,10 @@ public class LoginController {
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
         Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
-        Integer role = dataBaseEmployee.getEmployRole();
+        //Integer role = dataBaseEmployee.getEmployeeRole();
 
         BeanUtils.copyProperties(employee, dataBaseEmployee, BeanCopyUtil.getNullPropertyNames(employee));
-        dataBaseEmployee.setEmployRole(role);
+        //dataBaseEmployee.setEmployeeRole(role);
         try {
             Employee returnEmployee = employeeService.createEmployee(dataBaseEmployee);
             if (returnEmployee == null) {

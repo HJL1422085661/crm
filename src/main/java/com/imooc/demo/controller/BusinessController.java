@@ -80,7 +80,7 @@ public class BusinessController {
         // 个人订单，根据employeeId取个人所有的
         if (orderType == 1) {
             Page<ResourceBusiness> resourceBusinessPage = null;
-            if (employee.getEmployRole() == 2) {
+            if (employee.getEmployeeRole() == 2) {
                 // 管理员看到所有人的订单
                 resourceBusinessPage = resourceBusinessService.findAllResourceBusinessPageable(request);
             } else {
@@ -94,7 +94,7 @@ public class BusinessController {
         } else {
             // 公司订单
             Page<CompanyBusiness> companyBusinessPage = null;
-            if (employee.getEmployRole() == 2) {
+            if (employee.getEmployeeRole() == 2) {
                 // 管理员看到所有人的订单
                 companyBusinessPage = companyBusinessService.findAllCompanyBusinessPageable(request);
             } else {

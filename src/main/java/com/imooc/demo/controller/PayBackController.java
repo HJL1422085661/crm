@@ -242,7 +242,7 @@ public class PayBackController {
             log.error("【获取所有回款记录】employeeId为空");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【获取所有回款记录】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
@@ -286,7 +286,7 @@ public class PayBackController {
             log.error("【混合查询获取回款记录】AdminID不存在");
             return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
         }
-        if (employeeService.getEmployeeByEmployeeId(adminId).getEmployRole() != 2) {
+        if (employeeService.getEmployeeByEmployeeId(adminId).getEmployeeRole() != 2) {
             log.error("【混合查询获取回款记录】普通员工无权查看所有回款记录");
             return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
         }
