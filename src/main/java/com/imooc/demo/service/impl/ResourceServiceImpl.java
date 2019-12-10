@@ -86,12 +86,17 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public List<Resource> findResourceByshareStatus(Integer shareStatus) {
+    public List<Resource> findResourceByShareStatus(Integer shareStatus) {
         return resourceRepository.findResourceByShareStatus(shareStatus);
     }
 
     @Override
     public List<Resource> findAllResource() {
         return resourceRepository.findAll();
+    }
+
+    @Override
+    public Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable) {
+        return resourceRepository.findResourceByShareStatusPageable(shareStatus, pageable);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
@@ -102,7 +101,7 @@ public class EmployeeController {
     }
 
     /**
-     * 修改人才状态
+     * 修改人才状态（公有、私有）
      *
      * @param resourceId
      * @param shareStatus
@@ -123,24 +122,25 @@ public class EmployeeController {
     }
 
 
-    //分页显示私有客户信息
+    /**
+     * 分页显示人才客户信息
+     *
+     * @return
+     */
     @PostMapping("/getResourceList")
     public ResultVO<Map<String, String>> getResourceList(@RequestBody HashMap map,
                                                          HttpServletRequest req,
                                                          HttpServletResponse response) {
-
+        Integer shareStatus = Integer.parseInt(map.get("shareStatus").toString());
         Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
 
-        System.out.println(page + "," + size);
-        System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取人才列表】Token为空");
             return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        System.out.println("id:" + employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取人才列表】 employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
@@ -148,20 +148,24 @@ public class EmployeeController {
 
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<Resource> resourcePage = null;
-        // 管理员能看到所有客户
+        // 管理员能看到所有客户(所有公有、所有私有)
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
-            resourcePage = resourceService.findAllResourcePageable(request);
+            resourcePage = resourceService.findResourceByShareStatusPageable(shareStatus, request);
         } else {
-            resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
+            // 普通员工：只能取自己私有的或者 公共的
+            // 1 公有  2 私有
+            if (shareStatus == 1) {
+                resourcePage = resourceService.findResourceByShareStatusPageable(shareStatus, request);
+            } else {
+                resourcePage = resourceService.findResourceByEmployeeId(employeeId, request);
+            }
         }
-
         if (resourcePage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_LIST_EMPTY);
         } else {
             System.out.println(resourcePage.getContent());
             return ResultVOUtil.success(resourcePage);
         }
-
     }
 
 
@@ -196,7 +200,7 @@ public class EmployeeController {
         } else {
             privateResourceList = resourceService.getResourceByEmployeeId(employeeId);
             //1表示共有 2表示私有
-            List<Resource> publicResourceList = resourceService.findResourceByshareStatus(1);
+            List<Resource> publicResourceList = resourceService.findResourceByShareStatus(1);
             for (Resource resource : publicResourceList)
                 privateResourceList.add(resource);
         }
@@ -269,7 +273,7 @@ public class EmployeeController {
         }
         resource.setStatus(resourceFollowRecord.getStatus());
         Boolean flag = resourceService.saveResource(resource);
-        if (!flag){
+        if (!flag) {
             log.error("【创建人才跟进信息】保存人才信息失败");
             return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
         }
@@ -461,7 +465,7 @@ public class EmployeeController {
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
-            log.error("【修改企业信息】 employeeId为空");
+            log.error("【修改企业信息】employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
@@ -614,7 +618,7 @@ public class EmployeeController {
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee creatorEmployee = employeeService.getEmployeeByEmployeeId(company.getEmployeeId());
-        if (creatorEmployee == null){
+        if (creatorEmployee == null) {
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         company.setEmployeeName(creatorEmployee.getEmployeeName());
@@ -627,9 +631,17 @@ public class EmployeeController {
         return ResultVOUtil.success(company1);
     }
 
+
+    /**
+     * 分页显示企业客户信息
+     *
+     * @return
+     */
     @PostMapping("/getCompanyList")
-    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map, HttpServletRequest req,
+    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map,
+                                                        HttpServletRequest req,
                                                         HttpServletResponse response) {
+        Integer shareStatus = Integer.parseInt(map.get("shareStatus").toString());
         Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
@@ -646,6 +658,21 @@ public class EmployeeController {
         }
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
         Page<Company> companyPage = null;
+
+        // 管理员能看到所有客户(所有公有、所有私有)
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
+            companyPage = companyService.findCompanyByShareStatusPageable(shareStatus, request);
+        } else {
+            // 普通员工：只能取自己私有的或者 公共的
+            // 1 公有  2 私有
+            if (shareStatus == 1) {
+                companyPage = companyService.findCompanyByShareStatusPageable(shareStatus, request);
+            } else {
+                companyPage = companyService.findCompanyByEmployeeId(employeeId, request);
+            }
+        }
+
+
         // 管理员能看到所有客户
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             companyPage = companyService.findAllCompanyPageable(request);
@@ -718,7 +745,7 @@ public class EmployeeController {
         }
         company.setStatus(companyFollowRecord.getStatus());
         // 写回数据库
-        Boolean flag =  companyService.saveCompany(company);
+        Boolean flag = companyService.saveCompany(company);
         if (!flag) {
             log.error("【创建公司跟进信息】保存公司信息失败");
             return ResultVOUtil.fail(ResultEnum.SAVE_COMPANY_ERROR, response);

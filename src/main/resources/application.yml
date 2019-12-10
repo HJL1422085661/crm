@@ -24,7 +24,7 @@ spring:
   mail:
     host: smtp.163.com
     username: wangchiyaan@163.com
-    password:
+    password: wangchi205
 
 #  jackson:
 #    default-property-inclusion: non_null

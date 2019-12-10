@@ -26,9 +26,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Company createCompany(Company company) {
-        try{
+        try {
             return companyRepository.saveAndFlush(company);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【创建公司】发生异常");
             return null;
         }
@@ -36,7 +36,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Page<Company> findCompanyByEmployeeId(String employeeId, Pageable pageable) {
-        return  companyRepository.findCompanyByEmployeeId(employeeId, pageable);
+        return companyRepository.findCompanyByEmployeeId(employeeId, pageable);
     }
 
     @Modifying
@@ -74,7 +74,14 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public Page<Company> findCompanyByShareStatusPageable(Integer shareStatus, Pageable pageable) {
+        return companyRepository.findCompanyByShareStatus(shareStatus, pageable);
+    }
+
+    @Override
     public List<Company> findCompanyByShareStatus(Integer shareStatus) {
         return companyRepository.findCompanyByShareStatus(shareStatus);
+
+
     }
 }

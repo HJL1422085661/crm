@@ -22,5 +22,6 @@ public interface ResourceService {
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
     Page<Resource> findAllResourcePageable(Pageable pageable);
     List<Resource> findAllResource();
-    List<Resource> findResourceByshareStatus(Integer shareStatus);
+    List<Resource> findResourceByShareStatus(Integer shareStatus);
+    Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable);
 }

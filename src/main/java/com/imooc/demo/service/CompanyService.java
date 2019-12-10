@@ -9,13 +9,23 @@ import java.util.List;
 public interface CompanyService {
 
     Company createCompany(Company company);
+
     Page<Company> findCompanyByEmployeeId(String employeeId, Pageable pageable);
+
     Page<Company> findAllCompanyPageable(Pageable pageable);
+
+    Page<Company> findCompanyByShareStatusPageable(Integer shareStatus, Pageable pageable);
+
     Integer deleteCompanyByCompanyId(Integer companyId);
+
     Boolean saveCompany(Company company);
+
     Company getCompanyByCompanyId(Integer companyId);
+
     List<Company> findAllCompany();
+
     List<Company> getCompanyByEmployeeId(String employeeId);
+
     List<Company> findCompanyByShareStatus(Integer shareStatus);
 
 }

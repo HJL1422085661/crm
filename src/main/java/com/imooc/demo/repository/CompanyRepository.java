@@ -11,6 +11,8 @@ import java.util.List;
 public interface CompanyRepository extends JpaRepository<Company, Integer> {
     Page<Company> findCompanyByEmployeeId(String employeeId, Pageable pageable);
 
+    Page<Company> findCompanyByShareStatus(Integer shareStatus, Pageable pageable);
+
     Integer deleteCompanyByCompanyId(Integer companyId);
 
     Company getCompanyByCompanyId(Integer companyId);
