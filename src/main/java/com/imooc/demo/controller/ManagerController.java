@@ -113,7 +113,7 @@ public class ManagerController {
                 return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
             }
             createEmployee.setEmployeeManagerName(manager.getEmployeeName());
-        }else {
+        } else {
             createEmployee.setEmployeeManagerId("");
             createEmployee.setEmployeeManagerName("");
         }
@@ -173,6 +173,11 @@ public class ManagerController {
                 return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
             }
             employee.setEmployeeManagerName(manager.getEmployeeName());
+            // 改为经理后，所属经理置空
+            if (employee.getEmployeeRole() == 2) {
+                employee.setEmployeeManagerId("");
+                employee.setEmployeeManagerName("");
+            }
             // 写回数据库
             Boolean flag = employeeService.saveEmployee(employee);
             if (!flag) {
