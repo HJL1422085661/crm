@@ -17,12 +17,12 @@ public class WebConfiguration  extends WebMvcConfigurerAdapter {
     @Autowired
     private PassPortInterceptor passportInterceptor;
     @Autowired
-    private LoginRequiredInterceptor loginRequriedInterceptor;
+    private LoginRequiredInterceptor loginRequiredInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry){
         registry.addInterceptor(passportInterceptor);
-        //registry.addInterceptor(loginRequriedInterceptor);
-        //registry.addInterceptor(loginRequriedInterceptor).addPathPatterns("/setting*");
+        //registry.addInterceptor(loginRequiredInterceptor);
+        //registry.addInterceptor(loginRequiredInterceptor).addPathPatterns("/setting*");
         super.addInterceptors(registry);
     }
 

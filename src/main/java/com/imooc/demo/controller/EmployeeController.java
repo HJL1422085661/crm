@@ -1,6 +1,5 @@
 package com.imooc.demo.controller;
 
-import com.google.gson.internal.$Gson$Types;
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.*;
@@ -9,20 +8,18 @@ import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -67,7 +64,8 @@ public class EmployeeController {
     @Transactional
     @PostMapping("/createResource")
     public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
-                                                        HttpServletRequest request) {
+                                                        HttpServletRequest request,
+                                                        HttpServletResponse response) {
 
         resource.setShareStatus(2);
         //封装时间参数
@@ -79,12 +77,12 @@ public class EmployeeController {
 
         if (token.equals("")) {
             log.error("【创建人才资源】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建人才资源】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
         resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
@@ -95,7 +93,7 @@ public class EmployeeController {
             createResource = resourceService.createResource(resource);
             if (createResource == null) {
                 log.error("【录入人才信息】发生错误");
-                return ResultVOUtil.error(ResultEnum.SAVE_RESOURCE_ERROR);
+                return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
             }
         } catch (Exception e) {
             log.error("【录入人才信息】发生异常");
@@ -112,14 +110,15 @@ public class EmployeeController {
      */
     @PostMapping("/updateResourceShareStatus")
     public ResultVO<Map<String, String>> updateResourceShareStatus(@RequestParam("resourceId") Integer resourceId,
-                                                                   @RequestParam("shareStatus") String shareStatus) {
+                                                                   @RequestParam("shareStatus") String shareStatus,
+                                                                   HttpServletResponse response) {
         Boolean flag = resourceService.updateShareStatusByResourceId(shareStatus, resourceId);
         //TODO
         if (flag) {
             return ResultVOUtil.success();
         } else {
             log.error("【更新人才状态】发生错误");
-            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
+            return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
         }
     }
 
@@ -127,7 +126,8 @@ public class EmployeeController {
     //分页显示私有客户信息
     @PostMapping("/getResourceList")
     public ResultVO<Map<String, String>> getResourceList(@RequestBody HashMap map,
-                                                         HttpServletRequest req) {
+                                                         HttpServletRequest req,
+                                                         HttpServletResponse response) {
 
         Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());
@@ -137,13 +137,13 @@ public class EmployeeController {
         System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取人才列表】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         System.out.println("id:" + employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取人才列表】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
 
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
@@ -172,20 +172,21 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/getResourceNames")
-    public ResultVO<Map<String, String>> getResourceNames(HttpServletRequest req) {
+    public ResultVO<Map<String, String>> getResourceNames(HttpServletRequest req,
+                                                          HttpServletResponse response) {
 
         String token = TokenUtil.parseToken(req);
 
         System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取人才列表】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         System.out.println("id:" + employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取人才列表】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
 
         List<Resource> privateResourceList = new ArrayList<>();
@@ -227,12 +228,12 @@ public class EmployeeController {
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
         System.out.println("resourceId:" + resourceId);
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
         Page<ResourceFollowRecord> resourceFollowRecords = resourceFollowRecordService.getFollowRecordsByResourceId(resourceId, request);
         if (resourceFollowRecords.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.RESOURCE_FOLLOW_RECORD_EMPTY);
         } else {
-            return ResultVOUtil.success(resourceFollowRecords);
+            return ResultVOUtil.success(resourceFollowRecords.getContent());
         }
     }
 
@@ -245,26 +246,39 @@ public class EmployeeController {
      */
     @PostMapping("/createResourceFollow")
     public ResultVO<Map<String, String>> createResourceFollow(@RequestBody ResourceFollowRecord resourceFollowRecord,
-                                                              HttpServletRequest request) {
+                                                              HttpServletRequest request,
+                                                              HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建人才跟进信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建人才跟进信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         resourceFollowRecord.setEmployeeId(employeeId);
         resourceFollowRecord.setEmployeeName(employee.getEmployeeName());
+        // 更改对应人才的客户状态
+        Resource resource = resourceService.getResourceByResourceId(resourceFollowRecord.getResourceId());
+        if (resource == null) {
+            log.error("【创建人才跟进信息】 找不到对应的人才信息");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        resource.setStatus(resourceFollowRecord.getStatus());
+        Boolean flag = resourceService.saveResource(resource);
+        if (!flag){
+            log.error("【创建人才跟进信息】保存人才信息失败");
+            return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
+        }
         ResourceFollowRecord followRecord = resourceFollowRecordService.createResourceFollow(resourceFollowRecord);
         if (followRecord != null) {
             return ResultVOUtil.success(resourceFollowRecord);
         } else {
             log.error("【创建人才跟进信息】失败");
-            return ResultVOUtil.error(ResultEnum.CREATE_RESOURCE_FOLLOW_RECORD_ERROR);
+            return ResultVOUtil.fail(ResultEnum.CREATE_RESOURCE_FOLLOW_RECORD_ERROR, response);
         }
 
     }
@@ -281,16 +295,17 @@ public class EmployeeController {
     @Transactional
     @PostMapping("/updateResource")
     public ResultVO<Map<String, String>> updateResource(@RequestBody Resource resource,
-                                                        HttpServletRequest request) {
+                                                        HttpServletRequest request,
+                                                        HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【修改人才信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【修改人才信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         ResourceTemp createResource = null;
@@ -306,7 +321,7 @@ public class EmployeeController {
             //老板的话直接设置同意
             resourceTemp.setCheckedStatus(1);
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
-            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
+            if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR, response);
 
 //            Boolean flag = resourceService.saveResource(resource);
             Resource returnResource = resourceService.createResource(resource);
@@ -316,7 +331,7 @@ public class EmployeeController {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
             } else {
-                return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR);
+                return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR, response);
             }
         }
 
@@ -339,11 +354,11 @@ public class EmployeeController {
             }
             if (createResource == null) {
                 log.error("【修改人才信息】创建临时表发生错误");
-                return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
+                return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
             }
         } catch (Exception e) {
             log.error("【修改人才信息】创建临时表发生异常");
-            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_EXCEPTION);
+            return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_EXCEPTION, response);
         }
         return ResultVOUtil.success();
     }
@@ -359,18 +374,19 @@ public class EmployeeController {
     @Transactional
     @PostMapping("/deleteResource")
     public ResultVO<Map<String, String>> deleteResource(@RequestBody HashMap paramMap,
-                                                        HttpServletRequest request) {
+                                                        HttpServletRequest request,
+                                                        HttpServletResponse response) {
         Integer resourceId = Integer.parseInt(paramMap.get("resourceId").toString());
 
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除人才信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【删除人才信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         ResourceTemp createResource = new ResourceTemp();
@@ -386,7 +402,7 @@ public class EmployeeController {
             resourceTemp.setRequestStatus(1);
             resourceTemp.setCheckedStatus(1);
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
-            if (!isSuccess) return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
+            if (!isSuccess) return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_ERROR, response);
 
             Integer flag = resourceService.deleteResourceByResourceId(resource.resourceId);
             Map<String, Integer> map = new HashMap<>();
@@ -394,7 +410,7 @@ public class EmployeeController {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
             } else {
-                return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_ERROR);
+                return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_ERROR, response);
             }
         }
 
@@ -416,11 +432,11 @@ public class EmployeeController {
             }
             if (createResource == null) {
                 log.error("【删除人才信息】创建临时表发生错误");
-                return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_ERROR);
+                return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
             }
         } catch (Exception e) {
             log.error("【删除人才信息】创建临时表发生异常");
-            return ResultVOUtil.error(ResultEnum.UPDATE_RESOURCE_EXCEPTION);
+            return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_EXCEPTION, response);
         }
         return ResultVOUtil.success();
     }
@@ -436,18 +452,26 @@ public class EmployeeController {
     @Transactional
     @PostMapping("/updateCompany")
     public ResultVO<Map<String, String>> updateCompany(@RequestBody Company company,
-                                                       HttpServletRequest request) {
+                                                       HttpServletRequest request,
+                                                       HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【修改企业信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
             log.error("【修改企业信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+        // 封装员工姓名参数
+        Employee dbEmployee = employeeService.getEmployeeByEmployeeId(company.getEmployeeId());
+        if (dbEmployee == null) {
+            log.error("【修改企业信息】没有对应的员工");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        company.setEmployeeName(dbEmployee.getEmployeeName());
         CompanyTemp createCompany = null;
         CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
@@ -458,7 +482,7 @@ public class EmployeeController {
             companyTemp.setCheckedStatus(1);
 
             Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
-            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_UPDATE_COMPANY_INFO_ERROR);
+            if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_COMPANY_INFO_ERROR, response);
 
             Company returnCompany = companyService.createCompany(company);
             Map<String, Object> map = new HashMap<>();
@@ -467,7 +491,7 @@ public class EmployeeController {
                 map.put("company", returnCompany);
                 return ResultVOUtil.success(map);
             } else {
-                return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_ERROR);
+                return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_INFO_ERROR, response);
             }
         }
 
@@ -490,11 +514,11 @@ public class EmployeeController {
             }
             if (createCompany == null) {
                 log.error("【修改企业信息】创建临时表发生错误");
-                return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_ERROR);
+                return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_INFO_ERROR, response);
             }
         } catch (Exception e) {
             log.error("【修改企业信息】创建临时表发生异常");
-            return ResultVOUtil.error(ResultEnum.UPDATE_COMPANY_INFO_EXCEPTION);
+            return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_INFO_EXCEPTION, response);
         }
         return ResultVOUtil.success();
     }
@@ -510,19 +534,20 @@ public class EmployeeController {
     @Transactional
     @PostMapping("/deleteCompany")
     public ResultVO<Map<String, String>> deleteCompany(@RequestBody HashMap paramMap,
-                                                       HttpServletRequest request) {
+                                                       HttpServletRequest request,
+                                                       HttpServletResponse response) {
         Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
         Company company = companyService.getCompanyByCompanyId(companyId);
 
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除企业信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
             log.error("【删除企业信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         CompanyTemp createCompanyTmp = new CompanyTemp();
@@ -534,7 +559,7 @@ public class EmployeeController {
             companyTemp.setRequestStatus(1);
             companyTemp.setCheckedStatus(1);
             Boolean isSuccess = companyTempService.saveCompanyTemp(companyTemp);
-            if (!isSuccess) return ResultVOUtil.error(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR);
+            if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR, response);
 
             Integer flag = companyService.deleteCompanyByCompanyId(company.companyId);
             Map<String, Integer> map = new HashMap<>();
@@ -542,7 +567,7 @@ public class EmployeeController {
                 map.put("employeeRole", 2);
                 return ResultVOUtil.success(map);
             } else {
-                return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
+                return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_ERROR, response);
             }
         }
 
@@ -564,54 +589,62 @@ public class EmployeeController {
             }
             if (createCompanyTmp == null) {
                 log.error("【删除企业信息】创建临时表发生错误");
-                return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_ERROR);
+                return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_ERROR, response);
             }
         } catch (Exception e) {
             log.error("【删除企业信息】创建临时表发生异常");
-            return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_INFO_EXCEPTION);
+            return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_EXCEPTION, response);
         }
         return ResultVOUtil.success();
     }
 
     @PostMapping("/createCompany")
     public ResultVO<Map<String, String>> createCompany(@RequestBody Company company,
-                                                       HttpServletRequest request) {
+                                                       HttpServletRequest request,
+                                                       HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建公司资源信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建公司资源信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
-        company.setEmployeeId(employeeId);
+        Employee creatorEmployee = employeeService.getEmployeeByEmployeeId(company.getEmployeeId());
+        if (creatorEmployee == null){
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        company.setEmployeeName(creatorEmployee.getEmployeeName());
+        // 员工创建的公司默认为私有(1 公有  2 私有)
+        company.setShareStatus(2);
         Company company1 = companyService.createCompany(company);
         if (company1 == null) {
-            return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_ERROR);
+            return ResultVOUtil.fail(ResultEnum.CREATE_COMPANY_ERROR, response);
         }
         return ResultVOUtil.success(company1);
     }
 
     @PostMapping("/getCompanyList")
-    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map, HttpServletRequest req) {
-        Integer page = Integer.parseInt(map.get("page").toString()) - 1;
+    public ResultVO<Map<String, String>> getCompanyList(@RequestBody HashMap map, HttpServletRequest req,
+                                                        HttpServletResponse response) {
+        Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
         String token = TokenUtil.parseToken(req);
 
         if (token.equals("")) {
             log.error("【获取公司列表】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取公司列表】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "startDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
         Page<Company> companyPage = null;
         // 管理员能看到所有客户
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
@@ -649,7 +682,7 @@ public class EmployeeController {
         if (companyFollowRecordPage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.COMPANY_FOLLOW_RECORD_EMPTY);
         } else {
-            return ResultVOUtil.success(companyFollowRecordPage);
+            return ResultVOUtil.success(companyFollowRecordPage.getContent());
         }
     }
 
@@ -662,26 +695,40 @@ public class EmployeeController {
      */
     @PostMapping("/createCompanyFollow")
     public ResultVO<Map<String, String>> createCompanyFollow(@RequestBody CompanyFollowRecord companyFollowRecord,
-                                                             HttpServletRequest request) {
+                                                             HttpServletRequest request,
+                                                             HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建公司跟进信息】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建公司跟进信息】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.COMPANY_NOT_EXIST, response);
         }
         companyFollowRecord.setEmployeeId(employeeId);
         companyFollowRecord.setEmployeeName(employee.getEmployeeName());
+        // 修改对应公司的客户状态
+        Company company = companyService.getCompanyByCompanyId(companyFollowRecord.getCompanyId());
+        if (company == null) {
+            log.error("【创建公司跟进信息】找不到对应的公司");
+            return ResultVOUtil.fail(ResultEnum.COMPANY_NOT_EXIST, response);
+        }
+        company.setStatus(companyFollowRecord.getStatus());
+        // 写回数据库
+        Boolean flag =  companyService.saveCompany(company);
+        if (!flag) {
+            log.error("【创建公司跟进信息】保存公司信息失败");
+            return ResultVOUtil.fail(ResultEnum.SAVE_COMPANY_ERROR, response);
+        }
         CompanyFollowRecord createFollowRecord = companyFollowRecordService.createCompanyFollowRecord(companyFollowRecord);
         if (createFollowRecord != null) {
             return ResultVOUtil.success(createFollowRecord);
         } else {
             log.error("【创建公司跟进信息】失败");
-            return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_FOLLOW_RECORD_ERROR);
+            return ResultVOUtil.fail(ResultEnum.CREATE_COMPANY_FOLLOW_RECORD_ERROR, response);
         }
 
     }
@@ -693,20 +740,21 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/getCompanyNames")
-    public ResultVO<Map<String, String>> getCompanyNames(HttpServletRequest req) {
+    public ResultVO<Map<String, String>> getCompanyNames(HttpServletRequest req,
+                                                         HttpServletResponse response) {
 
         String token = TokenUtil.parseToken(req);
 
         System.out.println("token is:" + token);
         if (token.equals("")) {
             log.error("【获取公司列表】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         System.out.println("id:" + employeeId);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取公司列表】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
 
         List<Company> privateCompanyList = new ArrayList<>();

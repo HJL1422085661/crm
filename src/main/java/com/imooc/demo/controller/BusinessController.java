@@ -3,7 +3,6 @@ package com.imooc.demo.controller;
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.*;
-import com.imooc.demo.repository.ResourceRepository;
 import com.imooc.demo.service.*;
 import com.imooc.demo.utils.KeyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
@@ -14,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
@@ -55,7 +52,8 @@ public class BusinessController {
 
     @PostMapping("/getBusinessList")
     public ResultVO<Map<Integer, String>> getBusinessList(@RequestBody HashMap paramMap,
-                                                          HttpServletRequest req) {
+                                                          HttpServletRequest req,
+                                                          HttpServletResponse response) {
         //orderType 1表示人才订单 2表示公司订单
         Integer orderType = Integer.parseInt(paramMap.get("orderType").toString());
         Integer page = Integer.parseInt(paramMap.get("page").toString());
@@ -63,16 +61,16 @@ public class BusinessController {
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【获取订单列表】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【获取订单列表】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         if (orderType != 1 && orderType != 2) {
             log.error("【获取订单列表】参数错误");
-            return ResultVOUtil.error(ResultEnum.PARAM_ERROR);
+            return ResultVOUtil.fail(ResultEnum.PARAM_ERROR, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
@@ -133,23 +131,25 @@ public class BusinessController {
 
     @PostMapping("/createResourceBusiness")
     public ResultVO<Map<Integer, String>> createResourceBusiness(@RequestBody ResourceBusiness resourceBusiness,
-                                                                 HttpServletRequest request) {
+                                                                 HttpServletRequest request,
+                                                                 HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建人才订单】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建人才订单】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
 
         // 封装Name属性
         Resource resource = resourceService.getResourceByResourceId(resourceBusiness.getResourceId());
         if (resource == null) {
+            response.setStatus(400);
             log.error("【创建人才订单】该人才不存在");
-            return ResultVOUtil.error(ResultEnum.RESOURCE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.RESOURCE_NOT_EXIST, response);
         }
         // 生成订单ID
         resourceBusiness.setBusinessId(KeyUtil.createID());
@@ -163,36 +163,40 @@ public class BusinessController {
         try {
             ResourceBusiness createBusiness = resourceBusinessService.createResourceBusiness(resourceBusiness);
             if (createBusiness == null) {
+                response.setStatus(400);
                 log.error("【创建人才订单】发生错误");
-                return ResultVOUtil.error(ResultEnum.CREATE_RESOURCE_BUSINESS_ERROR);
+                return ResultVOUtil.fail(ResultEnum.CREATE_RESOURCE_BUSINESS_ERROR, response);
             }
         } catch (Exception e) {
+            response.setStatus(400);
             log.error("【创建人才订单】发生异常");
         }
         return ResultVOUtil.success();
     }
 
-    public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId) {
+    public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId,
+                                                                 HttpServletResponse response) {
         Integer flag = resourceBusinessService.deleteResourceBusinessByBusinessId(resourceBusinessId);
         if (flag == 0) {
             log.error("【删除人才订单】发生错误");
-            return ResultVOUtil.error(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR);
+            return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR, response);
         }
         return ResultVOUtil.success();
     }
 
     @PostMapping("/createCompanyBusiness")
     public ResultVO<Map<Integer, String>> createCompanyBusiness(@RequestBody HashMap paramMap,
-                                                                HttpServletRequest request) {
+                                                                HttpServletRequest request,
+                                                                HttpServletResponse response) {
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【创建公司订单】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【创建公司订单】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         // 提取属性
         String info = paramMap.get("info").toString();
@@ -218,8 +222,9 @@ public class BusinessController {
         createBusiness.setBusinessId(KeyUtil.createID());
         Company company = companyService.getCompanyByCompanyId(companyId);
         if (company == null) {
+            response.setStatus(400);
             log.error("【创建公司订单】该公司不存在");
-            return ResultVOUtil.error(ResultEnum.COMPANY_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.COMPANY_NOT_EXIST, response);
         }
         createBusiness.setEmployeeName(company.getEmployeeName());
         createBusiness.setCompanyName(company.getCompanyName());
@@ -228,8 +233,9 @@ public class BusinessController {
             Integer t = Integer.parseInt(s);
             Resource resource = resourceService.getResourceByResourceId(t);
             if (resource == null) {
+                response.setStatus(400);
                 log.error("【创建公司订单】该人才不存在");
-                return ResultVOUtil.error(ResultEnum.RESOURCE_NOT_EXIST);
+                return ResultVOUtil.fail(ResultEnum.RESOURCE_NOT_EXIST, response);
             }
             resourceNameString += resource.getResourceName() + ",";
         }
@@ -238,49 +244,53 @@ public class BusinessController {
 
         CompanyBusiness returnCompanyBusiness = companyBusinessService.createCompanyBusiness(createBusiness);
         if (returnCompanyBusiness == null) {
+            response.setStatus(400);
             log.error("【创建公司订单】失败");
-            return ResultVOUtil.error(ResultEnum.CREATE_COMPANY_BUSINESS_ERROR);
+            return ResultVOUtil.fail(ResultEnum.CREATE_COMPANY_BUSINESS_ERROR, response);
         }
         return ResultVOUtil.success();
     }
 
     @PostMapping("/deleteBusiness")
     public ResultVO<Map<Integer, String>> deleteBusiness(@RequestBody HashMap paramMap,
-                                                         HttpServletRequest request) {
+                                                         HttpServletRequest request,
+                                                         HttpServletResponse response) {
         String businessId = paramMap.get("businessId").toString();
         Integer businessType = Integer.parseInt(paramMap.get("orderType").toString());
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {
             log.error("【删除公司订单】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (StringUtils.isEmpty(employeeId)) {
             log.error("【删除公司订单】 employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         if (businessType == 1) {
             // 删除人才订单
-            return deleteResourceBusiness(businessId);
+            return deleteResourceBusiness(businessId, response);
         } else if (businessType == 2) {
             // 删除公司订单
-            return deleteCompanyBusiness(businessId);
+            return deleteCompanyBusiness(businessId, response);
         } else {
+            response.setStatus(400);
             log.error("【删除订单】发生错误");
-            return ResultVOUtil.error(ResultEnum.DELETE_BUSINESS_ERROR);
+            return ResultVOUtil.fail(ResultEnum.DELETE_BUSINESS_ERROR, response);
         }
     }
 
-    public ResultVO<Map<Integer, String>> deleteCompanyBusiness(String companyBusinessId) {
+    public ResultVO<Map<Integer, String>> deleteCompanyBusiness(String companyBusinessId,
+                                                                HttpServletResponse response) {
         CompanyBusiness dataBaseCompanyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(companyBusinessId);
         if (dataBaseCompanyBusiness == null) {
             log.error("【删除公司订单】该订单不存在");
-            return ResultVOUtil.error(ResultEnum.RESOURCE_BUSINESS_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.RESOURCE_BUSINESS_NOT_EXIST, response);
         }
         Integer flag = companyBusinessService.deleteCompanyBusinessByBusinessId(companyBusinessId);
         if (flag == 0) {
             log.error("【删除公司订单】发生错误");
-            return ResultVOUtil.error(ResultEnum.DELETE_COMPANY_BUSINESS_ERROR);
+            return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_BUSINESS_ERROR, response);
         }
         return ResultVOUtil.success();
     }

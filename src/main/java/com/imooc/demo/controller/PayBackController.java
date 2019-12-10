@@ -12,17 +12,16 @@ import com.imooc.demo.service.*;
 import com.imooc.demo.utils.BeanCopyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,8 @@ public class PayBackController {
      * @return
      */
     @PostMapping("/createPayBackRecord")
-    public ResultVO<Map<String, String>> createPayBackRecord(@RequestBody PayBackRecord payBackRecord) {
+    public ResultVO<Map<String, String>> createPayBackRecord(@RequestBody PayBackRecord payBackRecord,
+                                                             HttpServletResponse response) {
         PayBackRecord createPayBackRecord = new PayBackRecord();
         BeanUtils.copyProperties(payBackRecord, createPayBackRecord, BeanCopyUtil.getNullPropertyNames(payBackRecord));
         Employee employee = employeeService.getEmployeeByEmployeeId(payBackRecord.getEmployeeId());
@@ -101,7 +101,7 @@ public class PayBackController {
         Boolean flag = payBackRecordService.savePayBackRecord(createPayBackRecord);
         if (flag == false) {
             log.error("【创建回款记录】发生错误");
-            return ResultVOUtil.error(ResultEnum.CREATE_PAY_BACK_RECORD_ERROR);
+            return ResultVOUtil.fail(ResultEnum.CREATE_PAY_BACK_RECORD_ERROR, response);
         } else {
             return ResultVOUtil.success();
         }
@@ -117,19 +117,20 @@ public class PayBackController {
      */
     @PostMapping("/getPayBackRecordDetailByBusinessId")
     public ResultVO<Map<String, String>> getPayBackRecordDetailByBusinessId(@RequestBody HashMap paramMap,
-                                                                            HttpServletRequest req) {
+                                                                            HttpServletRequest req,
+                                                                            HttpServletResponse response) {
         String businessId = paramMap.get("businessId").toString();
         Integer businessType = Integer.parseInt(paramMap.get("orderType").toString());
 
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【获取回款记录】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
             log.error("【获取回款记录】employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         // 用于返回结果
         Map<String, Object> map = new HashMap<>();
@@ -146,7 +147,7 @@ public class PayBackController {
                     BeanUtils.copyProperties(resourceBusiness, payBackRecord, BeanCopyUtil.getNullPropertyNames(resourceBusiness));
                 }else {
                     log.error("【获取人才订单】没有这个订单");
-                    return ResultVOUtil.error(ResultEnum.COMPANY_RESOURCE_NOT_EXIST);
+                    return ResultVOUtil.fail(ResultEnum.COMPANY_RESOURCE_NOT_EXIST, response);
                 }
             } else {
                 // 公司订单
@@ -155,7 +156,7 @@ public class PayBackController {
                     BeanUtils.copyProperties(companyBusiness, payBackRecord, BeanCopyUtil.getNullPropertyNames(companyBusiness));
                 }else {
                     log.error("【获取公司订单】没有这个订单");
-                    return ResultVOUtil.error(ResultEnum.COMPANY_BUSINESS_NOT_EXIST);
+                    return ResultVOUtil.fail(ResultEnum.COMPANY_BUSINESS_NOT_EXIST, response);
                 }
             }
             map.put("payBackDetail", payBackRecord);
@@ -179,17 +180,18 @@ public class PayBackController {
      */
     @PostMapping("/getPayBackRecordListByBusinessId")
     public ResultVO<Map<String, String>> getPayBackRecordListByBusinessId(@RequestBody HashMap paramMap,
-                                                                          HttpServletRequest req) {
+                                                                          HttpServletRequest req,
+                                                                          HttpServletResponse response) {
         String businessId = paramMap.get("businessId").toString();
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【获取回款记录】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
             log.error("【获取回款记录】employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         List<PayBackRecord> payBackRecordList = payBackRecordService.findAllPayBackRecordByBusinessId(businessId);
 
@@ -231,20 +233,21 @@ public class PayBackController {
     @PostMapping("/getAllPayBackRecordList")
     public ResultVO<Map<String, String>> getAllPayBackRecordList(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                                  @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                                 HttpServletRequest req) {
+                                                                 HttpServletRequest req,
+                                                                 HttpServletResponse response) {
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【获取所有回款记录】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String employeeId = loginTicketService.getEmployeeIdByTicket(token);
         if (employeeId.equals("")) {
             log.error("【获取所有回款记录】employeeId为空");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
             log.error("【获取所有回款记录】普通员工无权查看所有回款记录");
-            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+            return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
         Page<PayBackRecord> payBackRecordPage = payBackRecordService.findPayBackRecord(request);
@@ -275,24 +278,25 @@ public class PayBackController {
                                                                @RequestParam("startTime") String startTime,
                                                                @RequestParam("endTime") String endTime,
                                                                @RequestParam("employeeId") String employeeId,
-                                                               HttpServletRequest req) {
+                                                               HttpServletRequest req,
+                                                               HttpServletResponse response) {
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【混合查询获取回款记录】Token为空");
-            return ResultVOUtil.error(ResultEnum.TOKEN_IS_EMPTY);
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
         }
         String adminId = loginTicketService.getEmployeeIdByTicket(token);
         if (adminId.equals("")) {
             log.error("【混合查询获取回款记录】AdminID不存在");
-            return ResultVOUtil.error(ResultEnum.EMPLOYEE_NOT_EXIST);
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         if (employeeService.getEmployeeByEmployeeId(adminId).getEmployeeRole() != 2) {
             log.error("【混合查询获取回款记录】普通员工无权查看所有回款记录");
-            return ResultVOUtil.error(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT);
+            return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
         if (employeeId.trim().equals("") && startTime.trim().equals("")) {
             log.error("【混合查询获取回款记录】参数错误");
-            return ResultVOUtil.error(ResultEnum.SELECT_PAY_BACK_RECORD_PARAM_ERROR);
+            return ResultVOUtil.fail(ResultEnum.SELECT_PAY_BACK_RECORD_PARAM_ERROR, response);
         }
 
         PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
@@ -350,7 +354,8 @@ public class PayBackController {
      */
     @PostMapping("/updatePayBackRecord")
     public ResultVO<Map<String, String>> updatePayBackRecord(@RequestParam("recordId") Integer recordId,
-                                                             @RequestParam("paybackrecord") PayBackRecord payBackRecord) {
+                                                             @RequestParam("paybackrecord") PayBackRecord payBackRecord,
+                                                             HttpServletResponse response) {
 
         //首先获取数据库中对应的回款记录
         PayBackRecord payBackRecord1 = payBackRecordService.getPayBackRecordByRecordId(recordId);
@@ -361,7 +366,7 @@ public class PayBackController {
             return ResultVOUtil.success();
         } else {
             log.error("【更改回款记录】发生错误");
-            return ResultVOUtil.error(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR);
+            return ResultVOUtil.fail(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR, response);
         }
     }
 
