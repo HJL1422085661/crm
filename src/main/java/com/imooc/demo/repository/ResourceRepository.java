@@ -31,7 +31,8 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     int updateShareStatusByResourceId(String shareStatus, Integer resourceId);
 
     Page<Resource> findResourceByEmployeeId(String employeeId, Pageable pageable);
-    Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable);
+
+    Page<Resource> findResourceByShareStatus(Integer shareStatus, Pageable pageable);
 
     List<Resource> findResourceByShareStatus(Integer shareStatus);
 }

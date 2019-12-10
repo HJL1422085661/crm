@@ -97,6 +97,6 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable) {
-        return resourceRepository.findResourceByShareStatusPageable(shareStatus, pageable);
+        return resourceRepository.findResourceByShareStatus(shareStatus, pageable);
     }
 }

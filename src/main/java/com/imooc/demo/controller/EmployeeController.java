@@ -672,14 +672,6 @@ public class EmployeeController {
             }
         }
 
-
-        // 管理员能看到所有客户
-        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
-            companyPage = companyService.findAllCompanyPageable(request);
-        } else {
-            companyPage = companyService.findCompanyByEmployeeId(employeeId, request);
-        }
-
         if (companyPage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.COMPANY_LIST_EMPTY);
         } else {
