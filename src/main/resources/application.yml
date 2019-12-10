@@ -20,6 +20,12 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+
+  mail:
+    host: smtp.163.com
+    username: wangchiyaan@163.com
+    password:
+
 #  jackson:
 #    default-property-inclusion: non_null
 

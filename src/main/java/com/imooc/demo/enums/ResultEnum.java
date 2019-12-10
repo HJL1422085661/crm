@@ -87,6 +87,15 @@ public enum ResultEnum {
     SAVE_PERSONAL_INFO_ERROR(76, "保存个人信息发生错误"),
     USER_PHONE_EXIST(77, "手机号已存在"),
     SAVE_COMPANY_ERROR(78, "保存公司信息失败"),
+    EMAIL_EMPTY(79, "邮箱为空"),
+    SEND_MSG_ERROR(80, "发送验证码失败"),
+    CORRECT_CODE(81, "验证码正确"),
+    WRONG_CODE(82, "验证码错误"),
+    RESET_PWD_ERROR(83, "重置密码失败"),
+    RESET_PWD_SUCCESS(84, "重置密码成功"),
+    SEND_CODE_SUCCESS(85, "发送验证码成功"),
+    CREATE_COMPANY_BUSINESS_SUCCESS(86, "创建人才订单成功"),
+    DELETE_RESOURCE_BUSINESS_SUCCESS(87, "删除人才订单成功"),
 
 
 

@@ -6,23 +6,33 @@ import com.imooc.demo.modle.Employee;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.LoginTicketService;
 import com.imooc.demo.utils.BeanCopyUtil;
+import com.imooc.demo.utils.PassUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 
 @Slf4j
@@ -34,6 +44,8 @@ public class LoginController {
     public EmployeeService employeeService;
     @Autowired
     public LoginTicketService loginTicketService;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @PostMapping("/login")
     public ResultVO<Map<String, String>> login(@RequestBody Employee employee,
@@ -66,6 +78,128 @@ public class LoginController {
 
         return "redirect:/crm/login";
     }
+
+
+    /**
+     * 获取验证码
+     *
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/getCode", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResultVO<Map<String, String>> getCode(@RequestBody HashMap paramMap, HttpServletResponse response) throws MessagingException {
+
+        String email = paramMap.get("employeeEmail").toString();
+        if (StringUtils.isEmpty(email)) {
+            log.error("【找回密码】邮箱不能为空");
+            return ResultVOUtil.fail(ResultEnum.EMAIL_EMPTY, response);
+        }
+        // 根据email在数据库中匹配
+        List<Employee> employeeList = employeeService.findEmployeeByEmail(email);
+        if (employeeList.size() == 0 || employeeList == null) {
+            log.error("【找回密码】没有匹配的邮箱");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        Employee employee = employeeList.get(0);
+
+        // 生成邮箱验证码，5分钟后过期
+        String verifyCode = String.valueOf(new Random().nextInt(899999) + 100000);
+        Timestamp verifyCodeExpireDate = new Timestamp(System.currentTimeMillis() + 5 * 60 * 1000);
+        // 将验证码和过期日期存到数据库
+        employee.setVerifyCode(verifyCode);
+        employee.setVerifyCodeExpireTime(verifyCodeExpireDate);
+        Boolean flag = employeeService.saveEmployee(employee);
+        if (!flag) {
+            log.error("【找回密码】发送验证码失败");
+            return ResultVOUtil.fail(ResultEnum.SEND_MSG_ERROR, response);
+        }
+        // 构建验证码内容
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<html><head><title></title></head><body>");
+        stringBuilder.append("您好<br/>");
+        stringBuilder.append("您的验证码是：").append(verifyCode).append("<br/>");
+        stringBuilder.append("您可以复制此验证码并返回至XXX，以验证您的邮箱。<br/>");
+        stringBuilder.append("此验证码只能使用一次，在5分钟内有效。验证成功则自动失效。<br/>");
+        stringBuilder.append("如果您没有进行上述操作，请忽略此邮件。");
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        //发送验证码到邮箱
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setFrom("wangchiyaan@163.com"); //这里只是设置username 并没有设置host和password，因为host和password在springboot启动创建JavaMailSender实例的时候已经读取了
+        mimeMessageHelper.setTo(email);
+        mimeMessage.setSubject("邮箱验证-XXX");
+        mimeMessageHelper.setText(stringBuilder.toString(), true);
+        mailSender.send(mimeMessage);
+
+        return ResultVOUtil.success(ResultEnum.SEND_CODE_SUCCESS);
+    }
+
+
+    /**
+     * 验证码比对
+     *
+     * @param response
+     * @return
+     */
+    @RequestMapping("/verifyCode")
+    public ResultVO<Map<String, String>> verifyCode(@RequestBody HashMap paramMap, HttpServletResponse response){
+
+        String email = paramMap.get("employeeEmail").toString();
+        String code = paramMap.get("verifyCode").toString();
+        if (StringUtils.isEmpty(email)) {
+            log.error("【验证码比对】邮箱不能为空");
+            return ResultVOUtil.fail(ResultEnum.EMAIL_EMPTY, response);
+        }
+        // 根据email在数据库中匹配
+        List<Employee> employeeList = employeeService.findEmployeeByEmail(email);
+        if (employeeList.size() == 0 || employeeList == null) {
+            log.error("【找回验证码比对密码】没有匹配的邮箱");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        Employee employee = employeeList.get(0);
+
+        // 验证码比对
+        if (code.equals(employee.getVerifyCode())){
+            return ResultVOUtil.success(ResultEnum.CORRECT_CODE);
+        }else {
+            return ResultVOUtil.success(ResultEnum.WRONG_CODE);
+        }
+    }
+     /**
+     * 验证码比对
+     *
+     * @param response
+     * @return
+     */
+    @RequestMapping("/resetPassword")
+    public ResultVO<Map<String, String>> resetPassword(@RequestBody HashMap paramMap, HttpServletResponse response){
+
+        String email = paramMap.get("employeeEmail").toString();
+        String passWord = paramMap.get("newPassword").toString();
+        if (StringUtils.isEmpty(email)) {
+            log.error("【重置密码】邮箱不能为空");
+            return ResultVOUtil.fail(ResultEnum.EMAIL_EMPTY, response);
+        }
+        // 根据email在数据库中匹配
+        List<Employee> employeeList = employeeService.findEmployeeByEmail(email);
+        if (employeeList.size() == 0 || employeeList == null) {
+            log.error("【重置密码】没有匹配的邮箱");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        Employee employee = employeeList.get(0);
+
+        // 重置密码
+        employee.setPassWord(PassUtil.MD5(passWord + employee.getSalt()));
+        Boolean flag = employeeService.saveEmployee(employee);
+        if (!flag){
+            log.error("【重置密码】失败");
+            return ResultVOUtil.fail(ResultEnum.RESET_PWD_ERROR, response);
+        }else {
+            return ResultVOUtil.success(ResultEnum.RESET_PWD_SUCCESS);
+        }
+    }
+
+
 
     /**
      * 获取个人信息

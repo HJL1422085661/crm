@@ -3,8 +3,10 @@ package com.imooc.demo.modle;
 import com.imooc.demo.enums.EmployeeRoleEnum;
 import lombok.Data;
 
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * @Author emperor
@@ -57,5 +59,13 @@ public class Employee {
     /** 员工所属经理姓名 **/
     @Column(name = "employeeManagerName", nullable = false)
     private String employeeManagerName;
+
+    /** 验证码 **/
+    @Column(name = "verifyCode")
+    private String verifyCode;
+
+    /** 验证码失效日期 **/
+    @Column(name = "verifyCodeExpireTime")
+    private Date verifyCodeExpireTime;
 
 }

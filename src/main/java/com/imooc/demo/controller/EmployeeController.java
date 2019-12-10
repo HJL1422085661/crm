@@ -360,7 +360,7 @@ public class EmployeeController {
             log.error("【修改人才信息】创建临时表发生异常");
             return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_EXCEPTION, response);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.UPDATE_RESOURCE_SUCCESS);
     }
 
     /**
@@ -438,7 +438,7 @@ public class EmployeeController {
             log.error("【删除人才信息】创建临时表发生异常");
             return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_EXCEPTION, response);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_SUCCESS);
     }
 
     /**
@@ -520,7 +520,7 @@ public class EmployeeController {
             log.error("【修改企业信息】创建临时表发生异常");
             return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_INFO_EXCEPTION, response);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.UPDATE_COMPANY_SUCCESS);
     }
 
     /**
@@ -595,7 +595,7 @@ public class EmployeeController {
             log.error("【删除企业信息】创建临时表发生异常");
             return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_EXCEPTION, response);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
     }
 
     @PostMapping("/createCompany")

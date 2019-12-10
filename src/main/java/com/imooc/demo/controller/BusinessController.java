@@ -171,7 +171,7 @@ public class BusinessController {
             response.setStatus(400);
             log.error("【创建人才订单】发生异常");
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.CREATE_COMPANY_BUSINESS_SUCCESS);
     }
 
     public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId,
@@ -181,7 +181,7 @@ public class BusinessController {
             log.error("【删除人才订单】发生错误");
             return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR, response);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_BUSINESS_SUCCESS);
     }
 
     @PostMapping("/createCompanyBusiness")

@@ -140,4 +140,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Boolean existsByPhoneNumber(String phoneNumber) {
         return employeeRepository.existsByPhoneNumber(phoneNumber);
     }
+
+    @Override
+    public List<Employee> findEmployeeByEmail(String email) {
+        return employeeRepository.findEmployeeByEmail(email);
+    }
 }

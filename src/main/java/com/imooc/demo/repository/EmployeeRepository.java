@@ -25,6 +25,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
 
     List<Employee> findEmployeeByEmployeeRole(Integer employeeRole);
 
+    List<Employee> findEmployeeByEmail(String email);
+
     List<Employee> findEmployeeByEmployeeManagerId(String employeeManagerId);
 
     Boolean existsByPhoneNumber(String phoneNumber);

@@ -24,7 +24,7 @@ public interface EmployeeService {
     Boolean updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
     List<Employee> findAllEmployee();
     List<Employee> findEmployeeByEmployeeRole(Integer role);
+    List<Employee> findEmployeeByEmail(String email);
     List<Employee> findEmployeeByManagerId(String managerId);
     Boolean existsByPhoneNumber(String phoneNumber);
-
 }
