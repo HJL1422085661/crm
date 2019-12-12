@@ -79,9 +79,13 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public Boolean updateShareStatusByCompanyId(String shareStatus, Integer companyId) {
+        if (companyRepository.updateShareStatusByCompanyId(shareStatus, companyId) != 0) return true;
+        else return false;
+    }
+
+    @Override
     public List<Company> findCompanyByShareStatus(Integer shareStatus) {
         return companyRepository.findCompanyByShareStatus(shareStatus);
-
-
     }
 }

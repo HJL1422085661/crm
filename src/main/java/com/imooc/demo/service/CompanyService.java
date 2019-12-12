@@ -28,4 +28,6 @@ public interface CompanyService {
 
     List<Company> findCompanyByShareStatus(Integer shareStatus);
 
+    Boolean updateShareStatusByCompanyId(String shareStatus, Integer companyId);
+
 }

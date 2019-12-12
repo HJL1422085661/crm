@@ -19,6 +19,9 @@ import java.util.List;
 public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     List<Resource> getResourceListByEmployeeId(String employeeId);
     Resource getResourceByResourceId(Integer resourceId);
+
+    @Transactional
+    @Modifying
     Integer deleteResourceByResourceId(Integer resourceId);
     @Transactional
     @Modifying

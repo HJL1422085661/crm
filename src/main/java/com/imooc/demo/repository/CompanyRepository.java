@@ -5,6 +5,9 @@ import com.imooc.demo.modle.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,5 +26,9 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
 
     List<Company> findCompanyByShareStatus(Integer shareStatus);
 
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "UPDATE company SET shareStatus = ?1 WHERE companyId = ?2 ")
+    int updateShareStatusByCompanyId(String shareStatus, Integer companyId);
 
 }

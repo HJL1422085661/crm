@@ -4,6 +4,7 @@ import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
 import com.imooc.demo.modle.*;
 import com.imooc.demo.service.*;
+import com.imooc.demo.utils.EnumUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,7 @@ import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
  * @Date 2019/10/21 10:15
  * @Version 1.0
  */
+
 
 @RestController
 @RequestMapping("/employee")
@@ -65,7 +68,6 @@ public class EmployeeController {
     public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
                                                         HttpServletRequest request,
                                                         HttpServletResponse response) {
-
         resource.setShareStatus(2);
         //封装时间参数
         Date createDate = new Date();
@@ -103,18 +105,49 @@ public class EmployeeController {
     /**
      * 修改人才状态（公有、私有）
      *
-     * @param resourceId
-     * @param shareStatus
      * @return
      */
     @PostMapping("/updateResourceShareStatus")
-    public ResultVO<Map<String, String>> updateResourceShareStatus(@RequestParam("resourceId") Integer resourceId,
-                                                                   @RequestParam("shareStatus") String shareStatus,
+    public ResultVO<Map<String, String>> updateResourceShareStatus(@RequestBody HashMap paramMap,
+                                                                   HttpServletRequest request,
                                                                    HttpServletResponse response) {
+        Integer resourceId = Integer.parseInt(paramMap.get("resourceId").toString());
+        String shareStatus = paramMap.get("shareStatus").toString();
+
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【更新人才状态】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【更新人才状态】 无权限");
+            return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
+        }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+
+        Resource resource = new Resource();
         Boolean flag = resourceService.updateShareStatusByResourceId(shareStatus, resourceId);
+
+        // 如果变为公有，对应employeeId则设为大boss
+        if (shareStatus.equals("1")) {
+            resource = resourceService.getResourceByResourceId(resourceId);
+            resource.setEmployeeId(EnumUtil.ROOT_ID);
+            resource.setEmployeeName(EnumUtil.ROOT_NAME);
+        } else {
+            // 如果变为私有，对应employeeId则设为自己
+            resource = resourceService.getResourceByResourceId(resourceId);
+            resource.setEmployeeId(employeeId);
+            resource.setEmployeeName(employee.getEmployeeName());
+        }
+        Boolean isSuccess = resourceService.saveResource(resource);
+        if (!isSuccess) {
+            log.error("【更新人才状态】保存失败");
+            return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
+        }
         //TODO
         if (flag) {
-            return ResultVOUtil.success();
+            return ResultVOUtil.success(ResultEnum.UPDATE_RESOURCE_SUCCESS);
         } else {
             log.error("【更新人才状态】发生错误");
             return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
@@ -633,6 +666,56 @@ public class EmployeeController {
 
 
     /**
+     * 修改企业状态（公有、私有）
+     *
+     * @return
+     */
+    @PostMapping("/updateCompanyShareStatus")
+    public ResultVO<Map<String, String>> updateCompanyShareStatus(@RequestBody HashMap paramMap,
+                                                                  HttpServletRequest request,
+                                                                  HttpServletResponse response) {
+        Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
+        String shareStatus = paramMap.get("shareStatus").toString();
+
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【更新企业状态】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【更新企业状态】employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        // 更新共享状态
+        Boolean flag = companyService.updateShareStatusByCompanyId(shareStatus, companyId);
+
+        Company company = new Company();
+        // 如果变为公有，对应employeeId则设为大boss
+        if (shareStatus.equals("1")) {
+            company = companyService.getCompanyByCompanyId(companyId);
+            company.setEmployeeId(EnumUtil.ROOT_ID);
+            company.setEmployeeName(EnumUtil.ROOT_NAME);
+        } else {
+            // 如果变为私有，对应employeeId则设为自己
+            company = companyService.getCompanyByCompanyId(companyId);
+            company.setEmployeeId(employeeId);
+            company.setEmployeeName(employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeName());
+        }
+        Boolean isSuccess = companyService.saveCompany(company);
+        if (!isSuccess) {
+            log.error("【更新企业状态】保存失败");
+            return ResultVOUtil.fail(ResultEnum.SAVE_COMPANY_ERROR, response);
+        }
+        if (flag) {
+            return ResultVOUtil.success(ResultEnum.UPDATE_COMPANY_SUCCESS);
+        } else {
+            log.error("【更新企业状态】发生错误");
+            return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_ERROR, response);
+        }
+    }
+
+    /**
      * 分页显示企业客户信息
      *
      * @return
@@ -693,7 +776,6 @@ public class EmployeeController {
         Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
 
-        System.out.println("companyId:" + companyId);
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
 
 
@@ -749,7 +831,6 @@ public class EmployeeController {
             log.error("【创建公司跟进信息】失败");
             return ResultVOUtil.fail(ResultEnum.CREATE_COMPANY_FOLLOW_RECORD_ERROR, response);
         }
-
     }
 
     /**
@@ -797,7 +878,6 @@ public class EmployeeController {
             companyList.add(map);
         }
         return ResultVOUtil.success(companyList);
-
     }
 
 
