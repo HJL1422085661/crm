@@ -1,11 +1,9 @@
-package com.imooc.demo.modle;
+package com.imooc.demo.model;
 
-import com.imooc.demo.enums.BusinessStatusRoleEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @ Author: yangfan

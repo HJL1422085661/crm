@@ -1,6 +1,6 @@
 package com.imooc.demo.interceptor;
 
-import com.imooc.demo.modle.HostHolder;
+import com.imooc.demo.model.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;

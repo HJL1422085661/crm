@@ -1,6 +1,8 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -35,4 +37,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE employee SET employeeRole = ?1  WHERE employeeId = ?2 ")
     int updateEmployeeRoleByEmployeeId(Integer employeeRole, String employeeId);
+
+    @Override
+    Page<Employee> findAll(Pageable pageable);
 }

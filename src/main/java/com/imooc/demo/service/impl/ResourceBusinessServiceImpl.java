@@ -1,6 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.ResourceBusiness;
+import com.imooc.demo.model.ResourceBusiness;
 import com.imooc.demo.repository.ResourceBusinessRepository;
 import com.imooc.demo.service.ResourceBusinessService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Slf4j
@@ -54,5 +56,15 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     @Override
     public ResourceBusiness findResourceBusinessByBusinessId(String businessId) {
         return resourceBusinessRepository.findResourceBusinessByBusinessId(businessId);
+    }
+
+    @Override
+    public List<ResourceBusiness> findResourceBusinessByBusinessIdList(List<String> businessId) {
+        return resourceBusinessRepository.findResourceBusinessByBusinessIdIn(businessId);
+    }
+
+    @Override
+    public List<ResourceBusiness> findResourceBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
+        return resourceBusinessRepository.findResourceBusinessByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
     }
 }

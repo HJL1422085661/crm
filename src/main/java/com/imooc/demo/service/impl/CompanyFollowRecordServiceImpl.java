@@ -1,6 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.CompanyFollowRecord;
+import com.imooc.demo.model.CompanyFollowRecord;
 import com.imooc.demo.repository.CompanyFollowRecordRepository;
 import com.imooc.demo.service.CompanyFollowRecordService;
 import org.springframework.beans.factory.annotation.Autowired;

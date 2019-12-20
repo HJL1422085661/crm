@@ -1,11 +1,9 @@
 package com.imooc.demo.controller;
 
-import com.imooc.demo.modle.PayBackRecord;
+import com.imooc.demo.model.PayBackRecord;
 import com.imooc.demo.service.PayBackRecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @Author emperor

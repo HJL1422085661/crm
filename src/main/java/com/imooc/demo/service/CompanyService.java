@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.Company;
+import com.imooc.demo.model.Company;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

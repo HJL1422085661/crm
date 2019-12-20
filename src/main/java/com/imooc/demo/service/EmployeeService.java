@@ -1,6 +1,8 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -27,4 +29,5 @@ public interface EmployeeService {
     List<Employee> findEmployeeByEmail(String email);
     List<Employee> findEmployeeByManagerId(String managerId);
     Boolean existsByPhoneNumber(String phoneNumber);
+    Page<Employee> findAllEmployeePageable(Pageable pageable);
 }

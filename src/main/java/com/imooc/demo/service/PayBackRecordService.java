@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.PayBackRecord;
+import com.imooc.demo.model.PayBackRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +21,9 @@ public interface PayBackRecordService {
     Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable);
     Page<PayBackRecord> findPayBackRecordByEmployeeIdAndTime(String startTime, String endTime, String employeeId, Pageable pageable);
     List<PayBackRecord> findAllPayBackRecordByBusinessId(String businessId);
+    List<PayBackRecord> findPayBackRecordByBusinessIdAndDate(String businessId, String startDate, String endDate);
+    List<PayBackRecord> findPayBackRecordByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
     Page<PayBackRecord>  findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
+
 
 }

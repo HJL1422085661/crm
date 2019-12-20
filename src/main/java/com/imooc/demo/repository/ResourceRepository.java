@@ -1,13 +1,12 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import redis.clients.jedis.util.RedisOutputStream;
 
 import java.util.List;
 
@@ -38,4 +37,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     Page<Resource> findResourceByShareStatus(Integer shareStatus, Pageable pageable);
 
     List<Resource> findResourceByShareStatus(Integer shareStatus);
+
+    Boolean existsByPhone(String phone);
 }

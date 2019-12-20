@@ -4,8 +4,7 @@ package com.imooc.demo.service.impl;/*
  * @create: 2019-11-22 12:13
  **/
 
-import com.imooc.demo.modle.Company;
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.Company;
 import com.imooc.demo.repository.CompanyRepository;
 import com.imooc.demo.service.CompanyService;
 import lombok.extern.slf4j.Slf4j;

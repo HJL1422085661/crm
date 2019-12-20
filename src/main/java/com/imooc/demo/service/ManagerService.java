@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
 
 
 /**

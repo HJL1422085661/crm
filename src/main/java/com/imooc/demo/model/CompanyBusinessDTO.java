@@ -1,8 +1,7 @@
-package com.imooc.demo.modle;
+package com.imooc.demo.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;

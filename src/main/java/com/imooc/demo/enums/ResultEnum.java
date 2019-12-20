@@ -96,6 +96,12 @@ public enum ResultEnum {
     SEND_CODE_SUCCESS(85, "发送验证码成功"),
     CREATE_COMPANY_BUSINESS_SUCCESS(86, "创建人才订单成功"),
     DELETE_RESOURCE_BUSINESS_SUCCESS(87, "删除人才订单成功"),
+    DUPICATE_PHONE(88, "电话号码已存在"),
+    VALID_TOKEN(89, "token有效"),
+    INVALLID_TOKEN(90, "token已过期"),
+    EMPLOYEE_SALARY_EMPTY(91, "订单列表为空"),
+    CREATE_SALARY_REGULATION_SUCCESS(92, "创建员工工资结算规则成功"),
+    CREATE_SALARY_REGULATION_ERROR(93, "创建员工工资结算规则失败"),
 
 
 

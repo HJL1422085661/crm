@@ -1,11 +1,10 @@
 package com.imooc.demo.interceptor;
 
-import com.imooc.demo.modle.Employee;
-import com.imooc.demo.modle.HostHolder;
-import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.model.Employee;
+import com.imooc.demo.model.HostHolder;
+import com.imooc.demo.model.LoginTicket;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.LoginTicketService;
-import com.imooc.demo.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;

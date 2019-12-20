@@ -2,14 +2,14 @@ package com.imooc.demo.controller;
 
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
+import com.imooc.demo.model.LoginTicket;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.LoginTicketService;
 import com.imooc.demo.utils.BeanCopyUtil;
 import com.imooc.demo.utils.PassUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +26,10 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 @Slf4j
@@ -79,6 +76,40 @@ public class LoginController {
         return "redirect:/crm/login";
     }
 
+    /**
+     * 验证token有效期
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    @GetMapping("/verifyToken")
+    public ResultVO<Map<String, String>> verifyToken(HttpServletRequest request, HttpServletResponse response) {
+        String token = TokenUtil.parseToken(request);
+        if (token.equals("")) {
+            log.error("【验证Token有效期】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        LoginTicket loginTicket = loginTicketService.findLoginTicketByTicket(token);
+        Date expireDate = loginTicket.getExpired();
+        // 获取当前时间
+        SimpleDateFormat sdf = new SimpleDateFormat();// 格式化时间
+        sdf.applyPattern("yyyy-MM-dd HH:mm:ss a");// a为am/pm的标记
+        Date curDate = new Date();// 获取当前时间
+        if (expireDate.compareTo(curDate) >= 0) {
+            HashMap<String, String> map = new HashMap<>();
+            String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+            Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+            map.put("token", token);
+            map.put("user_name", employee.getEmployeeName());
+            map.put("user_Id", employee.getEmployeeId());
+            map.put("user_role", employee.getEmployeeRole().toString());
+            return ResultVOUtil.success(map);
+        } else {
+            return ResultVOUtil.fail(ResultEnum.INVALLID_TOKEN, response);
+        }
+
+    }
 
     /**
      * 获取验证码
@@ -142,7 +173,7 @@ public class LoginController {
      * @return
      */
     @RequestMapping("/verifyCode")
-    public ResultVO<Map<String, String>> verifyCode(@RequestBody HashMap paramMap, HttpServletResponse response){
+    public ResultVO<Map<String, String>> verifyCode(@RequestBody HashMap paramMap, HttpServletResponse response) {
 
         String email = paramMap.get("employeeEmail").toString();
         String code = paramMap.get("verifyCode").toString();
@@ -159,20 +190,21 @@ public class LoginController {
         Employee employee = employeeList.get(0);
 
         // 验证码比对
-        if (code.equals(employee.getVerifyCode())){
+        if (code.equals(employee.getVerifyCode())) {
             return ResultVOUtil.success(ResultEnum.CORRECT_CODE);
-        }else {
+        } else {
             return ResultVOUtil.success(ResultEnum.WRONG_CODE);
         }
     }
-     /**
+
+    /**
      * 验证码比对
      *
      * @param response
      * @return
      */
     @RequestMapping("/resetPassword")
-    public ResultVO<Map<String, String>> resetPassword(@RequestBody HashMap paramMap, HttpServletResponse response){
+    public ResultVO<Map<String, String>> resetPassword(@RequestBody HashMap paramMap, HttpServletResponse response) {
 
         String email = paramMap.get("employeeEmail").toString();
         String passWord = paramMap.get("newPassword").toString();
@@ -191,14 +223,13 @@ public class LoginController {
         // 重置密码
         employee.setPassWord(PassUtil.MD5(passWord + employee.getSalt()));
         Boolean flag = employeeService.saveEmployee(employee);
-        if (!flag){
+        if (!flag) {
             log.error("【重置密码】失败");
             return ResultVOUtil.fail(ResultEnum.RESET_PWD_ERROR, response);
-        }else {
+        } else {
             return ResultVOUtil.success(ResultEnum.RESET_PWD_SUCCESS);
         }
     }
-
 
 
     /**

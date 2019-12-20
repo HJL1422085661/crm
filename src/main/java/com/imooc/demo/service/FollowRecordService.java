@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.ResourceFollowRecord;
+import com.imooc.demo.model.ResourceFollowRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

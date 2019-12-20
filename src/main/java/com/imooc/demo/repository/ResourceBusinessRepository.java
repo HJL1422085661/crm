@@ -1,11 +1,11 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.ResourceBusiness;
+import com.imooc.demo.model.ResourceBusiness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
 
+import java.util.List;
 
 
 public interface ResourceBusinessRepository extends JpaRepository<ResourceBusiness, Integer> {
@@ -15,4 +15,6 @@ public interface ResourceBusinessRepository extends JpaRepository<ResourceBusine
     Page<ResourceBusiness> findResourceBusinessByEmployeeId(String employeeId, Pageable pageable);
     Page<ResourceBusiness> findAll(Pageable pageable);
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);
+    List<ResourceBusiness> findResourceBusinessByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
+    List<ResourceBusiness> findResourceBusinessByBusinessIdIn(List<String> businessId);
 }

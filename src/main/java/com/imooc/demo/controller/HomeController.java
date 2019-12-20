@@ -1,8 +1,8 @@
 package com.imooc.demo.controller;
 
 import com.imooc.demo.VO.ResultVO;
-import com.imooc.demo.modle.HostHolder;
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.HostHolder;
+import com.imooc.demo.model.Resource;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.ResourceService;
 import com.imooc.demo.utils.ResultVOUtil;

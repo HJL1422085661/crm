@@ -2,7 +2,7 @@ package com.imooc.demo.controller;
 
 import com.imooc.demo.VO.ResultVO;
 import com.imooc.demo.enums.ResultEnum;
-import com.imooc.demo.modle.*;
+import com.imooc.demo.model.*;
 import com.imooc.demo.service.*;
 import com.imooc.demo.utils.EnumUtil;
 import com.imooc.demo.utils.ResultVOUtil;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -89,6 +88,15 @@ public class EmployeeController {
         resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
         resource.setEmployeeId(employeeId);
 
+        // 判断电话号码是否已存在
+//            Boolean flag = resourceService.saveResource(resource);
+        Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
+        if (phoneExist) {
+            log.error("【录入人才信息】电话号码已存在");
+            return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
+        }
+
+
         Resource createResource = null;
         try {
             createResource = resourceService.createResource(resource);
@@ -99,6 +107,7 @@ public class EmployeeController {
         } catch (Exception e) {
             log.error("【录入人才信息】发生异常");
         }
+
         return ResultVOUtil.success(createResource);
     }
 
@@ -164,6 +173,7 @@ public class EmployeeController {
     public ResultVO<Map<String, String>> getResourceList(@RequestBody HashMap map,
                                                          HttpServletRequest req,
                                                          HttpServletResponse response) {
+//        String colName = map.get("dataIndex").toString();
         Integer shareStatus = Integer.parseInt(map.get("shareStatus").toString());
         Integer page = Integer.parseInt(map.get("page").toString()) - 1;
         Integer size = Integer.parseInt(map.get("pageSize").toString());
@@ -185,8 +195,8 @@ public class EmployeeController {
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             resourcePage = resourceService.findResourceByShareStatusPageable(shareStatus, request);
         } else {
-            // 普通员工：只能取自己私有的或者 公共的
-            // 1 公有  2 私有
+            // 普通员工：只能取自己私有的或者公共的
+            // 1 公有,  2 私有
             if (shareStatus == 1) {
                 resourcePage = resourceService.findResourceByShareStatusPageable(shareStatus, request);
             } else {
@@ -360,8 +370,16 @@ public class EmployeeController {
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR, response);
 
+            // 判断电话号码是否已存在
 //            Boolean flag = resourceService.saveResource(resource);
+            Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
+            if (phoneExist) {
+                log.error("【修改人才信息】电话号码已存在");
+                return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
+            }
+
             Resource returnResource = resourceService.createResource(resource);
+
             Map<String, Object> map = new HashMap<>();
             if (returnResource != null) {
                 map.put("resource", returnResource);
@@ -509,7 +527,7 @@ public class EmployeeController {
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         company.setEmployeeName(dbEmployee.getEmployeeName());
-        CompanyTemp createCompany = null;
+        CompanyTemp createCompany = new CompanyTemp();
         CompanyTemp companyTemp = new CompanyTemp();
         //如果是老板则直接操作，不需要审批,但是需要记录操作?
         if (employee.getEmployeeRole() == 2) {
@@ -714,6 +732,7 @@ public class EmployeeController {
             return ResultVOUtil.fail(ResultEnum.UPDATE_COMPANY_ERROR, response);
         }
     }
+
 
     /**
      * 分页显示企业客户信息

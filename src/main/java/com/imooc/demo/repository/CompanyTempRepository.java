@@ -1,8 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.Company;
-import com.imooc.demo.modle.CompanyTemp;
-import com.imooc.demo.modle.ResourceTemp;
+import com.imooc.demo.model.CompanyTemp;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

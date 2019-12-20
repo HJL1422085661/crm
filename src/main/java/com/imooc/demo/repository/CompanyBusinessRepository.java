@@ -1,6 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.CompanyBusiness;
+import com.imooc.demo.model.CompanyBusiness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +19,6 @@ public interface CompanyBusinessRepository extends JpaRepository<CompanyBusiness
     CompanyBusiness getCompanyBusinessByBusinessId(String businessId);
     Integer deleteCompanyBusinessByBusinessId(String businessId);
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId,  Pageable pageable);
+    List<CompanyBusiness> findCompanyBusinessesByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
+    List<CompanyBusiness> findCompanyBusinessByBusinessIdIn(List<String> businessId);
 }

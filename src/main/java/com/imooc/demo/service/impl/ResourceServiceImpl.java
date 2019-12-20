@@ -1,6 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.Resource;
 import com.imooc.demo.repository.ResourceRepository;
 import com.imooc.demo.service.ResourceService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +38,11 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Resource createResource(Resource resource) {
+    public Resource createResource(Resource resource){
         Resource resource1;
         try {
             resource1 = resourceRepository.saveAndFlush(resource);
+
         }catch (Exception e){
             log.error("【创建人才资源】发生异常");
             return null;
@@ -98,5 +99,10 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable) {
         return resourceRepository.findResourceByShareStatus(shareStatus, pageable);
+    }
+
+    @Override
+    public Boolean existsByPhone(String phone) {
+        return resourceRepository.existsByPhone(phone);
     }
 }

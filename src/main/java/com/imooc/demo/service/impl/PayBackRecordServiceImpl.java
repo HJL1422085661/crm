@@ -1,7 +1,7 @@
 package com.imooc.demo.service.impl;
 
 
-import com.imooc.demo.modle.PayBackRecord;
+import com.imooc.demo.model.PayBackRecord;
 import com.imooc.demo.repository.PayBackRecordRepository;
 import com.imooc.demo.service.PayBackRecordService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
 
     /**
      * 根据回款记录ID取回款记录
+     *
      * @param recordId: 回款记录ID
      * @return
      */
@@ -33,7 +34,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     public Boolean savePayBackRecord(PayBackRecord payBackRecord) {
         try {
             payBackRecordRepository.saveAndFlush(payBackRecord);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【保存回款记录】失败");
             return false;
         }
@@ -51,7 +52,7 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     }
 
     @Override
-    public Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable){
+    public Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable) {
         return payBackRecordRepository.findPayBackRecordsByCreateDateBetween(startTime, endTime, pageable);
     }
 
@@ -68,5 +69,15 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     @Override
     public Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable) {
         return payBackRecordRepository.findPayBackRecordByEmployeeIdAndBusinessType(employeeId, businessType, pageable);
+    }
+
+    @Override
+    public List<PayBackRecord> findPayBackRecordByBusinessIdAndDate(String businessId, String startDate, String endDate) {
+        return payBackRecordRepository.findPayBackRecordByBusinessIdAndLaterBackDateBetween(businessId, startDate, endDate);
+    }
+
+    @Override
+    public List<PayBackRecord> findPayBackRecordByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
+        return payBackRecordRepository.findPayBackRecordByEmployeeIdAndLaterBackDateBetween(employeeId, startDate, endDate);
     }
 }

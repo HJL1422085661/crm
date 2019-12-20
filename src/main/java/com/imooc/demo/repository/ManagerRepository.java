@@ -1,6 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

@@ -1,7 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.CompanyFollowRecord;
-import com.imooc.demo.modle.ResourceFollowRecord;
+import com.imooc.demo.model.CompanyFollowRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

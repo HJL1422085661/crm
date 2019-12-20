@@ -1,18 +1,13 @@
 package com.imooc.demo.controller;
 
-import com.imooc.demo.modle.Company;
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.Company;
+import com.imooc.demo.model.Resource;
 import com.imooc.demo.repository.ResourceRepository;
-import com.imooc.demo.service.ResourceService;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 /**

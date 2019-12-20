@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.CompanyBusiness;
+import com.imooc.demo.model.CompanyBusiness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,4 +23,6 @@ public interface CompanyBusinessService {
     Page<CompanyBusiness> findAllCompanyBusinessPageable(Pageable pageable);
 
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId, Pageable pageable);
+    List <CompanyBusiness> findCompanyBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
+    List <CompanyBusiness> findCompanyBusinessByBusinessIdList(List<String> companyBusinessIdList);
 }

@@ -1,6 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.model.LoginTicket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,5 +20,6 @@ public interface LoginTicketRepository extends JpaRepository<LoginTicket, Intege
     @Modifying
     @Query(nativeQuery = true, value = "SELECT employeeId FROM loginticket WHERE ticket = ?1 ")
     String getEmployeeIdByTicket(String ticket);
+
 
 }

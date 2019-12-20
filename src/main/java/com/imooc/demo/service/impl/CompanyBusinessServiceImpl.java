@@ -1,6 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.CompanyBusiness;
+import com.imooc.demo.model.CompanyBusiness;
 import com.imooc.demo.repository.CompanyBusinessRepository;
 import com.imooc.demo.service.CompanyBusinessService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,5 +57,15 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
     @Override
     public CompanyBusiness getCompanyBusinessByBusinessId(String businessId) {
         return companyBusinessRepository.getCompanyBusinessByBusinessId(businessId);
+    }
+
+    @Override
+    public List<CompanyBusiness> findCompanyBusinessByBusinessIdList(List<String> businessId) {
+        return companyBusinessRepository.findCompanyBusinessByBusinessIdIn(businessId);
+    }
+
+    @Override
+    public List<CompanyBusiness> findCompanyBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
+        return companyBusinessRepository.findCompanyBusinessesByEmployeeIdAndCreateDateBetween(employeeId,startDate, endDate);
     }
 }

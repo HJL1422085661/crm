@@ -1,14 +1,16 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.model.LoginTicket;
 import com.imooc.demo.repository.EmployeeRepository;
 import com.imooc.demo.repository.LoginTicketRepository;
 import com.imooc.demo.service.EmployeeService;
-import com.imooc.demo.modle.Employee;
+import com.imooc.demo.model.Employee;
 import com.imooc.demo.utils.PassUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -77,7 +79,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         LoginTicket ticket = new LoginTicket();
         ticket.setEmployeeId(employeeId);
         Date date = new Date();
-        date.setTime(date.getTime() + 1000 * 365 * 24);
+//        date.setTime(date.getTime() + 1000 * 365 * 24);
+        date.setTime(date.getTime() + 1000 * 60 * 24 * 7);
         ticket.setExpired(date);
         ticket.setStatus(0);
         ticket.setTicket(UUID.randomUUID().toString().replaceAll("-", ""));
@@ -92,6 +95,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         LoginTicket loginTicket = loginTicketRepository.findLoginTicketByTicket(ticket);
         loginTicket.setStatus(1);
         loginTicketRepository.save(loginTicket);
+    }
+
+    @Override
+    public Page<Employee> findAllEmployeePageable(Pageable pageable) {
+        return employeeRepository.findAll(pageable);
     }
 
     @Override

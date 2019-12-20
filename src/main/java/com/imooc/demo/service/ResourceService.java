@@ -1,6 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.Resource;
+import com.imooc.demo.model.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +24,5 @@ public interface ResourceService {
     List<Resource> findAllResource();
     List<Resource> findResourceByShareStatus(Integer shareStatus);
     Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable);
+    Boolean existsByPhone(String phone);
 }

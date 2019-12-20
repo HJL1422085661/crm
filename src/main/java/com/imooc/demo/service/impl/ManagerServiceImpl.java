@@ -1,7 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.Employee;
-import com.imooc.demo.modle.LoginTicket;
+import com.imooc.demo.model.Employee;
 import com.imooc.demo.repository.LoginTicketRepository;
 import com.imooc.demo.repository.ManagerRepository;
 import com.imooc.demo.service.ManagerService;
@@ -9,7 +8,6 @@ import com.imooc.demo.utils.PassUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.UUID;
 
 /**

@@ -1,6 +1,6 @@
 package com.imooc.demo.service.impl;
 
-import com.imooc.demo.modle.ResourceFollowRecord;
+import com.imooc.demo.model.ResourceFollowRecord;
 import com.imooc.demo.repository.ResourceFollowRecordRepository;
 import com.imooc.demo.service.ResourceFollowRecordService;
 import lombok.extern.slf4j.Slf4j;

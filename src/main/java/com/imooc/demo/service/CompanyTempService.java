@@ -1,7 +1,6 @@
 package com.imooc.demo.service;
 
-import com.imooc.demo.modle.CompanyTemp;
-import com.imooc.demo.modle.ResourceTemp;
+import com.imooc.demo.model.CompanyTemp;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

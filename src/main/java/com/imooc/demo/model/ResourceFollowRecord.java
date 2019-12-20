@@ -1,11 +1,8 @@
-package com.imooc.demo.modle;
+package com.imooc.demo.model;
 
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Date;
-
-import static javax.persistence.GenerationType.*;
 
 /**
  * @Author emperor

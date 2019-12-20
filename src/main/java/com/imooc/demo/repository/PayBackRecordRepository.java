@@ -1,6 +1,6 @@
 package com.imooc.demo.repository;
 
-import com.imooc.demo.modle.PayBackRecord;
+import com.imooc.demo.model.PayBackRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +19,8 @@ public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, In
 
     Page<PayBackRecord> findPayBackRecordsByCreateDateBetweenAndEmployeeId(String startTime, String endTime, String employeeId, Pageable pageable);
     List<PayBackRecord> findAllByBusinessId(String businessId);
+    List<PayBackRecord> findPayBackRecordByBusinessIdAndLaterBackDateBetween(String businessId, String startDate, String endDate);
+    List<PayBackRecord> findPayBackRecordByEmployeeIdAndLaterBackDateBetween(String employeeId, String startDate, String endDate);
     Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
 }
 

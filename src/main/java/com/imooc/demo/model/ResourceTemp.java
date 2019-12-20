@@ -1,4 +1,4 @@
-package com.imooc.demo.modle;
+package com.imooc.demo.model;
 /*
  * @program: demo
  * @author: Mason Wang
