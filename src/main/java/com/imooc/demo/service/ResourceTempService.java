@@ -12,6 +12,8 @@ public interface ResourceTempService {
 
     Page<ResourceTemp> findResourceTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
 
+    Page<ResourceTemp> findResourceTempByCheckedStatusIsNotAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
+
     ResourceTemp findResourceTempById(Integer id);
 
     ResourceTemp findResourceTempByResourceIdAndCheckedStatus(Integer resourceId, Integer checkedStatus);

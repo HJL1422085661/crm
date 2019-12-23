@@ -20,5 +20,5 @@ public interface CompanyBusinessRepository extends JpaRepository<CompanyBusiness
     Integer deleteCompanyBusinessByBusinessId(String businessId);
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId,  Pageable pageable);
     List<CompanyBusiness> findCompanyBusinessesByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
-    List<CompanyBusiness> findCompanyBusinessByBusinessIdIn(List<String> businessId);
+    List<CompanyBusiness> findCompanyBusinessByBusinessIdIsIn(List<String> businessId);
 }

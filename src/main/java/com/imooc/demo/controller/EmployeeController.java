@@ -61,55 +61,55 @@ public class EmployeeController {
      * @param request
      * @return
      */
-    @Modifying
-    @Transactional
-    @PostMapping("/createResource")
-    public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
-                                                        HttpServletRequest request,
-                                                        HttpServletResponse response) {
-        resource.setShareStatus(2);
-        //封装时间参数
-        Date createDate = new Date();
-        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
-        resource.setCreateDate(sim.format(createDate));
-
-        String token = TokenUtil.parseToken(request);
-
-        if (token.equals("")) {
-            log.error("【创建人才资源】Token为空");
-            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
-        }
-        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-        if (StringUtils.isEmpty(employeeId)) {
-            log.error("【创建人才资源】 employeeId为空");
-            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
-        }
-        Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
-        resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
-        resource.setEmployeeId(employeeId);
-
-        // 判断电话号码是否已存在
-//            Boolean flag = resourceService.saveResource(resource);
-        Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
-        if (phoneExist) {
-            log.error("【录入人才信息】电话号码已存在");
-            return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
-        }
-
-
-        Resource createResource = null;
-        try {
-            createResource = resourceService.createResource(resource);
-            if (createResource == null) {
-                log.error("【录入人才信息】发生错误");
-                return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
-            }
-        } catch (Exception e) {
-            log.error("【录入人才信息】发生异常");
-        }
-
-        return ResultVOUtil.success(createResource);
-    }
+//    @Modifying
+//    @Transactional
+//    @PostMapping("/createResource")
+//    public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
+//                                                        HttpServletRequest request,
+//                                                        HttpServletResponse response) {
+//        resource.setShareStatus(2);
+//        //封装时间参数
+//        Date createDate = new Date();
+//        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
+//        resource.setCreateDate(sim.format(createDate));
+//
+//        String token = TokenUtil.parseToken(request);
+//
+//        if (token.equals("")) {
+//            log.error("【创建人才资源】Token为空");
+//            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+//        }
+//        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+//        if (StringUtils.isEmpty(employeeId)) {
+//            log.error("【创建人才资源】 employeeId为空");
+//            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+//        }
+//        Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
+//        resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
+//        resource.setEmployeeId(employeeId);
+//
+//        // 判断电话号码是否已存在
+////            Boolean flag = resourceService.saveResource(resource);
+//        Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
+//        if (phoneExist) {
+//            log.error("【录入人才信息】电话号码已存在");
+//            return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
+//        }
+//
+//
+//        Resource createResource = null;
+//        try {
+//            createResource = resourceService.createResource(resource);
+//            if (createResource == null) {
+//                log.error("【录入人才信息】发生错误");
+//                return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
+//            }
+//        } catch (Exception e) {
+//            log.error("【录入人才信息】发生异常");
+//        }
+//
+//        return ResultVOUtil.success(createResource);
+//    }
 
     /**
      * 修改人才状态（公有、私有）
@@ -372,7 +372,7 @@ public class EmployeeController {
 
             // 判断电话号码是否已存在
 //            Boolean flag = resourceService.saveResource(resource);
-            Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
+            Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
             if (phoneExist) {
                 log.error("【修改人才信息】电话号码已存在");
                 return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);

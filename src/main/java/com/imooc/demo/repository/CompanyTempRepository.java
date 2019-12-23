@@ -11,4 +11,5 @@ public interface CompanyTempRepository extends JpaRepository<CompanyTemp, String
 
     CompanyTemp findCompanyTempByCompanyIdAndCheckedStatus(Integer companyId, Integer checkedStatus);
     Page<CompanyTemp> findCompanyTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
+    Page<CompanyTemp> findCompanyTempByCheckedStatusIsNotAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
 }

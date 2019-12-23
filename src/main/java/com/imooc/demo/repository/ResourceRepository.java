@@ -38,5 +38,5 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
 
     List<Resource> findResourceByShareStatus(Integer shareStatus);
 
-    Boolean existsByPhone(String phone);
+    Boolean existsByPhoneNumber(String phoneNumber);
 }

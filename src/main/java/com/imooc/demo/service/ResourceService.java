@@ -24,5 +24,5 @@ public interface ResourceService {
     List<Resource> findAllResource();
     List<Resource> findResourceByShareStatus(Integer shareStatus);
     Page<Resource> findResourceByShareStatusPageable(Integer shareStatus, Pageable pageable);
-    Boolean existsByPhone(String phone);
+    Boolean existsByPhoneNumber(String phoneNumber);
 }

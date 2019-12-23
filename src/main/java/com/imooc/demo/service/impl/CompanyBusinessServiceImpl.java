@@ -61,7 +61,7 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
 
     @Override
     public List<CompanyBusiness> findCompanyBusinessByBusinessIdList(List<String> businessId) {
-        return companyBusinessRepository.findCompanyBusinessByBusinessIdIn(businessId);
+        return companyBusinessRepository.findCompanyBusinessByBusinessIdIsIn(businessId);
     }
 
     @Override

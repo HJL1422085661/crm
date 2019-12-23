@@ -113,14 +113,27 @@ public class EmployeeSalaryRegulation {
     @Column(name = "salary")
     public BigDecimal salary = new BigDecimal("0");
 
+      /**
+     * 业绩（提成）
+     **/
+    @Column(name = "performance")
+    public BigDecimal performance = new BigDecimal("0");
+
+
+
     /**
      * 备注
      **/
     @Column(name = "info")
     public String info;
 
+    /**
+     * 计算绩效及应发工资
+     * @return
+     */
     public BigDecimal getTotalSalary() {
-        this.salary = this.baseSalary.add(this.resourcePaySum.multiply(this.resourceRatio)).add(this.companyPaySum.multiply(this.companyRatio))
+        this.performance = this.resourcePaySum.multiply(this.resourceRatio.divide(new BigDecimal("100"))).add(this.companyPaySum.multiply(this.companyRatio.divide(new BigDecimal("100"))));
+        this.salary = this.baseSalary.add(this.resourcePaySum.multiply(this.resourceRatio.divide(new BigDecimal("100")))).add(this.companyPaySum.multiply(this.companyRatio.divide(new BigDecimal("100"))))
                 .add(this.positionAge).add(this.positionWage)
                 .subtract(this.employeeLate).subtract(this.employeeLeave).subtract(this.penalty)
                 .add(this.bonus)

@@ -586,7 +586,7 @@ public class ManagerController {
 
         // 判断电话号码是否已存在
 //            Boolean flag = resourceService.saveResource(resource);
-        Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
+        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
         if (phoneExist) {
             log.error("【修改人才信息】电话号码已存在");
             return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
@@ -674,6 +674,7 @@ public class ManagerController {
         Integer requestStatus = Integer.parseInt(map.get("requestStatus").toString());
         Integer page = Integer.parseInt(map.get("page").toString());
         Integer size = Integer.parseInt(map.get("pageSize").toString());
+
         String token = TokenUtil.parseToken(req);
         if (token.equals("")) {
             log.error("【获取人才资源审批|未审批列表】Token为空");
@@ -689,7 +690,14 @@ public class ManagerController {
             return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
-        Page<ResourceTemp> resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
+        Page<ResourceTemp> resourceTempPage = null;
+        if (checkedStatus == 0) {
+            // 未审核
+            resourceTempPage = resourceTempService.findResourceTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
+        } else {
+            // 已审核（同意、拒绝）
+            resourceTempPage = resourceTempService.findResourceTempByCheckedStatusIsNotAndRequestStatus(0, requestStatus, request);
+        }
 
         if (resourceTempPage.getContent().isEmpty()) {
             if (page > 1) {
@@ -706,7 +714,7 @@ public class ManagerController {
 
 
     /**
-     * 管理员获取人才修改|删除代办事项
+     * 管理员获取公司修改|删除代办事项
      *
      * @param map 审批状态 0: 未审批,1：同意 2:不同意
      * @param req
@@ -735,7 +743,14 @@ public class ManagerController {
             return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
         PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
-        Page<CompanyTemp> companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
+        Page<CompanyTemp> companyTempPage = null;
+        if (checkedStatus == 0) {
+            // 未审核
+            companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
+        } else {
+            // 已审核（同意、拒绝）
+            companyTempPage = companyTempService.findCompanyTempByCheckedStatusIsNotAndRequestStatus(0, requestStatus, request);
+        }
 
         if (companyTempPage.getContent().isEmpty()) {
             if (page > 1) {
@@ -925,6 +940,7 @@ public class ManagerController {
         Integer totalPages = 0;
         Integer curPage = 0;
         List<Object> employeeSalaryList = new ArrayList<>();
+        EmployeeSalaryRegulation createEmployeeSalaryRegulation = new EmployeeSalaryRegulation();
         // 管理员能看到所有员工的订单(所有公有、所有私有)
         if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() == 2) {
             employeePage = employeeService.findAllEmployeePageable(request);
@@ -935,9 +951,8 @@ public class ManagerController {
             // 遍历员工，取得某个员工的所有公司订单+人才订单
             for (Employee employee : employeeList) {
                 String employeeIdIdx = employee.getEmployeeId();
-                // TODO 应该找到当月所有存在回款记录的订单，而不是当月创建的订单！
-                // 取到所有的该月订单
-                List<PayBackRecord> payBackRecordList = payBackRecordService.findPayBackRecordByEmployeeIdAndDate(startDate, endDate, employeeIdIdx);
+                // 应该找到当月所有存在回款记录的订单，而不是当月创建的订单！
+                List<PayBackRecord> payBackRecordList = payBackRecordService.findPayBackRecordByEmployeeIdAndDate(employeeIdIdx, startDate, endDate);
                 // 按照人才、企业订单分组
                 Map<Integer, List<PayBackRecord>> groupByType = payBackRecordList.stream().collect(Collectors.groupingBy(PayBackRecord::getBusinessType));
                 List<PayBackRecord> companyBusinessPayBackRecordList = groupByType.get(2);
@@ -947,9 +962,11 @@ public class ManagerController {
                 List<String> companyBusinessIdList = null;
                 List<String> resourceBusinessIdList = null;
                 if (companyBusinessPayBackRecordList != null) {
+                    // 当月所有存在回款记录的订单，并去重
                     companyBusinessIdList = companyBusinessPayBackRecordList.stream()
                             .map(PayBackRecord::getBusinessId).distinct()
                             .collect(Collectors.toList());
+                    //
                 }
                 if (resourceBusinessPayBackRecordList != null) {
                     resourceBusinessIdList = resourceBusinessPayBackRecordList.stream()
@@ -957,64 +974,145 @@ public class ManagerController {
                             .collect(Collectors.toList());
                 }
                 EmployeeSalary employeeSalary = new EmployeeSalary();
-                EmployeeSalaryRegulation employeeSalaryRegulation = employeeSalaryRegulationService.findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeIdIdx, searchMonth);
-                if (employeeSalaryRegulation != null) {
-                    BeanUtils.copyProperties(employeeSalaryRegulation, employeeSalary, BeanCopyUtil.getNullPropertyNames(employeeSalaryRegulation));
-                } else {
-                    employeeSalary.setEmployeeId(employeeIdIdx);
-                    employeeSalary.setEmployeeName(employee.getEmployeeName());
-                }
+                employeeSalary.setEmployeeId(employeeIdIdx);
+                employeeSalary.setEmployeeName(employee.getEmployeeName());
+
+                // 用于计算人才、企业当月回款总额
+                BigDecimal resourcePaySum = new BigDecimal("0");
+                BigDecimal companyPaySum = new BigDecimal("0");
 
                 // 封装公司订单
                 List<Object> companyBusinessList1 = new ArrayList<>();
 //                List<CompanyBusiness> companyBusinessList = companyBusinessService.findCompanyBusinessByEmployeeIdAndDate(employeeIdIdx, startDate, endDate);
-                List<CompanyBusiness> companyBusinessList = companyBusinessService.findCompanyBusinessByBusinessIdList(companyBusinessIdList);
+                List<CompanyBusiness> companyBusinessList = new ArrayList<>();
+                if (companyBusinessIdList != null) {
+                    companyBusinessList = companyBusinessService.findCompanyBusinessByBusinessIdList(companyBusinessIdList);
+                }
                 for (CompanyBusiness companyBusiness : companyBusinessList) {
                     Map<String, Object> businessMap = new HashMap<>();
                     businessMap.put("clientName", companyBusiness.getCompanyName());
                     businessMap.put("businessId", companyBusiness.getBusinessId());
                     businessMap.put("createDate", companyBusiness.getCreateDate());
+                    // 通过当前订单该月的所有回款记录，计算回款总额
+                    BigDecimal paybackSum = calPayBackSumByBusinessIsAndDate(companyBusiness.getBusinessId(), startDate, endDate);
+                    businessMap.put("paybackSum", paybackSum);
+                    // 欠款
+                    List<PayBackRecord> payBackRecordListIdx = payBackRecordService.findAllPayBackRecordByBusinessId(companyBusiness.getBusinessId());
+                    Optional<PayBackRecord> p = payBackRecordListIdx.stream().max(Comparator.comparingInt(PayBackRecord::getBackTimes));
+                    businessMap.put("oweSum", p.get().getOwePay());
+
                     businessMap.put("orderPaySum", companyBusiness.getOrderPaySum());
                     companyBusinessList1.add(businessMap);
+
+                    companyPaySum = companyPaySum.add(paybackSum);
                 }
+
                 employeeSalary.setComapnyBusinessList(companyBusinessList1);
 
                 // 封装人才订单
                 List<Object> resourceBusinessList1 = new ArrayList<>();
 //                List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByEmployeeIdAndDate(employeeIdIdx, startDate, endDate);
-                List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByBusinessIdList(resourceBusinessIdList);
+                List<ResourceBusiness> resourceBusinessList = new ArrayList<>();
+                if (resourceBusinessIdList != null) {
+                    resourceBusinessList = resourceBusinessService.findResourceBusinessByBusinessIdList(resourceBusinessIdList);
+                }
                 for (ResourceBusiness resourceBusiness : resourceBusinessList) {
                     Map<String, Object> businessMap = new HashMap<>();
                     businessMap.put("clientName", resourceBusiness.getResourceName());
                     businessMap.put("businessId", resourceBusiness.getBusinessId());
                     businessMap.put("createDate", resourceBusiness.getCreateDate());
+                    // 通过当前订单该月的所有回款记录，计算回款总额
+                    BigDecimal paybackSum = calPayBackSumByBusinessIsAndDate(resourceBusiness.getBusinessId(), startDate, endDate);
+                    businessMap.put("paybackSum", paybackSum);
+                    // 欠款
+                    List<PayBackRecord> payBackRecordListIdx = payBackRecordService.findAllPayBackRecordByBusinessId(resourceBusiness.getBusinessId());
+                    Optional<PayBackRecord> p = payBackRecordListIdx.stream().max(Comparator.comparingInt(PayBackRecord::getBackTimes));
+                    businessMap.put("oweSum", p.get().getOwePay());
                     businessMap.put("orderPaySum", resourceBusiness.getOrderPaySum());
                     resourceBusinessList1.add(businessMap);
+
+                    resourcePaySum = resourcePaySum.add(paybackSum);
                 }
                 employeeSalary.setResourceBusinessList(resourceBusinessList1);
-                employeeSalaryList.add(employeeSalary);
-            }
 
+
+                // 创建EmployeeSalaryRegulation表
+                EmployeeSalaryRegulation employeeSalaryRegulation = new EmployeeSalaryRegulation();
+                BeanUtils.copyProperties(employeeSalary, employeeSalaryRegulation, BeanCopyUtil.getNullPropertyNames(employeeSalary));
+                employeeSalaryRegulation.setCompanyPaySum(companyPaySum);
+                employeeSalaryRegulation.setResourcePaySum(resourcePaySum);
+                employeeSalaryRegulation.setMonth(searchMonth);
+
+                // 先去数据库查找是否存在
+                // 1、存在，则取出来更新
+                EmployeeSalaryRegulation dbEmployeeSalaryRegulation = employeeSalaryRegulationService.
+                        findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeSalaryRegulation.getEmployeeId(), employeeSalaryRegulation.getMonth());
+                if (dbEmployeeSalaryRegulation != null) {
+                    // 更新
+//                    BeanUtils.copyProperties(employeeSalaryRegulation, dbEmployeeSalaryRegulation, BeanCopyUtil.getNullPropertyNames(employeeSalaryRegulation));
+                    dbEmployeeSalaryRegulation.setResourcePaySum(employeeSalaryRegulation.getResourcePaySum());
+                    dbEmployeeSalaryRegulation.setCompanyPaySum(employeeSalaryRegulation.getCompanyPaySum());
+                    createEmployeeSalaryRegulation = employeeSalaryRegulationService.createEmployeeSalaryRegulation(dbEmployeeSalaryRegulation);
+                } else {
+                    // 2、不存在，则新建
+                    createEmployeeSalaryRegulation = employeeSalaryRegulationService.createEmployeeSalaryRegulation(employeeSalaryRegulation);
+                }
+                // 保存到数据库
+                if (createEmployeeSalaryRegulation == null) {
+                    log.error("{【创建工资结算规则】失败");
+                    return ResultVOUtil.fail(ResultEnum.CREATE_SALARY_REGULATION_ERROR, response);
+                }
+                if (employeeSalary != null) {
+                    BeanUtils.copyProperties(dbEmployeeSalaryRegulation, employeeSalary, BeanCopyUtil.getNullPropertyNames(dbEmployeeSalaryRegulation));
+                }
+
+                employeeSalaryList.add(employeeSalary);
+
+            }
         } else {
             // 普通员工：只能取自己的订单
             totalPages = 1;
             curPage = 1;
-            EmployeeSalary employeeSalary = new EmployeeSalary();
-            EmployeeSalaryRegulation employeeSalaryRegulation = employeeSalaryRegulationService.findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeId, searchMonth);
-            if (employeeSalaryRegulation != null) {
-                BeanUtils.copyProperties(employeeSalaryRegulation, employeeSalary, BeanCopyUtil.getNullPropertyNames(employeeSalaryRegulation));
-            } else {
-                employeeSalary.setEmployeeId(employeeId);
-                Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
-                if (employee == null) {
-                    log.error("【获取工资列表】employee不存在");
-                    return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
-                }
-                employeeSalary.setEmployeeName(employee.getEmployeeName());
+            // 应该找到当月所有存在回款记录的订单，而不是当月创建的订单！
+            List<PayBackRecord> payBackRecordList = payBackRecordService.findPayBackRecordByEmployeeIdAndDate(employeeId, startDate, endDate);
+            // 按照人才、企业订单分组
+            Map<Integer, List<PayBackRecord>> groupByType = payBackRecordList.stream().collect(Collectors.groupingBy(PayBackRecord::getBusinessType));
+            List<PayBackRecord> companyBusinessPayBackRecordList = groupByType.get(2);
+            List<PayBackRecord> resourceBusinessPayBackRecordList = groupByType.get(1);
+            // TODO 判断空
+            // 得到人才、企业订单的BusinessId列表
+            List<String> companyBusinessIdList = null;
+            List<String> resourceBusinessIdList = null;
+            if (companyBusinessPayBackRecordList != null) {
+                companyBusinessIdList = companyBusinessPayBackRecordList.stream()
+                        .map(PayBackRecord::getBusinessId).distinct()
+                        .collect(Collectors.toList());
+            }
+            if (resourceBusinessPayBackRecordList != null) {
+                resourceBusinessIdList = resourceBusinessPayBackRecordList.stream()
+                        .map(PayBackRecord::getBusinessId).distinct()
+                        .collect(Collectors.toList());
             }
 
+            // 用于计算人才、企业当月回款总额
+            BigDecimal resourcePaySum = new BigDecimal("0");
+            BigDecimal companyPaySum = new BigDecimal("0");
+
+            EmployeeSalary employeeSalary = new EmployeeSalary();
+
+            employeeSalary.setEmployeeId(employeeId);
+            Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+            if (employee == null) {
+                log.error("【获取工资列表】employee不存在");
+                return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+            }
+            employeeSalary.setEmployeeName(employee.getEmployeeName());
+
+
             List<Object> companyBusinessList1 = new ArrayList<>();
-            List<CompanyBusiness> companyBusinessList = companyBusinessService.findCompanyBusinessByEmployeeIdAndDate(employeeId, startDate, endDate);
+//            List<CompanyBusiness> companyBusinessList = companyBusinessService.findCompanyBusinessByEmployeeIdAndDate(employeeId, startDate, endDate);
+            List<CompanyBusiness> companyBusinessList = companyBusinessService.findCompanyBusinessByBusinessIdList(companyBusinessIdList);
+
             for (CompanyBusiness companyBusiness : companyBusinessList) {
                 Map<String, Object> businessMap = new HashMap<>();
                 businessMap.put("clientName", companyBusiness.getCompanyName());
@@ -1022,15 +1120,24 @@ public class ManagerController {
                 businessMap.put("createDate", companyBusiness.getCreateDate());
                 // 通过当前订单该月的所有回款记录，计算回款总额
                 BigDecimal paybackSum = calPayBackSumByBusinessIsAndDate(companyBusiness.getBusinessId(), startDate, endDate);
-                businessMap.put("orderPaySum", paybackSum);
-//                businessMap.put("orderPaySum", companyBusiness.getOrderPaySum());
+                businessMap.put("paybackSum", paybackSum);
+                // 欠款
+                List<PayBackRecord> payBackRecordListIdx = payBackRecordService.findAllPayBackRecordByBusinessId(companyBusiness.getBusinessId());
+                Optional<PayBackRecord> p = payBackRecordListIdx.stream().max(Comparator.comparingInt(PayBackRecord::getBackTimes));
+                businessMap.put("orderPaySum", companyBusiness.getOrderPaySum());
+
+                businessMap.put("oweSum", p.get().getOwePay());
+
                 companyBusinessList1.add(businessMap);
+
+                companyPaySum = companyPaySum.add(paybackSum);
             }
             employeeSalary.setComapnyBusinessList(companyBusinessList1);
 
             List<Object> resourceBusinessList1 = new ArrayList<>();
             // TODO 应该找到当月所有存在回款记录的订单，而不是当月创建的订单！
-            List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByEmployeeIdAndDate(employeeId, startDate, endDate);
+//            List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByEmployeeIdAndDate(employeeId, startDate, endDate);
+            List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByBusinessIdList(resourceBusinessIdList);
             for (ResourceBusiness resourceBusiness : resourceBusinessList) {
                 Map<String, Object> businessMap = new HashMap<>();
                 businessMap.put("clientName", resourceBusiness.getResourceName());
@@ -1038,12 +1145,52 @@ public class ManagerController {
                 businessMap.put("createDate", resourceBusiness.getCreateDate());
                 // 通过当前订单该月的所有回款记录，计算回款总额
                 BigDecimal paybackSum = calPayBackSumByBusinessIsAndDate(resourceBusiness.getBusinessId(), startDate, endDate);
-                businessMap.put("orderPaySum", paybackSum);
+                businessMap.put("paybackSum", paybackSum);
+                // 欠款
+                List<PayBackRecord> payBackRecordListIdx = payBackRecordService.findAllPayBackRecordByBusinessId(resourceBusiness.getBusinessId());
+                Optional<PayBackRecord> p = payBackRecordListIdx.stream().max(Comparator.comparingInt(PayBackRecord::getBackTimes));
+                businessMap.put("oweSum", p.get().getOwePay());
+                businessMap.put("orderPaySum", resourceBusiness.getOrderPaySum());
 
                 resourceBusinessList1.add(businessMap);
+
+                resourcePaySum = resourcePaySum.add(paybackSum);
             }
             employeeSalary.setResourceBusinessList(resourceBusinessList1);
+
+            // 创建EmployeeSalaryRegulation表
+            EmployeeSalaryRegulation employeeSalaryRegulation = new EmployeeSalaryRegulation();
+            BeanUtils.copyProperties(employeeSalary, employeeSalaryRegulation, BeanCopyUtil.getNullPropertyNames(employeeSalary));
+            employeeSalaryRegulation.setCompanyPaySum(companyPaySum);
+            employeeSalaryRegulation.setResourcePaySum(resourcePaySum);
+            employeeSalaryRegulation.setMonth(searchMonth);
+
+            // 先去数据库查找是否存在
+            // 1、存在，则取出来更新
+            EmployeeSalaryRegulation dbEmployeeSalaryRegulation = employeeSalaryRegulationService.
+                    findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeSalaryRegulation.getEmployeeId(), employeeSalaryRegulation.getMonth());
+            if (dbEmployeeSalaryRegulation != null) {
+                // 更新
+//                BeanUtils.copyProperties(employeeSalaryRegulation, dbEmployeeSalaryRegulation, BeanCopyUtil.getNullPropertyNames(employeeSalaryRegulation));
+                dbEmployeeSalaryRegulation.setResourcePaySum(employeeSalaryRegulation.getResourcePaySum());
+                dbEmployeeSalaryRegulation.setCompanyPaySum(employeeSalaryRegulation.getCompanyPaySum());
+                createEmployeeSalaryRegulation = employeeSalaryRegulationService.createEmployeeSalaryRegulation(dbEmployeeSalaryRegulation);
+            } else {
+                // 2、不存在，则新建
+                createEmployeeSalaryRegulation = employeeSalaryRegulationService.createEmployeeSalaryRegulation(employeeSalaryRegulation);
+            }
+            // 保存到数据库
+            if (createEmployeeSalaryRegulation == null) {
+                log.error("{【创建工资结算规则】失败");
+                return ResultVOUtil.fail(ResultEnum.CREATE_SALARY_REGULATION_ERROR, response);
+            }
+
+            if (employeeSalary != null) {
+                BeanUtils.copyProperties(dbEmployeeSalaryRegulation, employeeSalary, BeanCopyUtil.getNullPropertyNames(dbEmployeeSalaryRegulation));
+            }
+
             employeeSalaryList.add(employeeSalary);
+
         }
 
         if (employeeSalaryList.size() == 0) {
@@ -1060,7 +1207,7 @@ public class ManagerController {
 
 
     /**
-     * 计算订单已回款总额
+     * 计算订单当月已回款总额
      *
      * @param businessId
      * @param startDate
@@ -1103,7 +1250,7 @@ public class ManagerController {
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
 
-        // 计算员工本月应发工资
+        // 计算员工本月绩效和应发工资
         BigDecimal salary = employeeSalaryRegulation.getTotalSalary();
 
         EmployeeSalaryRegulation createEmployeeSalaryRegulation = new EmployeeSalaryRegulation();
@@ -1141,7 +1288,7 @@ public class ManagerController {
                                                                      HttpServletRequest req,
                                                                      HttpServletResponse response) {
         String searchEmployeeId = paramMap.get("employeeId").toString();
-        String month = paramMap.get("month").toString();
+        String month = paramMap.get("searchMonth").toString();
 
         // 解析token
         String token = TokenUtil.parseToken(req);
@@ -1156,8 +1303,7 @@ public class ManagerController {
         }
         // 先去数据库查找是否存在
         // 1、存在，则取出来返回
-        EmployeeSalaryRegulation dbEmployeeSalaryRegulation = employeeSalaryRegulationService.
-                findEmployeeSalaryRegulationByEmployeeIdAndMonth(searchEmployeeId, month);
+        EmployeeSalaryRegulation dbEmployeeSalaryRegulation = employeeSalaryRegulationService.findEmployeeSalaryRegulationByEmployeeIdAndMonth(searchEmployeeId, month);
         if (dbEmployeeSalaryRegulation != null) {
             return ResultVOUtil.success(dbEmployeeSalaryRegulation);
         } else {

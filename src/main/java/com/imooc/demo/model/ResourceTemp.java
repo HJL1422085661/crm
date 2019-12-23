@@ -54,8 +54,8 @@ public class ResourceTemp {
     @Column(name = "resourceName", nullable = false)
     public String resourceName;
     /** 客户手机号 **/
-    @Column(name = "phone", nullable = false)
-    public String phone;
+    @Column(name = "phoneNumber", nullable = false)
+    public String phoneNumber;
     /** 证书 **/
     @Column(name = "certificate", nullable = false)
     public String certificate;

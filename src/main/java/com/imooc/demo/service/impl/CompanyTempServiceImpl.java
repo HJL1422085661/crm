@@ -21,11 +21,16 @@ public class CompanyTempServiceImpl implements CompanyTempService {
 
 
     @Override
+    public Page<CompanyTemp> findCompanyTempByCheckedStatusIsNotAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable) {
+        return companyTempRepository.findCompanyTempByCheckedStatusIsNotAndRequestStatus(checkedStatus, requestStatus, pageable);
+    }
+
+    @Override
     public CompanyTemp createCompanyTemp(CompanyTemp companyTemp) {
         CompanyTemp companyTemp1;
         try {
             companyTemp1 = companyTempRepository.saveAndFlush(companyTemp);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【改善企业资源】发生异常");
             return null;
         }

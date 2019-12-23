@@ -24,7 +24,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@RestController("/upload")
+@RestController
+@RequestMapping(("/upload"))
 @Slf4j
 public class CsvController {
 
@@ -36,10 +37,9 @@ public class CsvController {
     @PostMapping("/uploadResourceFile")
     public ResultVO<Map<String, String>> uploadResourceFile(HttpServletRequest request
                                                             ,HttpServletResponse response) throws IOException {
-
-       File file = new File(request.getParameter("file"));//file是form-data中二进制字段对应的name
-        System.out.println(file.getName());
-        MultipartFile multipartFile = (MultipartFile)file;
+        System.out.printf("1111");
+       MultipartHttpServletRequest multipartRequest=(MultipartHttpServletRequest) request;
+        MultipartFile multipartFile = multipartRequest.getFile("file");
 
         String token = TokenUtil.parseToken(request);
         if (token.equals("")) {

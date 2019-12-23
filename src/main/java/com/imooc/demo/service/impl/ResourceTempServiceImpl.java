@@ -19,6 +19,11 @@ import org.springframework.stereotype.Service;
 public class ResourceTempServiceImpl implements ResourceTempService {
 
 
+    @Override
+    public Page<ResourceTemp> findResourceTempByCheckedStatusIsNotAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable) {
+        return resourceTempRepository.findResourceTempByCheckedStatusIsNotAndRequestStatus(checkedStatus, requestStatus, pageable);
+    }
+
     @Autowired
     public ResourceTempRepository resourceTempRepository;
 

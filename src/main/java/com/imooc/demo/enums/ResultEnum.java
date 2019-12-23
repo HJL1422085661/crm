@@ -102,6 +102,9 @@ public enum ResultEnum {
     EMPLOYEE_SALARY_EMPTY(91, "订单列表为空"),
     CREATE_SALARY_REGULATION_SUCCESS(92, "创建员工工资结算规则成功"),
     CREATE_SALARY_REGULATION_ERROR(93, "创建员工工资结算规则失败"),
+    PAYBACK_TOO_MUCH(94, "回款金额大于欠款金额"),
+    PAYBACK_RECORD_TEMP_NOT_EXIST(95, "回款记录空"),
+    EXIST_PAYBACK_RECORD_ALREADY(96, "该订单已存在未审核回款记录"),
 
 
 

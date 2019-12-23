@@ -35,8 +35,8 @@ public class Resource {
     @Column(name = "resourceName")
     public String resourceName;
     /** 客户手机号 **/
-    @Column(name = "phone")
-    public String phone;
+    @Column(name = "phoneNumber")
+    public String phoneNumber;
     /** 证书 **/
     @Column(name = "certificate")
     public String certificate;

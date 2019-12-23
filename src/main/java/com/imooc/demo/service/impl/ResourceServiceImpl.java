@@ -102,7 +102,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Boolean existsByPhone(String phone) {
-        return resourceRepository.existsByPhone(phone);
+    public Boolean existsByPhoneNumber(String phoneNumber) {
+        return resourceRepository.existsByPhoneNumber(phoneNumber);
     }
 }

@@ -31,7 +31,7 @@ class EmployeeControllerTest {
 
         resource.setQq("1422123344");
         resource.setEmail("xxx.qq.com");
-        resource.setPhone("13731345667");
+        resource.setPhoneNumber("13731345667");
         resource.setProvince("四川");
         resource.setInfo("London No,2 Lake Park");
         resource.setCertificate("四六级证书");

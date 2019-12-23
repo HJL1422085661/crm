@@ -15,4 +15,6 @@ public interface CompanyTempService {
 
     Page<CompanyTemp> findCompanyTempByCheckedStatusAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
 
+    Page<CompanyTemp> findCompanyTempByCheckedStatusIsNotAndRequestStatus(Integer checkedStatus, Integer requestStatus, Pageable pageable);
+
 }
