@@ -105,4 +105,14 @@ public class ResourceServiceImpl implements ResourceService {
     public Boolean existsByPhoneNumber(String phoneNumber) {
         return resourceRepository.existsByPhoneNumber(phoneNumber);
     }
+
+    @Override
+    public List<Resource> getNewClients(String employeeId, String searchStartDate, String searchEndDate) {
+        return resourceRepository.findResourceByEmployeeIdAndCreateDateBetween(employeeId, searchStartDate, searchEndDate);
+    }
+
+    @Override
+    public List<Resource> getAllNewClients(String searchStartDate, String searchEndDate) {
+        return resourceRepository.findResourceByCreateDateBetween(searchStartDate, searchEndDate);
+    }
 }

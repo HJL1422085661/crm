@@ -22,6 +22,9 @@ public class CompanyFollowRecord {
     /** 公司ID **/
     @Column(name = "companyId", nullable = false)
     public Integer companyId;
+    /** 公司姓名 **/
+    @Column(name = "companyName", nullable = false)
+    public String companyName;
 
     /** 员工姓名 **/
     @Column(name = "employeeName", nullable = false)

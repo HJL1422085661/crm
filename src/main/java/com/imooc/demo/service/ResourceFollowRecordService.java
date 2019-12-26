@@ -4,6 +4,8 @@ import com.imooc.demo.model.ResourceFollowRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 /**
  * @Author emperor
@@ -13,4 +15,6 @@ import org.springframework.data.domain.Pageable;
 public interface ResourceFollowRecordService {
     Page<ResourceFollowRecord> getFollowRecordsByResourceId(Integer resourceId, Pageable pageable);
     ResourceFollowRecord createResourceFollow(ResourceFollowRecord resourceFollowRecord);
+    List<ResourceFollowRecord> getAllResourceFollowRecords(String startDate, String endDate);
+    List<ResourceFollowRecord> getResourceFollowRecords(String employeeId,String startDate, String endDate);
 }

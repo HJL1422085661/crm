@@ -25,5 +25,9 @@ public interface PayBackRecordService {
     List<PayBackRecord> findPayBackRecordByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
     Page<PayBackRecord>  findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
 
+    List<PayBackRecord> getAllPayBackRecords(String startDate, String endDate);
+    List<PayBackRecord> getPayBackRecords(String employeeId, String startDate, String endDate);
+
+
 
 }

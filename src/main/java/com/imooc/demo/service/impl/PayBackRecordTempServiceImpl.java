@@ -32,10 +32,6 @@ public class PayBackRecordTempServiceImpl implements PayBackRecordTempService {
         return payBackRecordTempRepository.existsByEmployeeIdAndBusinessIdAndStatus(employeeId, businessId, status);
     }
 
-    @Override
-    public Page<PayBackRecordTemp> findPayBackRecordTempByStatusIsNot(Integer status, Pageable pageable) {
-        return payBackRecordTempRepository.findPayBackRecordTempByStatusIsNot(status, pageable);
-    }
 
     @Override
     public Boolean savePayBackRecordTemp(PayBackRecordTemp payBackRecordTemp) {
@@ -46,6 +42,11 @@ public class PayBackRecordTempServiceImpl implements PayBackRecordTempService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Page<PayBackRecordTemp> findPayBackRecordTempByStatusIsNot(Integer status, Pageable pageable) {
+        return payBackRecordTempRepository.findPayBackRecordTempByStatusIsNot(status, pageable);
     }
 
     @Override

@@ -25,9 +25,14 @@ public class ResourceFollowRecord {
     /** 员工姓名 **/
     @Column(name = "employeeName", nullable = false)
     public String employeeName;
+
     /** 人才ID **/
     @Column(name = "resourceId", nullable = false)
     private Integer resourceId;
+    /** 人才姓名 **/
+    @Column(name = "resourceName", nullable = false)
+    public String resourceName;
+
     /** 跟进内容 **/
     @Column(name = "content")
     private String content;

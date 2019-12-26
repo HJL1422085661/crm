@@ -67,4 +67,14 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     public List<ResourceBusiness> findResourceBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
         return resourceBusinessRepository.findResourceBusinessByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
     }
+
+    @Override
+    public List<ResourceBusiness> getAllResourceBusiness(String startDate, String endDate) {
+        return resourceBusinessRepository.findAllByCreateDateBetween(startDate, endDate);
+    }
+
+    @Override
+    public List<ResourceBusiness> getResourceBusiness(String employeeId, String startDate, String endDate) {
+        return resourceBusinessRepository.findResourceBusinessByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
+    }
 }

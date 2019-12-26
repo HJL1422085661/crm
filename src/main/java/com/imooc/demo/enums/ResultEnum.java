@@ -96,7 +96,7 @@ public enum ResultEnum {
     SEND_CODE_SUCCESS(85, "发送验证码成功"),
     CREATE_COMPANY_BUSINESS_SUCCESS(86, "创建人才订单成功"),
     DELETE_RESOURCE_BUSINESS_SUCCESS(87, "删除人才订单成功"),
-    DUPICATE_PHONE(88, "电话号码已存在"),
+    DUPLICATE_PHONE(88, "电话号码已存在"),
     VALID_TOKEN(89, "token有效"),
     INVALLID_TOKEN(90, "token已过期"),
     EMPLOYEE_SALARY_EMPTY(91, "订单列表为空"),
@@ -105,6 +105,10 @@ public enum ResultEnum {
     PAYBACK_TOO_MUCH(94, "回款金额大于欠款金额"),
     PAYBACK_RECORD_TEMP_NOT_EXIST(95, "回款记录空"),
     EXIST_PAYBACK_RECORD_ALREADY(96, "该订单已存在未审核回款记录"),
+    FILE_IS_EMPTY(97, "文件为空"),
+    IMPORT_FILE_EXCEPTION(98, "导入数据发生异常"),
+    PASS_PAYBACK_SUCCESS(99, "审批回款成功(同意)"),
+    REJECT_PAYBACK_SUCCESS(100, "审批回款成功（驳回）"),
 
 
 

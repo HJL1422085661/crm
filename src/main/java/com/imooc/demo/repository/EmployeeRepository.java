@@ -40,4 +40,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
 
     @Override
     Page<Employee> findAll(Pageable pageable);
+
+    Employee getEmployeeByEmployeeName(String employeeName);
 }

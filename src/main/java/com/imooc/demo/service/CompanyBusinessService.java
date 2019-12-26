@@ -25,4 +25,7 @@ public interface CompanyBusinessService {
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId, Pageable pageable);
     List <CompanyBusiness> findCompanyBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
     List <CompanyBusiness> findCompanyBusinessByBusinessIdList(List<String> companyBusinessIdList);
+
+    List<CompanyBusiness> getAllCompanyBusiness(String startDate, String endDate);
+    List<CompanyBusiness> getCompanyBusiness(String employeeId,String startDate, String endDate);
 }

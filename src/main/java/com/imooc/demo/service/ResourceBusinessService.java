@@ -17,5 +17,6 @@ public interface ResourceBusinessService {
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);
     List<ResourceBusiness> findResourceBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
     List<ResourceBusiness> findResourceBusinessByBusinessIdList(List<String> resourceBusinessIdList);
-
+    List<ResourceBusiness> getAllResourceBusiness(String startDate, String endDate);
+    List<ResourceBusiness> getResourceBusiness(String employeeId, String startDate, String endDate);
 }

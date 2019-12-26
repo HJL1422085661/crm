@@ -39,4 +39,8 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     List<Resource> findResourceByShareStatus(Integer shareStatus);
 
     Boolean existsByPhoneNumber(String phoneNumber);
+
+    List<Resource> findResourceByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
+
+    List<Resource> findResourceByCreateDateBetween(String startDate, String endDate);
 }

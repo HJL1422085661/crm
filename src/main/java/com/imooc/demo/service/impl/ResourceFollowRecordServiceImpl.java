@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 /**
  * @Author emperor
@@ -34,6 +36,15 @@ public class ResourceFollowRecordServiceImpl implements ResourceFollowRecordServ
             log.error("【创建人才跟进信息】发生异常");
             return null;
         }
+    }
 
+    @Override
+    public List<ResourceFollowRecord> getAllResourceFollowRecords(String startDate, String endDate) {
+        return resourceFollowRecordRepository.findResourceFollowRecordsByCreateDateBetween(startDate, endDate);
+    }
+
+    @Override
+    public List<ResourceFollowRecord> getResourceFollowRecords(String employeeId, String startDate, String endDate) {
+        return resourceFollowRecordRepository.findResourceFollowRecordsByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
     }
 }

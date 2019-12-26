@@ -17,4 +17,5 @@ public interface ResourceBusinessRepository extends JpaRepository<ResourceBusine
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);
     List<ResourceBusiness> findResourceBusinessByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
     List<ResourceBusiness> findResourceBusinessByBusinessIdIn(List<String> businessId);
+    List<ResourceBusiness> findAllByCreateDateBetween(String startDate, String endDate);
 }

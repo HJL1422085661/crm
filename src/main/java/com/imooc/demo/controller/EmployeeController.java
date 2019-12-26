@@ -61,55 +61,54 @@ public class EmployeeController {
      * @param request
      * @return
      */
-//    @Modifying
-//    @Transactional
-//    @PostMapping("/createResource")
-//    public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
-//                                                        HttpServletRequest request,
-//                                                        HttpServletResponse response) {
-//        resource.setShareStatus(2);
-//        //封装时间参数
-//        Date createDate = new Date();
-//        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
-//        resource.setCreateDate(sim.format(createDate));
-//
-//        String token = TokenUtil.parseToken(request);
-//
-//        if (token.equals("")) {
-//            log.error("【创建人才资源】Token为空");
-//            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
-//        }
-//        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
-//        if (StringUtils.isEmpty(employeeId)) {
-//            log.error("【创建人才资源】 employeeId为空");
-//            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
-//        }
-//        Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
-//        resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
-//        resource.setEmployeeId(employeeId);
-//
-//        // 判断电话号码是否已存在
-////            Boolean flag = resourceService.saveResource(resource);
-//        Boolean phoneExist = resourceService.existsByPhone(resource.getPhone());
-//        if (phoneExist) {
-//            log.error("【录入人才信息】电话号码已存在");
-//            return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
-//        }
-//
-//
-//        Resource createResource = null;
-//        try {
-//            createResource = resourceService.createResource(resource);
-//            if (createResource == null) {
-//                log.error("【录入人才信息】发生错误");
-//                return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
-//            }
-//        } catch (Exception e) {
-//            log.error("【录入人才信息】发生异常");
-//        }
-//
-//        return ResultVOUtil.success(createResource);
-//    }
+    @Modifying
+    @Transactional
+    @PostMapping("/createResource")
+    public ResultVO<Map<String, String>> createResource(@RequestBody Resource resource,
+                                                        HttpServletRequest request,
+                                                        HttpServletResponse response) {
+        resource.setShareStatus(2);
+        //封装时间参数
+        Date createDate = new Date();
+        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
+        resource.setCreateDate(sim.format(createDate));
+
+        String token = TokenUtil.parseToken(request);
+
+        if (token.equals("")) {
+            log.error("【创建人才资源】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【创建人才资源】 employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        Employee dataBaseEmployee = employeeService.getEmployeeByEmployeeId(employeeId);
+        resource.setEmployeeName(dataBaseEmployee.getEmployeeName());
+        resource.setEmployeeId(employeeId);
+
+        // 判断电话号码是否已存在
+//            Boolean flag = resourceService.saveResource(resource);
+        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
+        if (phoneExist) {
+            log.error("【录入人才信息】电话号码已存在");
+            return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+        }
+
+        Resource createResource = null;
+        try {
+            createResource = resourceService.createResource(resource);
+            if (createResource == null) {
+                log.error("【录入人才信息】发生错误");
+                return ResultVOUtil.fail(ResultEnum.SAVE_RESOURCE_ERROR, response);
+            }
+        } catch (Exception e) {
+            log.error("【录入人才信息】发生异常");
+        }
+
+        return ResultVOUtil.success(createResource);
+    }
 
     /**
      * 修改人才状态（公有、私有）
@@ -355,6 +354,15 @@ public class EmployeeController {
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+
+        // 判断电话号码是否已存在
+//                    Boolean flag = resourceService.saveResource(resource);
+        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
+        if (phoneExist) {
+            log.error("【修改人才信息】电话号码已存在");
+            return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+        }
+
         ResourceTemp createResource = null;
         ResourceTemp resourceTemp = new ResourceTemp();
         // 前台只传了employeeId，要自己封装employeeName属性
@@ -370,15 +378,15 @@ public class EmployeeController {
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR, response);
 
-            // 判断电话号码是否已存在
-//            Boolean flag = resourceService.saveResource(resource);
-            Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
-            if (phoneExist) {
-                log.error("【修改人才信息】电话号码已存在");
-                return ResultVOUtil.fail(ResultEnum.DUPICATE_PHONE, response);
+            // 解决电话号码唯一性问题：先删后存
+            Resource returnResource = new Resource();
+            Integer delSuccess =  resourceService.deleteResourceByResourceId(resource.getResourceId());
+            if (delSuccess != 0) {
+                 returnResource = resourceService.createResource(resource);
+            }else {
+                log.error("【修改人才信息】修改异常");
+                return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
             }
-
-            Resource returnResource = resourceService.createResource(resource);
 
             Map<String, Object> map = new HashMap<>();
             if (returnResource != null) {

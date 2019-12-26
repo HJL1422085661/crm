@@ -22,5 +22,6 @@ public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, In
     List<PayBackRecord> findPayBackRecordByBusinessIdAndLaterBackDateBetween(String businessId, String startDate, String endDate);
     List<PayBackRecord> findPayBackRecordByEmployeeIdAndLaterBackDateBetween(String employeeId, String startDate, String endDate);
     Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
+    List<PayBackRecord> findPayBackRecordByLaterBackDateBetween(String startDate, String endDate);
 }
 

@@ -79,7 +79,7 @@ public class PayBackController {
         //如果是普通员工，存在未审核的回款记录，，则不予创建
         if (employee.getEmployeeRole() == 1) {
             // 找到该员工该订单是否有未审核回款记录
-            Boolean flag = payBackRecordTempService.isExist(employeeId, payBackRecordTemp.getBusinessId(), 1);
+            Boolean flag = payBackRecordTempService.isExist(employeeId, payBackRecordTemp.getBusinessId(), 0);
             if (flag) {
                 log.error("【新建回款记录】该订单已存在未审核回款记录");
                 return ResultVOUtil.fail(ResultEnum.EXIST_PAYBACK_RECORD_ALREADY, response);
@@ -153,11 +153,15 @@ public class PayBackController {
 
         // 保存回款记录
         Boolean flag = payBackRecordTempService.savePayBackRecordTemp(payBackRecordTemp);
-        if (flag == false) {
+        if (!flag) {
             log.error("【创建回款记录】新建临时表发生错误");
             return ResultVOUtil.fail(ResultEnum.CREATE_PAY_BACK_RECORD_ERROR, response);
         } else {
-            return ResultVOUtil.success();
+//            if (employee.getEmployeeRole() == 2) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("employeeRole", employee.getEmployeeRole());
+            return ResultVOUtil.success(map);
+//            return ResultVOUtil.success();
         }
     }
 
@@ -306,7 +310,7 @@ public class PayBackController {
             log.error("【获取所有回款记录】普通员工无权查看所有回款记录");
             return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
-        PageRequest request = PageRequest.of(page, size, Sort.Direction.DESC, "createDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
         Page<PayBackRecordTemp> payBackRecordTempPage = null;
         if (checkedStatus == 0) {
             // 未审核
@@ -363,11 +367,11 @@ public class PayBackController {
                 log.error("【创建回款记录】发生错误");
                 return ResultVOUtil.fail(ResultEnum.CREATE_PAY_BACK_RECORD_ERROR, response);
             } else {
-                return ResultVOUtil.success();
+                return ResultVOUtil.success(ResultEnum.PASS_PAYBACK_SUCCESS);
             }
         } else {
             // 不同意，则不作操作
-            return ResultVOUtil.success();
+            return ResultVOUtil.success(ResultEnum.REJECT_PAYBACK_SUCCESS);
         }
 
 

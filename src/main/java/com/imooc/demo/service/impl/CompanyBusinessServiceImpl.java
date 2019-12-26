@@ -68,4 +68,14 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
     public List<CompanyBusiness> findCompanyBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
         return companyBusinessRepository.findCompanyBusinessesByEmployeeIdAndCreateDateBetween(employeeId,startDate, endDate);
     }
+
+    @Override
+    public List<CompanyBusiness> getAllCompanyBusiness(String startDate, String endDate) {
+        return companyBusinessRepository.findAllCompanyBusinessByCreateDateBetween(startDate, endDate);
+    }
+
+    @Override
+    public List<CompanyBusiness> getCompanyBusiness(String employeeId, String startDate, String endDate) {
+        return companyBusinessRepository.findCompanyBusinessesByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
+    }
 }

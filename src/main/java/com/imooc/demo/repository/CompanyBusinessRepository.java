@@ -21,4 +21,5 @@ public interface CompanyBusinessRepository extends JpaRepository<CompanyBusiness
     Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId,  Pageable pageable);
     List<CompanyBusiness> findCompanyBusinessesByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
     List<CompanyBusiness> findCompanyBusinessByBusinessIdIsIn(List<String> businessId);
+    List<CompanyBusiness> findAllCompanyBusinessByCreateDateBetween(String startDate, String endDate);
 }

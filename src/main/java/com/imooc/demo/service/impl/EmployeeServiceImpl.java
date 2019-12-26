@@ -153,4 +153,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> findEmployeeByEmail(String email) {
         return employeeRepository.findEmployeeByEmail(email);
     }
+
+    @Override
+    public Employee getEmployeeByEmployeeName(String employeeName) {
+        return employeeRepository.getEmployeeByEmployeeName(employeeName);
+    }
+
+    public EmployeeServiceImpl() {
+        super();
+    }
 }

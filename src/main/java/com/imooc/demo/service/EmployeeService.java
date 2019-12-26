@@ -30,4 +30,5 @@ public interface EmployeeService {
     List<Employee> findEmployeeByManagerId(String managerId);
     Boolean existsByPhoneNumber(String phoneNumber);
     Page<Employee> findAllEmployeePageable(Pageable pageable);
+    Employee getEmployeeByEmployeeName(String employeeName);
 }
