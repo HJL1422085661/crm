@@ -83,15 +83,16 @@ public class ExcelUtil {
                 Resource resource = new Resource();
                 Row row = sheet.getRow(i);
                 String resourceName = row.getCell(0).getStringCellValue();
-                String phoneNumber = row.getCell(1).getStringCellValue();
-                String certificate = row.getCell(2).getStringCellValue();
-                String endDate = row.getCell(3).getStringCellValue();
-                String province = row.getCell(4).getStringCellValue();
-                String qq = row.getCell(5).getStringCellValue();
-                Integer gender = row.getCell(6).getStringCellValue().equals("女") ? 1 : 2;
-                String email = row.getCell(9).getStringCellValue();
-                String info = row.getCell(8).getStringCellValue();
-                String ResourceStatus = row.getCell(9).getStringCellValue();
+                Integer gender = row.getCell(1).getStringCellValue().equals("女") ? 1 : 2;
+                String phoneNumber = row.getCell(2).getStringCellValue();
+                String certificate = row.getCell(3).getStringCellValue();
+                String endDate = row.getCell(4).getStringCellValue();
+                String province = row.getCell(5).getStringCellValue();
+                String weChat = row.getCell(6).getStringCellValue();
+                String qq = row.getCell(7).getStringCellValue();
+                String email = row.getCell(8).getStringCellValue();
+                String info = row.getCell(9).getStringCellValue();
+                String ResourceStatus = row.getCell(10).getStringCellValue();
 
                 Integer status = 1; //status默认值为啥？
                 if (ResourceStatus.equals("潜在客户")) status = 1;
@@ -202,7 +203,7 @@ public class ExcelUtil {
                 else if (companyStatus.equals("失败客户")) status = 4;
                 else if (companyStatus.equals("已流失客户")) status = 5;
 
-                String startDate = row.getCell(14).getStringCellValue();
+                String createDate = row.getCell(14).getStringCellValue();
                 String employeeName = row.getCell(15).getStringCellValue();
                 //去数据库查重
 //                Boolean flag = excelUtil.resourceService.existsByPhoneNumber(phoneNumber);
@@ -220,7 +221,7 @@ public class ExcelUtil {
                         company.setPhoneNumber(phoneNumber);
                         company.setCompanyName(companyName);
                         company.setStatus(status);
-                        company.setStartDate(startDate);
+                        company.setCreateDate(createDate);
                         company.setExpireDate(expireDate);
                         company.setOccupation(occupation);
                         company.setContactorName(contactorName);

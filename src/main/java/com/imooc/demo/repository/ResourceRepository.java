@@ -43,4 +43,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     List<Resource> findResourceByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
 
     List<Resource> findResourceByCreateDateBetween(String startDate, String endDate);
+
+    Resource findResourceByPhoneNumber(String phoneNumber);
 }

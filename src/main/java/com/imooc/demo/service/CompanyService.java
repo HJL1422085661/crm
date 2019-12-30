@@ -1,6 +1,7 @@
 package com.imooc.demo.service;
 
 import com.imooc.demo.model.Company;
+import com.imooc.demo.model.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,5 +30,9 @@ public interface CompanyService {
     List<Company> findCompanyByShareStatus(Integer shareStatus);
 
     Boolean updateShareStatusByCompanyId(String shareStatus, Integer companyId);
+
+    List<Company> getNewCompanyClients(String employeeId, String searchStartDate, String searchEndDate);
+    List<Company> getAllNewCompanyClients(String searchStartDate, String searchEndDate);
+
 
 }

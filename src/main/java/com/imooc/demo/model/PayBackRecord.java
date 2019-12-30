@@ -8,60 +8,111 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
-@Table(name="paybackrecord")
-public class PayBackRecord {
-    /** 回款记录ID **/
+@Table(name = "paybackrecord")
+public class PayBackRecord implements Comparable<PayBackRecord> {
+    /**
+     * 回款记录ID
+     **/
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Integer id;
 
-    /** 提成给谁 **/
+    /**
+     * 提成给谁
+     **/
     @Column(name = "employeeId")
     public String employeeId;
-    /** 提成给谁 **/
+    /**
+     * 提成给谁
+     **/
     @Column(name = "employeeName")
     public String employeeName;
 
-     /** 回款相应订单ID（哪个订单的回款） **/
+    /**
+     * 回款相应订单ID（哪个订单的回款）
+     **/
     @Column(name = "businessId")
     public String businessId;
-    /** 订单类型：1：人才订单 2：企业订单 **/
+    /**
+     * 订单类型：1：人才订单 2：企业订单
+     **/
     @Column(name = "businessType")
     public Integer businessType;
 
-    /** 成交总额 **/
+    /**
+     * 成交总额
+     **/
     @Column(name = "orderPaySum")
     public BigDecimal orderPaySum;
-    /** 欠款金额 **/
+    /**
+     * 欠款金额
+     **/
     @Column(name = "owePay")
     public BigDecimal owePay;
-    /** 已回款金额 **/
+    /**
+     * 已回款金额
+     **/
     @Column(name = "backPay")
     public BigDecimal backPay;
 
-    /** 最后回款金额 **/
+    /**
+     * 最后回款金额
+     **/
     @Column(name = "laterBackPay")
     public BigDecimal laterBackPay;
-    /** 最后回款时间 **/
+    /**
+     * 最后回款时间
+     **/
     @Column(name = "laterBackDate")
     public String laterBackDate;
 
-    /** 回款次数 **/
+    /**
+     * 回款次数
+     **/
     @Column(name = "backTimes")
     public Integer backTimes;
-    /** 录入时间 **/
+    /**
+     * 录入时间
+     **/
     @Column(name = "recordDate")
     public String recordDate;
 
-    /** 最后成交时间 **/
+    /**
+     * 最后成交时间
+     **/
     @Column(name = "createDate")
     public String createDate;
 
-    /** 备注 **/
+    /**
+     * 是否已完成（是否有欠款）0 表示ing 1表示完成
+     **/
+    @Column(name = "isCompleted")
+    public Integer isCompleted = 0;
+
+    /**
+     * 备注
+     **/
     @Column(name = "info")
     public String info;
 
 
+    /**
+     * 成交企业名称
+     **/
+    @Column(name = "companyName")
+    public String companyName;
+
+
+    @Override
+    public int compareTo(PayBackRecord p) {
+        return this.owePay.compareTo(p.getOwePay());
+//        if (res == 1) {
+//            return 1;
+//        } else {
+//            return -1;
+//        }
+    }
 
 }
+

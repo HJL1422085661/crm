@@ -31,8 +31,8 @@ public class PayBackRecordTemp {
     public Integer businessType;
 
     /** 回款审核状态：0：未审核 1：同意 2：拒绝 **/
-    @Column(name = "status")
-    public Integer status;
+    @Column(name = "checkedStatus")
+    public Integer checkedStatus;
 
     /** 成交总额 **/
     @Column(name = "orderPaySum")
@@ -62,9 +62,21 @@ public class PayBackRecordTemp {
     @Column(name = "createDate")
     public String createDate;
 
+    /** 是否已完成（是否有欠款）0 表示ing 1表示完成 **/
+    @Column(name = "isCompleted")
+    public Integer isCompleted = 0;
+
     /** 备注 **/
     @Column(name = "info")
     public String info;
+
+
+    /**
+     * 成交企业名称
+     **/
+    @Column(name = "companyName")
+    public String companyName;
+
 
 
 

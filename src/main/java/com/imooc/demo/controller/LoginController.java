@@ -173,8 +173,8 @@ public class LoginController {
      * @return
      */
     @RequestMapping("/verifyCode")
-    public ResultVO<Map<String, String>> verifyCode(@RequestBody HashMap paramMap, HttpServletResponse response) {
-
+    public ResultVO<Map<String, String>> verifyCode(@RequestBody HashMap paramMap,
+                                                    HttpServletResponse response) {
         String email = paramMap.get("employeeEmail").toString();
         String code = paramMap.get("verifyCode").toString();
         if (StringUtils.isEmpty(email)) {
@@ -194,6 +194,53 @@ public class LoginController {
             return ResultVOUtil.success(ResultEnum.CORRECT_CODE);
         } else {
             return ResultVOUtil.success(ResultEnum.WRONG_CODE);
+        }
+    }
+
+    /**
+     * 管理员直接重置密码(默认：123456)
+     *
+     * @param response
+     * @return
+     */
+
+    @PostMapping("/resetPasswordAdmin")
+    public ResultVO<Map<String, String>> resetPasswordAdmin(@RequestBody HashMap paramMap,HttpServletRequest req,
+                                                            HttpServletResponse response) {
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【管理员直接重置密码】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【管理员直接重置密码】 employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        if (employeeService.getEmployeeByEmployeeId(employeeId).getEmployeeRole() != 2) {
+            log.error("【管理员直接重置密码】普通员工无权访问");
+            return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
+        }
+
+        String resetEmployeeId = paramMap.get("employeeId").toString();
+//        String passWord = paramMap.get("passWord").toString();
+        String passWord = "123456";
+
+        // 根据empoyeeId在数据库中匹配
+        Employee employee = employeeService.getEmployeeByEmployeeId(resetEmployeeId);
+        if (employee == null) {
+            log.error("【重置密码】没有匹配的员工");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+
+        // 重置密码
+        employee.setPassWord(PassUtil.MD5(passWord + employee.getSalt()));
+        Boolean flag = employeeService.saveEmployee(employee);
+        if (!flag) {
+            log.error("【重置密码】失败");
+            return ResultVOUtil.fail(ResultEnum.RESET_PWD_ERROR, response);
+        } else {
+            return ResultVOUtil.success(ResultEnum.RESET_PWD_SUCCESS);
         }
     }
 

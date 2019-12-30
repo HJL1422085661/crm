@@ -356,12 +356,17 @@ public class EmployeeController {
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
 
         // 判断电话号码是否已存在
-//                    Boolean flag = resourceService.saveResource(resource);
-        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
-        if (phoneExist) {
+        // 先根据电话号码找出resource，然后比较resourceId是否与当前传入的resourceId一致。一致才可以更新，否则电话号码重复。
+        Resource searchResource = resourceService.findResourceByPhoneNumber(resource.getPhoneNumber());
+        if (!searchResource.getResourceId().equals(resource.getResourceId())) {
             log.error("【修改人才信息】电话号码已存在");
             return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
         }
+//        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
+//        if (phoneExist) {
+//            log.error("【修改人才信息】电话号码已存在");
+//            return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+//        }
 
         ResourceTemp createResource = null;
         ResourceTemp resourceTemp = new ResourceTemp();
@@ -380,10 +385,10 @@ public class EmployeeController {
 
             // 解决电话号码唯一性问题：先删后存
             Resource returnResource = new Resource();
-            Integer delSuccess =  resourceService.deleteResourceByResourceId(resource.getResourceId());
+            Integer delSuccess = resourceService.deleteResourceByResourceId(resource.getResourceId());
             if (delSuccess != 0) {
-                 returnResource = resourceService.createResource(resource);
-            }else {
+                returnResource = resourceService.createResource(resource);
+            } else {
                 log.error("【修改人才信息】修改异常");
                 return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
             }
@@ -399,7 +404,7 @@ public class EmployeeController {
         }
 
         BeanUtils.copyProperties(resource, resourceTemp, getNullPropertyNames(resource));
-        // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示审批 2表示同意 3 表示不同意
+        // 前端提交到数据库时，需要设置checkedStatus、 0表示未审批 1表示同意 2表示不同意
         resourceTemp.setCheckedStatus(0);
         // 请求内容 0: 改, 1:删
         resourceTemp.setRequestStatus(0);
@@ -661,6 +666,14 @@ public class EmployeeController {
         return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
     }
 
+    /**
+     * 创建企业客户
+     *
+     * @param company
+     * @param request
+     * @param response
+     * @return
+     */
     @PostMapping("/createCompany")
     public ResultVO<Map<String, String>> createCompany(@RequestBody Company company,
                                                        HttpServletRequest request,
@@ -766,7 +779,7 @@ public class EmployeeController {
             log.error("【获取公司列表】 employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
-        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
         Page<Company> companyPage = null;
 
         // 管理员能看到所有客户(所有公有、所有私有)

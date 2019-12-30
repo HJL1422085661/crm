@@ -53,6 +53,10 @@ public class ResourceBusiness {
     @Column(name = "createDate")
     public String createDate;
 
+    /** 订单状态 0 表示ing 1表示完成 **/
+    @Column(name = "isCompleted")
+    public Integer isCompleted = 0;
+
     /** 备注 **/
     @Column(name = "info")
     public String info;

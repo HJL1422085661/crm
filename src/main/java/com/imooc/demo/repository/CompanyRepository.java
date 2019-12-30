@@ -30,4 +30,8 @@ public interface CompanyRepository extends JpaRepository<Company, Integer> {
     @Query(nativeQuery = true, value = "UPDATE company SET shareStatus = ?1 WHERE companyId = ?2 ")
     int updateShareStatusByCompanyId(String shareStatus, Integer companyId);
 
+    List<Company> findCompanyByEmployeeIdAndCreateDateBetween(String employeeId, String searchStartDate, String searchEndDate);
+
+    List<Company> findCompanyByCreateDateBetween(String searchStartDate, String searchEndDate);
+
 }

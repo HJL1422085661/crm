@@ -17,10 +17,10 @@ import java.util.List;
 public interface ResourceFollowRecordRepository extends JpaRepository<ResourceFollowRecord, String> {
     Page<ResourceFollowRecord> getResourceFollowRecordByResourceId(Integer resourceId, Pageable pageable);
 
-    @Query("select r from ResourceFollowRecord r ORDER BY r.createDate DESC")
+    @Query("select r from ResourceFollowRecord r WHERE r.employeeId = ?1 and r.createDate between ?2 and ?3 order by r.createDate DESC")
     List<ResourceFollowRecord> findResourceFollowRecordsByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
 
-    @Query("select r from ResourceFollowRecord r ORDER BY r.createDate DESC")
+    @Query("select r from ResourceFollowRecord r WHERE r.createDate between ?1 and ?2 order by r.createDate DESC")
     List<ResourceFollowRecord> findResourceFollowRecordsByCreateDateBetween(String startDate, String endDate);
 
 }

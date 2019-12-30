@@ -29,16 +29,17 @@ public class Company {
     @Column(name = "employeeName")
     public String employeeName;
 
+
     /** 客户状态（潜在客户、流失客户等） **/
     @Column(name = "status")
     public Integer status;
     /** 公司资源共享状态  1 公有  2 私有**/
     @Column(name = "shareStatus")
     public Integer shareStatus;
-    /** 合同起始时间 **/
-    @Column(name = "startDate")
-    public String startDate;
-    /** 合同截止时间 */
+    /** 获得客户时间 **/
+    @Column(name = "createDate")
+    public String createDate;
+    /** 证书截止时间 **/
     @Column(name = "expireDate")
     public String expireDate;
     /** 职位 **/

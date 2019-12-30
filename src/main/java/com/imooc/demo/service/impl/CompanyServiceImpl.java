@@ -84,6 +84,16 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public List<Company> getNewCompanyClients(String employeeId, String searchStartDate, String searchEndDate) {
+        return companyRepository.findCompanyByEmployeeIdAndCreateDateBetween(employeeId, searchStartDate, searchEndDate);
+    }
+
+    @Override
+    public List<Company> getAllNewCompanyClients(String searchStartDate, String searchEndDate) {
+        return companyRepository.findCompanyByCreateDateBetween(searchStartDate, searchEndDate);
+    }
+
+    @Override
     public List<Company> findCompanyByShareStatus(Integer shareStatus) {
         return companyRepository.findCompanyByShareStatus(shareStatus);
     }

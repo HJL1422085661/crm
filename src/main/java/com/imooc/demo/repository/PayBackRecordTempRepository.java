@@ -15,10 +15,10 @@ public interface PayBackRecordTempRepository extends JpaRepository<PayBackRecord
 
     PayBackRecordTemp findPayBackRecordTempById(Integer id);
 
-    Boolean existsByEmployeeIdAndBusinessIdAndStatus(String employeeId, String businessId, Integer status);
+    Boolean existsByEmployeeIdAndBusinessIdAndCheckedStatus(String employeeId, String businessId, Integer checkedStatus);
 
-    Page<PayBackRecordTemp> findPayBackRecordTempByStatus(Integer status, Pageable pageable);
+    Page<PayBackRecordTemp> findPayBackRecordTempByCheckedStatus(Integer checkedStatus, Pageable pageable);
 
-    Page<PayBackRecordTemp> findPayBackRecordTempByStatusIsNot(Integer status, Pageable pageable);
+    Page<PayBackRecordTemp> findPayBackRecordTempByCheckedStatusIsNot(Integer checkedStatus, Pageable pageable);
 }
 

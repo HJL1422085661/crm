@@ -32,9 +32,15 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Boolean saveResource(Resource resource) {
+
         Resource resource1 = resourceRepository.saveAndFlush(resource);
         if (resource1 == null) return false;
         return true;
+    }
+
+    @Override
+    public Resource findResourceByPhoneNumber(String phoneNumber) {
+        return resourceRepository.findResourceByPhoneNumber(phoneNumber);
     }
 
     @Override
@@ -42,7 +48,6 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource1;
         try {
             resource1 = resourceRepository.saveAndFlush(resource);
-
         }catch (Exception e){
             log.error("【创建人才资源】发生异常");
             return null;
@@ -107,12 +112,12 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public List<Resource> getNewClients(String employeeId, String searchStartDate, String searchEndDate) {
+    public List<Resource> getNewResourceClients(String employeeId, String searchStartDate, String searchEndDate) {
         return resourceRepository.findResourceByEmployeeIdAndCreateDateBetween(employeeId, searchStartDate, searchEndDate);
     }
 
     @Override
-    public List<Resource> getAllNewClients(String searchStartDate, String searchEndDate) {
+    public List<Resource> getAllNewResourceClients(String searchStartDate, String searchEndDate) {
         return resourceRepository.findResourceByCreateDateBetween(searchStartDate, searchEndDate);
     }
 }

@@ -12,6 +12,7 @@ import com.imooc.demo.service.*;
 import com.imooc.demo.utils.BeanCopyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +95,14 @@ public class PayBackController {
             // 人才订单
             ResourceBusiness resourceBusiness = resourceBusinessService.findResourceBusinessByBusinessId(payBackRecordTemp.getBusinessId());
             orderPaySum = resourceBusiness.getOrderPaySum();
+            // 封装成交企业名称
+            payBackRecordTemp.setCompanyName(resourceBusiness.getCompanyName());
         } else {
             // 公司订单
             CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(payBackRecordTemp.getBusinessId());
             orderPaySum = companyBusiness.getOrderPaySum();
+            // 封装成交企业名称
+            payBackRecordTemp.setCompanyName(companyBusiness.getCompanyName());
         }
 
         // 获取该订单最新回款记录(已审核的)
@@ -106,14 +112,15 @@ public class PayBackController {
         Integer backTimes = 0;
         if (payBackRecordList.size() != 0) {
             // 如果有，取最后一个
-            PayBackRecord payBackRecord = payBackRecordList.get(payBackRecordList.size() - 1);
-            owePay = payBackRecord.getOwePay().subtract(payBackRecord.getLaterBackPay());
+//            PayBackRecord payBackRecord = payBackRecordList.get(payBackRecordList.size() - 1);
+            PayBackRecord p = Collections.min(payBackRecordList);
+            owePay = p.getOwePay().subtract(payBackRecordTemp.getLaterBackPay());
             if (owePay.signum() < 0) {
                 log.error("【创建回款记录】回款金额大于欠款金额");
                 return ResultVOUtil.fail(ResultEnum.PAYBACK_TOO_MUCH, response);
             }
-            backTimes = payBackRecord.getBackTimes() + 1;
-            backPay = payBackRecord.getBackPay().add(payBackRecordTemp.getLaterBackPay());
+            backTimes = p.getBackTimes() + 1;
+            backPay = p.getBackPay().add(payBackRecordTemp.getLaterBackPay());
         } else {
             // 没有回款记录
             backPay = new BigDecimal("0");
@@ -134,21 +141,38 @@ public class PayBackController {
         payBackRecordTemp.setLaterBackDate(payBackRecordTemp.getRecordDate());
         payBackRecordTemp.setLaterBackPay(payBackRecordTemp.getLaterBackPay());
 
+        if(owePay.signum()==0){
+            payBackRecordTemp.setIsCompleted(1);
+            Integer businessType = payBackRecordTemp.getBusinessType();
+            String businessId = payBackRecordTemp.getBusinessId();
+            //2表示企业订单
+            if(businessType.equals(2)){
+                CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(businessId);
+                companyBusiness.setIsCompleted(1);
+                companyBusinessService.createCompanyBusiness(companyBusiness);
+            }else {
+                ResourceBusiness resourceBusiness = resourceBusinessService.getResourceBusinessByBusinessId(businessId);
+                resourceBusiness.setIsCompleted(1);
+                resourceBusinessService.createResourceBusiness(resourceBusiness);
+            }
+        }
+
         //如果是老板则直接操作，不需要审批,但是需要记录操作
         if (employee.getEmployeeRole() == 2) {
             // 直接同意
-            payBackRecordTemp.setStatus(1);
+            payBackRecordTemp.setCheckedStatus(1);
             // 并且直接在回款记录表插入
             PayBackRecord payBackRecord = new PayBackRecord();
             BeanUtils.copyProperties(payBackRecordTemp, payBackRecord, BeanCopyUtil.getNullPropertyNames(payBackRecordTemp));
             Boolean saveSuccess = payBackRecordService.savePayBackRecord(payBackRecord);
+
             if (!saveSuccess) {
                 log.error("【创建回款记录】新建回款记录失败");
                 return ResultVOUtil.fail(ResultEnum.CREATE_PAY_BACK_RECORD_ERROR, response);
             }
         } else {
             // 普通员工新建回款默认未审核
-            payBackRecordTemp.setStatus(0);
+            payBackRecordTemp.setCheckedStatus(0);
         }
 
         // 保存回款记录
@@ -314,10 +338,10 @@ public class PayBackController {
         Page<PayBackRecordTemp> payBackRecordTempPage = null;
         if (checkedStatus == 0) {
             // 未审核
-            payBackRecordTempPage = payBackRecordTempService.findPayBackRecordTempByStatus(checkedStatus, request);
+            payBackRecordTempPage = payBackRecordTempService.findPayBackRecordTempByCheckedStatus(checkedStatus, request);
         } else {
             // 已审核（同意、拒绝）
-            payBackRecordTempPage = payBackRecordTempService.findPayBackRecordTempByStatusIsNot(0, request);
+            payBackRecordTempPage = payBackRecordTempService.findPayBackRecordTempByCheckedStatusIsNot(0, request);
         }
         if (payBackRecordTempPage.isEmpty()) {
             return ResultVOUtil.success(ResultEnum.PAYBACK_RECORD_TEMP_NOT_EXIST);
@@ -329,7 +353,7 @@ public class PayBackController {
     /**
      * 管理员审批回款代办事项
      *
-     * @param map 审批状态 0: 未审批,1：同意 2:不同意; 公司改删临时表ID
+     * @param map 审批状态 0: 未审批,1：同意 2:不同意;
      * @param req
      * @return
      */
@@ -357,7 +381,12 @@ public class PayBackController {
 
         PayBackRecordTemp payBackRecordTemp = payBackRecordTempService.findPayBackRecordTempById(id);
         // 设置审核状态
-        payBackRecordTemp.setStatus(checkedStatus);
+        payBackRecordTemp.setCheckedStatus(checkedStatus);
+        Boolean updateSuccess = payBackRecordTempService.savePayBackRecordTemp(payBackRecordTemp);
+        if (!updateSuccess) {
+            log.error("【创建回款记录】更新临时表发生错误");
+            return ResultVOUtil.fail(ResultEnum.UPDATE_PAY_BACK_RECORD_ERROR, response);
+        }
         if (checkedStatus == 1) {
             // 同意，则在回款记录表新建
             PayBackRecord payBackRecord = new PayBackRecord();
@@ -369,9 +398,12 @@ public class PayBackController {
             } else {
                 return ResultVOUtil.success(ResultEnum.PASS_PAYBACK_SUCCESS);
             }
-        } else {
+        } else if (checkedStatus == 2) {
             // 不同意，则不作操作
             return ResultVOUtil.success(ResultEnum.REJECT_PAYBACK_SUCCESS);
+        }else {
+            log.error("【创建回款记录】参数错误");
+            return ResultVOUtil.fail(ResultEnum.PARAM_ERROR, response);
         }
 
 

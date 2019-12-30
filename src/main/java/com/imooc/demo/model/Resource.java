@@ -10,6 +10,7 @@ import javax.persistence.*;
  */
 @Entity
 @Data
+//@Table(name = "resource", uniqueConstraints=@UniqueConstraint(columnNames="phoneNumber"))
 @Table(name = "resource")
 public class Resource {
 

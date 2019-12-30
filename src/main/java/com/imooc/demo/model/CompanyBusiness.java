@@ -60,9 +60,10 @@ public class CompanyBusiness {
     public String info;
 
 
-//    /** 订单状态 0 表示ing 1表示完成 **/
-//    @Column(name = "businessStatus")
-//    public Integer businessStatus =  BusinessStatusRoleEnum.PROCESSING.getCode();
+    /** 订单状态 0 表示ing 1表示完成 **/
+    @Column(name = "isCompleted")
+    public Integer isCompleted = 0;
+
 //    /** 公司类型 **/
 //    @Column(name = "companyCategory")
 //    public Integer companyCategory;

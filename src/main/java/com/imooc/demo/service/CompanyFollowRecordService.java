@@ -4,6 +4,8 @@ import com.imooc.demo.model.CompanyFollowRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 /**
  * @Author emperor
@@ -13,4 +15,6 @@ import org.springframework.data.domain.Pageable;
 public interface CompanyFollowRecordService {
     Page<CompanyFollowRecord> getCompanyFollowRecordByCompanyId(Integer companyId, Pageable pageable);
     CompanyFollowRecord createCompanyFollowRecord(CompanyFollowRecord companyFollowRecord);
+    List<CompanyFollowRecord> getAllCompanyFollowRecords(String searchStartDate, String endDate);
+    List<CompanyFollowRecord> getCompanyFollowRecords(String employeeId, String searchStartDate, String endDate);
 }
