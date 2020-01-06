@@ -8,6 +8,7 @@ import com.imooc.demo.utils.EnumUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.crypto.hash.Hash;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -358,10 +359,13 @@ public class EmployeeController {
         // 判断电话号码是否已存在
         // 先根据电话号码找出resource，然后比较resourceId是否与当前传入的resourceId一致。一致才可以更新，否则电话号码重复。
         Resource searchResource = resourceService.findResourceByPhoneNumber(resource.getPhoneNumber());
-        if (!searchResource.getResourceId().equals(resource.getResourceId())) {
-            log.error("【修改人才信息】电话号码已存在");
-            return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+        if (searchResource != null) {
+            if (!searchResource.getResourceId().equals(resource.getResourceId())) {
+                log.error("【修改人才信息】电话号码已存在");
+                return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+            }
         }
+
 //        Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
 //        if (phoneExist) {
 //            log.error("【修改人才信息】电话号码已存在");
@@ -383,13 +387,18 @@ public class EmployeeController {
             Boolean isSuccess = resourceTempService.saveResourceTemp(resourceTemp);
             if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_UPDATE_RESOURCE_INFO_ERROR, response);
 
-            // 解决电话号码唯一性问题：先删后存
+            // 解决电话号码唯一性问题：先设置数据库的电话为一个特殊值，然后再修改
             Resource returnResource = new Resource();
-            Integer delSuccess = resourceService.deleteResourceByResourceId(resource.getResourceId());
-            if (delSuccess != 0) {
-                returnResource = resourceService.createResource(resource);
-            } else {
-                log.error("【修改人才信息】修改异常");
+            Resource tempResource = resourceService.getResourceByResourceId(resource.getResourceId());
+            tempResource.setPhoneNumber("ceshiceshi");
+            Boolean tempReturnResource = resourceService.saveResource(tempResource);
+            if (!tempReturnResource) {
+                log.error("【修改人才信息】临时修改异常");
+                return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
+            }
+            returnResource = resourceService.createResource(resource);
+            if (returnResource == null) {
+                log.error("【修改人才信息】创建失败");
                 return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_ERROR, response);
             }
 

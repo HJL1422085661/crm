@@ -19,16 +19,18 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer> {
     List<Resource> getResourceListByEmployeeId(String employeeId);
     Resource getResourceByResourceId(Integer resourceId);
 
-    @Transactional
     @Modifying
+    @Transactional
+    @Query("DELETE from Resource re where re.resourceId = ?1")
     Integer deleteResourceByResourceId(Integer resourceId);
-    @Transactional
+
     @Modifying
+    @Transactional
     @Query(nativeQuery = true, value = "UPDATE resource SET shareStatus = ?1 ,employeeId = ?2 WHERE resourceId = ?3 ")
     int updateShareStatusAndEmployeeIdByResourceId(String shareStatus, String employeeId, Integer resourceId);
 
-    @Transactional
     @Modifying
+    @Transactional
     @Query(nativeQuery = true, value = "UPDATE resource SET shareStatus = ?1 WHERE resourceId = ?2 ")
     int updateShareStatusByResourceId(String shareStatus, Integer resourceId);
 

@@ -1440,7 +1440,6 @@ public class ManagerController {
                     PayBackRecord p = Collections.min(payBackRecordListTemp);
                     returnPayBackRecordsList.add(p);
                 }
-
             }
         }
         countPayBackSum = countPayBackSum.setScale(1, BigDecimal.ROUND_DOWN);

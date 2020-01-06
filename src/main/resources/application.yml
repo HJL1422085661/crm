@@ -6,7 +6,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: admin
+    password: 12345678
     url: jdbc:mysql://localhost/crm?serverTimezone=UTC&&characterEncoding=utf-8
   jpa:
     show-sql: true
@@ -29,10 +29,10 @@ spring:
 #  jackson:
 #    default-property-inclusion: non_null
 
-logging:
-  pattern:
-    console: "%d - %msg%n"
-  #path: /Study/Idea_work/demo/var/log/tomcat/
-  file: /Study/Idea_work/demo/var/log/tomcat/crm.log
-  level:
-    com.imooc.sell.LoggerTest: debug
+#logging:
+#  pattern:
+#    console: "%d - %msg%n"
+#  #path: /Study/Idea_work/demo/var/log/tomcat/
+#  file: /Study/Idea_work/demo/var/log/tomcat/crm.log
+#  level:
+#    com.imooc.sell.LoggerTest: debug

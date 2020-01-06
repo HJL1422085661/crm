@@ -32,7 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Boolean saveResource(Resource resource) {
-
+//        resourceRepository.flush();
         Resource resource1 = resourceRepository.saveAndFlush(resource);
         if (resource1 == null) return false;
         return true;
@@ -43,8 +43,10 @@ public class ResourceServiceImpl implements ResourceService {
         return resourceRepository.findResourceByPhoneNumber(phoneNumber);
     }
 
+    @Transactional
     @Override
     public Resource createResource(Resource resource){
+//        resourceRepository.flush();
         Resource resource1;
         try {
             resource1 = resourceRepository.saveAndFlush(resource);
@@ -64,7 +66,9 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional
     @Override
     public Integer deleteResourceByResourceId(Integer resourceId) {
-        return resourceRepository.deleteResourceByResourceId(resourceId);
+        Integer res = resourceRepository.deleteResourceByResourceId(resourceId);
+//        resourceRepository.flush();
+        return res;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class ResourceServiceImpl implements ResourceService {
             return true;
         else return false;
     }
+
 
     @Override
     public Boolean updateShareStatusByResourceId(String sharStatus, Integer resourceId) {
