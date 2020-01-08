@@ -22,6 +22,7 @@ import java.util.List;
 @Slf4j
 public class ResourceServiceImpl implements ResourceService {
 
+
     @Autowired
     public ResourceRepository resourceRepository;
 
@@ -29,6 +30,93 @@ public class ResourceServiceImpl implements ResourceService {
     public List<Resource> getResourceByEmployeeId(String employeeId) {
         return resourceRepository.getResourceListByEmployeeId(employeeId);
     }
+
+    @Override
+    public Page<Resource> findResourceByEmployeeIdAndLike(Integer shareStatus, String phoneNumber, String resourceName,
+                                             String qq, String email, String info,
+                                             String certificate, String province, String employeeId, Pageable pageable) {
+        return resourceRepository.findResourceByEmployeeIdAndLike(shareStatus, phoneNumber, resourceName,
+                qq, email, info, certificate, province, employeeId, pageable);
+    }
+
+    @Override
+    public Page<Resource> findResourceByLike(Integer shareStatus, String phoneNumber, String resourceName,
+                                             String qq, String email, String info,
+                                             String certificate, String province, Pageable pageable) {
+        return resourceRepository.findResourceByLike(shareStatus, phoneNumber, resourceName,
+                qq, email, info, certificate, province, pageable);
+    }
+
+    //    @Override
+//    public Page<Resource> findResourceByShareStatusAndPhoneNumberLike(Integer shareStatus, String phoneNumber, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndPhoneNumberLike(shareStatus, phoneNumber, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndPhoneNumberLike(Integer shareStatus, String employeeId, String phoneNumber, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndPhoneNumberLike(shareStatus, employeeId, phoneNumber, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndResourceNameLike(Integer shareStatus, String resourceName, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndResourceNameLike(shareStatus, resourceName, pageable);
+//    }
+//
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndResourceNameLike(Integer shareStatus, String employeeId, String resourceName, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndResourceNameLike(shareStatus, employeeId, resourceName, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndQqLike(Integer shareStatus, String qq, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndQqLike(shareStatus, qq, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndQqLike(Integer shareStatus, String employeeId, String qq, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndQqLike(shareStatus, employeeId, qq, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmailLike(Integer shareStatus, String email, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmailLike(shareStatus, email, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndEmailLike(Integer shareStatus, String employeeId, String email, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndEmailLike(shareStatus, employeeId, email, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndInfoLike(Integer shareStatus, String info, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndInfoLike(shareStatus, info, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndInfoLike(Integer shareStatus, String employeeId, String info, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndInfoLike(shareStatus, employeeId, info, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndCertificateLike(Integer shareStatus, String certificate, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndCertificateLike(shareStatus, certificate, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndCertificateLike(Integer shareStatus, String employeeId, String certificate, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndCertificateLike(shareStatus, employeeId, certificate, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndProvinceLike(Integer shareStatus, String province, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndProvinceLike(shareStatus, province, pageable);
+//    }
+//
+//    @Override
+//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndProvinceLike(Integer shareStatus, String employeeId, String province, Pageable pageable) {
+//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndProvinceLike(shareStatus, employeeId, province, pageable);
+//    }
 
     @Override
     public Boolean saveResource(Resource resource) {
@@ -45,12 +133,12 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Transactional
     @Override
-    public Resource createResource(Resource resource){
+    public Resource createResource(Resource resource) {
 //        resourceRepository.flush();
         Resource resource1;
         try {
             resource1 = resourceRepository.saveAndFlush(resource);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("【创建人才资源】发生异常");
             return null;
         }
@@ -115,6 +203,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Boolean existsByPhoneNumber(String phoneNumber) {
         return resourceRepository.existsByPhoneNumber(phoneNumber);
     }
+
 
     @Override
     public List<Resource> getNewResourceClients(String employeeId, String searchStartDate, String searchEndDate) {

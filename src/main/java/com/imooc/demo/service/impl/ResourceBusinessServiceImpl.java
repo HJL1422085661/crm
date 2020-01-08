@@ -22,6 +22,11 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     public ResourceBusinessRepository resourceBusinessRepository;
 
     @Override
+    public List<ResourceBusiness> findResourceBusinessByResourceId(Integer resourceId) {
+        return resourceBusinessRepository.findResourceBusinessByResourceId(resourceId);
+    }
+
+    @Override
     public ResourceBusiness createResourceBusiness(ResourceBusiness resourceBusiness) {
         try {
             return resourceBusinessRepository.saveAndFlush(resourceBusiness);

@@ -141,16 +141,16 @@ public class PayBackController {
         payBackRecordTemp.setLaterBackDate(payBackRecordTemp.getRecordDate());
         payBackRecordTemp.setLaterBackPay(payBackRecordTemp.getLaterBackPay());
 
-        if(owePay.signum()==0){
+        if (owePay.signum() == 0) {
             payBackRecordTemp.setIsCompleted(1);
             Integer businessType = payBackRecordTemp.getBusinessType();
             String businessId = payBackRecordTemp.getBusinessId();
             //2表示企业订单
-            if(businessType.equals(2)){
+            if (businessType.equals(2)) {
                 CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(businessId);
                 companyBusiness.setIsCompleted(1);
                 companyBusinessService.createCompanyBusiness(companyBusiness);
-            }else {
+            } else {
                 ResourceBusiness resourceBusiness = resourceBusinessService.getResourceBusinessByBusinessId(businessId);
                 resourceBusiness.setIsCompleted(1);
                 resourceBusinessService.createResourceBusiness(resourceBusiness);
@@ -281,6 +281,60 @@ public class PayBackController {
     }
 
     /**
+     * 根据人才ID查看回款记录
+     *
+     * @param paramMap
+     * @param req
+     * @return
+     */
+    @PostMapping("/getPayBackRecordListByResourceId")
+    public ResultVO<Map<String, String>> getPayBackRecordListByResourceId(@RequestBody HashMap paramMap,
+                                                                          HttpServletRequest req,
+                                                                          HttpServletResponse response) {
+        Integer resourceId = Integer.parseInt(paramMap.get("resourceId").toString());
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取回款记录】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (employeeId.equals("")) {
+            log.error("【获取回款记录】employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        List<PayBackRecord> payBackRecordList = payBackRecordService.findAllPayBackRecordByResourceId(resourceId);
+
+        return ResultVOUtil.success(payBackRecordList);
+    }
+
+    /**
+     * 根据企业ID查看回款记录
+     *
+     * @param paramMap
+     * @param req
+     * @return
+     */
+    @PostMapping("/getPayBackRecordListByCompanyId")
+    public ResultVO<Map<String, String>> getPayBackRecordListByCompanyId(@RequestBody HashMap paramMap,
+                                                                         HttpServletRequest req,
+                                                                         HttpServletResponse response) {
+        Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取回款记录】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (employeeId.equals("")) {
+            log.error("【获取回款记录】employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+        List<PayBackRecord> payBackRecordList = payBackRecordService.findAllPayBackRecordByCompanyId(companyId);
+
+        return ResultVOUtil.success(payBackRecordList);
+    }
+
+    /**
      * 根据员工ID和订单类型取相应的回款记录
      * 1表示人才订单 2表示公司订单
      *
@@ -401,7 +455,7 @@ public class PayBackController {
         } else if (checkedStatus == 2) {
             // 不同意，则不作操作
             return ResultVOUtil.success(ResultEnum.REJECT_PAYBACK_SUCCESS);
-        }else {
+        } else {
             log.error("【创建回款记录】参数错误");
             return ResultVOUtil.fail(ResultEnum.PARAM_ERROR, response);
         }

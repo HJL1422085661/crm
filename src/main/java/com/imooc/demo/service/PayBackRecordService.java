@@ -15,19 +15,32 @@ import java.util.List;
 public interface PayBackRecordService {
 
     PayBackRecord getPayBackRecordByRecordId(Integer recordId);
+
     Boolean savePayBackRecord(PayBackRecord payBackRecord);
+
     Page<PayBackRecord> findPayBackRecordByEmployeeId(String employeeId, Pageable pageable);
+
     Page<PayBackRecord> findPayBackRecord(Pageable pageable);
+
     Page<PayBackRecord> findPayBackRecordByTime(String startTime, String endTime, Pageable pageable);
+
     Page<PayBackRecord> findPayBackRecordByEmployeeIdAndTime(String startTime, String endTime, String employeeId, Pageable pageable);
+
     List<PayBackRecord> findAllPayBackRecordByBusinessId(String businessId);
+
     List<PayBackRecord> findPayBackRecordByBusinessIdAndDate(String businessId, String startDate, String endDate);
+
     List<PayBackRecord> findPayBackRecordByEmployeeIdAndDate(String employeeId, String startDate, String endDate);
-    Page<PayBackRecord>  findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
+
+    Page<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessType(String employeeId, Integer businessType, Pageable pageable);
 
     List<PayBackRecord> getAllPayBackRecords(String startDate, String endDate);
+
     List<PayBackRecord> getPayBackRecords(String employeeId, String startDate, String endDate);
 
+    List<PayBackRecord> findAllPayBackRecordByCompanyId(Integer companyId);
+
+    List<PayBackRecord> findAllPayBackRecordByResourceId(Integer resourceId);
 
 
 }

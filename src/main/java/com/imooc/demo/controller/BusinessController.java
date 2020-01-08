@@ -49,6 +49,63 @@ public class BusinessController {
     @Autowired
     public CompanyService companyService;
 
+    /**
+     * 根据人才Id取人才订单
+     *
+     * @param paramMap
+     * @param req
+     * @param response
+     * @return
+     */
+    @PostMapping("/getResourceBusinessListByResourceId")
+    public ResultVO<Map<Integer, String>> getResourceBusinessListByResourceId(@RequestBody HashMap paramMap,
+                                                                              HttpServletRequest req,
+                                                                              HttpServletResponse response) {
+        Integer resourceId = Integer.parseInt(paramMap.get("resourceId").toString());
+
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取订单列表】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取订单列表】 employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+
+        List<ResourceBusiness> resourceBusinessList = resourceBusinessService.findResourceBusinessByResourceId(resourceId);
+        return ResultVOUtil.success(resourceBusinessList);
+    }
+
+    /**
+     * 根据企业Id取人才订单
+     *
+     * @param paramMap
+     * @param req
+     * @param response
+     * @return
+     */
+    @PostMapping("/getCompanyBusinessListByCompanyId")
+    public ResultVO<Map<Integer, String>> getCompanyBusinessListByCompanyId(@RequestBody HashMap paramMap,
+                                                                            HttpServletRequest req,
+                                                                            HttpServletResponse response) {
+        Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
+
+        String token = TokenUtil.parseToken(req);
+        if (token.equals("")) {
+            log.error("【获取订单列表】Token为空");
+            return ResultVOUtil.fail(ResultEnum.TOKEN_IS_EMPTY, response);
+        }
+        String employeeId = loginTicketService.getEmployeeIdByTicket(token);
+        if (StringUtils.isEmpty(employeeId)) {
+            log.error("【获取订单列表】 employeeId为空");
+            return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
+        }
+
+        List<CompanyBusiness> CompanyBusinessList = companyBusinessService.findCompanyBusinessByCompanyId(companyId);
+        return ResultVOUtil.success(CompanyBusinessList);
+    }
 
     @PostMapping("/getBusinessList")
     public ResultVO<Map<Integer, String>> getBusinessList(@RequestBody HashMap paramMap,

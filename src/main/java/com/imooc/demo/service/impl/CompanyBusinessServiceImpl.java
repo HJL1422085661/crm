@@ -70,6 +70,11 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
     }
 
     @Override
+    public List<CompanyBusiness> findCompanyBusinessByCompanyId(Integer companyId) {
+        return companyBusinessRepository.findCompanyBusinessesByCompanyId(companyId);
+    }
+
+    @Override
     public List<CompanyBusiness> getAllCompanyBusiness(String startDate, String endDate) {
         return companyBusinessRepository.findAllCompanyBusinessByCreateDateBetween(startDate, endDate);
     }

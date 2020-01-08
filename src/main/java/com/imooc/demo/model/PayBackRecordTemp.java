@@ -23,7 +23,7 @@ public class PayBackRecordTemp {
     @Column(name = "employeeName")
     public String employeeName;
 
-     /** 回款相应订单ID（哪个订单的回款） **/
+    /** 回款相应订单ID（哪个订单的回款） **/
     @Column(name = "businessId")
     public String businessId;
     /** 订单类型：1：人才订单 2：企业订单 **/
@@ -70,6 +70,13 @@ public class PayBackRecordTemp {
     @Column(name = "info")
     public String info;
 
+    /** 人才ID **/
+    @Column(name = "resourceId")
+    public Integer resourceId;
+
+    /** 公司ID **/
+    @Column(name = "companyId")
+    public  Integer companyId;
 
     /**
      * 成交企业名称

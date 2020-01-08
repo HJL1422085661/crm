@@ -1,6 +1,7 @@
 package com.imooc.demo.service;
 
 import com.imooc.demo.model.CompanyBusiness;
+import com.imooc.demo.model.ResourceBusiness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,4 +29,7 @@ public interface CompanyBusinessService {
 
     List<CompanyBusiness> getAllCompanyBusiness(String startDate, String endDate);
     List<CompanyBusiness> getCompanyBusiness(String employeeId,String startDate, String endDate);
+
+    List<CompanyBusiness> findCompanyBusinessByCompanyId(Integer companyId);
+
 }

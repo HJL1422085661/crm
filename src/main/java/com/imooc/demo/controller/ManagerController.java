@@ -721,7 +721,7 @@ public class ManagerController {
             log.error("【获取人才资源审批|未审批列表】普通员工无权查看所有回款记录");
             return ResultVOUtil.fail(ResultEnum.COMMON_EMPLOYEE_NO_RIGHT, response);
         }
-        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "startDate");
+        PageRequest request = PageRequest.of(page - 1, size, Sort.Direction.DESC, "createDate");
         Page<CompanyTemp> companyTempPage = null;
         if (checkedStatus == 0) {
             // 未审核
@@ -733,7 +733,7 @@ public class ManagerController {
 
         if (companyTempPage.getContent().isEmpty()) {
             if (page > 1) {
-                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "startDate");
+                request = PageRequest.of(page - 2, size, Sort.Direction.DESC, "createDate");
                 companyTempPage = companyTempService.findCompanyTempByCheckedStatusAndRequestStatus(checkedStatus, requestStatus, request);
                 return ResultVOUtil.success(companyTempPage);
             } else

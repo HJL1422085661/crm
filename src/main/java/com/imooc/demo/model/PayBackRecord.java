@@ -97,6 +97,14 @@ public class PayBackRecord implements Comparable<PayBackRecord> {
     public String info;
 
 
+    /** 人才ID **/
+    @Column(name = "resourceId")
+    public Integer resourceId;
+
+    /** 公司ID **/
+    @Column(name = "companyId")
+    public  Integer companyId;
+
     /**
      * 成交企业名称
      **/
