@@ -952,6 +952,13 @@ public class ManagerController {
                             .collect(Collectors.toList());
                 }
                 EmployeeSalary employeeSalary = new EmployeeSalary();
+
+                // 先去数据库找存在EmployeeSalaryRegulation与否
+                EmployeeSalaryRegulation searchEmployeeSalaryRegulation = employeeSalaryRegulationService.findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeIdIdx, searchMonth);
+                if (searchEmployeeSalaryRegulation != null) {
+                    BeanUtils.copyProperties(searchEmployeeSalaryRegulation, employeeSalary,BeanCopyUtil.getNullPropertyNames(searchEmployeeSalaryRegulation));
+                }
+
                 employeeSalary.setEmployeeId(employeeIdIdx);
                 employeeSalary.setEmployeeName(employee.getEmployeeName());
 
@@ -986,7 +993,7 @@ public class ManagerController {
                         companyPaySum = companyPaySum.add(paybackSum);
                     }
                 }
-                employeeSalary.setComapnyBusinessList(companyBusinessList1);
+                employeeSalary.setCompanyBusinessList(companyBusinessList1);
 
                 // 封装人才订单
                 List<Object> resourceBusinessList1 = new ArrayList<>();
@@ -1118,7 +1125,7 @@ public class ManagerController {
                     companyPaySum = companyPaySum.add(paybackSum);
                 }
             }
-            employeeSalary.setComapnyBusinessList(companyBusinessList1);
+            employeeSalary.setCompanyBusinessList(companyBusinessList1);
 
             List<Object> resourceBusinessList1 = new ArrayList<>();
             // TODO 应该找到当月所有存在回款记录的订单，而不是当月创建的订单！
@@ -1211,7 +1218,7 @@ public class ManagerController {
         BigDecimal paybackSum = new BigDecimal("0");
         // 计算回款总额
         for (PayBackRecord payBackRecord : payBackRecordList) {
-            paybackSum = paybackSum.add(payBackRecord.getBackPay());
+            paybackSum = paybackSum.add(payBackRecord.getLaterBackPay());
         }
         return paybackSum;
     }

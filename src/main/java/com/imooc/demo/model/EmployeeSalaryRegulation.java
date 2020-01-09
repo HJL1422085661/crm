@@ -113,12 +113,11 @@ public class EmployeeSalaryRegulation {
     @Column(name = "salary")
     public BigDecimal salary = new BigDecimal("0");
 
-      /**
+    /**
      * 业绩（提成）
      **/
     @Column(name = "performance")
     public BigDecimal performance = new BigDecimal("0");
-
 
 
     /**
@@ -129,6 +128,7 @@ public class EmployeeSalaryRegulation {
 
     /**
      * 计算绩效及应发工资
+     *
      * @return
      */
     public BigDecimal getTotalSalary() {
@@ -141,14 +141,5 @@ public class EmployeeSalaryRegulation {
                 .add(this.other);
         return this.salary;
     }
-
-//    /**实际收入**/
-//    @Column(name = "performance")
-//    public BigDecimal performance;
-//
-//    /** 录入时间 **/
-//    @Column(name = "recordDate")
-//    public String recordDate;
-//
 
 }
