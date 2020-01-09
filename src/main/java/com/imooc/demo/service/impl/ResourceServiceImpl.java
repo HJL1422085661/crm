@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -46,77 +47,6 @@ public class ResourceServiceImpl implements ResourceService {
         return resourceRepository.findResourceByLike(shareStatus, phoneNumber, resourceName,
                 qq, email, info, certificate, province, pageable);
     }
-
-    //    @Override
-//    public Page<Resource> findResourceByShareStatusAndPhoneNumberLike(Integer shareStatus, String phoneNumber, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndPhoneNumberLike(shareStatus, phoneNumber, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndPhoneNumberLike(Integer shareStatus, String employeeId, String phoneNumber, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndPhoneNumberLike(shareStatus, employeeId, phoneNumber, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndResourceNameLike(Integer shareStatus, String resourceName, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndResourceNameLike(shareStatus, resourceName, pageable);
-//    }
-//
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndResourceNameLike(Integer shareStatus, String employeeId, String resourceName, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndResourceNameLike(shareStatus, employeeId, resourceName, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndQqLike(Integer shareStatus, String qq, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndQqLike(shareStatus, qq, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndQqLike(Integer shareStatus, String employeeId, String qq, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndQqLike(shareStatus, employeeId, qq, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmailLike(Integer shareStatus, String email, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmailLike(shareStatus, email, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndEmailLike(Integer shareStatus, String employeeId, String email, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndEmailLike(shareStatus, employeeId, email, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndInfoLike(Integer shareStatus, String info, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndInfoLike(shareStatus, info, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndInfoLike(Integer shareStatus, String employeeId, String info, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndInfoLike(shareStatus, employeeId, info, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndCertificateLike(Integer shareStatus, String certificate, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndCertificateLike(shareStatus, certificate, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndCertificateLike(Integer shareStatus, String employeeId, String certificate, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndCertificateLike(shareStatus, employeeId, certificate, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndProvinceLike(Integer shareStatus, String province, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndProvinceLike(shareStatus, province, pageable);
-//    }
-//
-//    @Override
-//    public Page<Resource> findResourceByShareStatusAndEmployeeIdAndProvinceLike(Integer shareStatus, String employeeId, String province, Pageable pageable) {
-//        return resourceRepository.findResourceByShareStatusAndEmployeeIdAndProvinceLike(shareStatus, employeeId, province, pageable);
-//    }
 
     @Override
     public Boolean saveResource(Resource resource) {
@@ -213,5 +143,10 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<Resource> getAllNewResourceClients(String searchStartDate, String searchEndDate) {
         return resourceRepository.findResourceByCreateDateBetween(searchStartDate, searchEndDate);
+    }
+
+    @Override
+    public HashSet<String> getAllResourcePhoneNumber() {
+        return  resourceRepository.findAllResourcePhoneNumber();
     }
 }

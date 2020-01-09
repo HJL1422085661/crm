@@ -25,6 +25,10 @@ spring:
     host: smtp.163.com
     username: wangchiyaan@163.com
     password: wangchi205
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
 
 #  jackson:
 #    default-property-inclusion: non_null

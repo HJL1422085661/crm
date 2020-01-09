@@ -48,6 +48,8 @@ public class BusinessController {
     public ResourceService resourceService;
     @Autowired
     public CompanyService companyService;
+    @Autowired
+    public PayBackRecordService payBackRecordService;
 
     /**
      * 根据人才Id取人才订单
@@ -113,6 +115,7 @@ public class BusinessController {
                                                           HttpServletResponse response) {
         // orderType 1表示人才订单 2表示公司订单
         Integer orderType = Integer.parseInt(paramMap.get("orderType").toString());
+        Integer isCompleted = Integer.parseInt(paramMap.get("isCompleted").toString());
         Integer page = Integer.parseInt(paramMap.get("page").toString());
         Integer size = Integer.parseInt(paramMap.get("pageSize").toString());
         String token = TokenUtil.parseToken(req);
@@ -137,12 +140,13 @@ public class BusinessController {
             Page<ResourceBusiness> resourceBusinessPage = null;
             if (employee.getEmployeeRole() == 2) {
                 // 管理员看到所有人的订单
-                resourceBusinessPage = resourceBusinessService.findAllResourceBusinessPageable(request);
+//                resourceBusinessPage = resourceBusinessService.findAllResourceBusinessPageable(request);
+                resourceBusinessPage = resourceBusinessService.findAllResourceBusinessByIsCompletedPageable(isCompleted, request);
             } else {
                 // 普通员工看到自己的订单
-                resourceBusinessPage = resourceBusinessService.findResourceBusinessByEmployeeId(employeeId, request);
+//                resourceBusinessPage = resourceBusinessService.findResourceBusinessByEmployeeId(employeeId, request);
+                resourceBusinessPage = resourceBusinessService.findResourceBusinessByEmployeeIdAndIsCompleted(employeeId, isCompleted, request);
             }
-
             map.put("businessList", resourceBusinessPage);
             map.put("orderType", ResultEnum.GET_RESOURCE_BUSINESS_SUCCESS);
             return ResultVOUtil.success(map);
@@ -151,12 +155,13 @@ public class BusinessController {
             Page<CompanyBusiness> companyBusinessPage = null;
             if (employee.getEmployeeRole() == 2) {
                 // 管理员看到所有人的订单
-                companyBusinessPage = companyBusinessService.findAllCompanyBusinessPageable(request);
+//                companyBusinessPage = companyBusinessService.findAllCompanyBusinessPageable(request);
+                companyBusinessPage = companyBusinessService.findAllCompanyBusinessByIsCompletedPageable(isCompleted, request);
             } else {
                 // 普通员工看到自己的订单
-                companyBusinessPage = companyBusinessService.findCompanyBusinessByEmployeeId(employeeId, request);
+//                companyBusinessPage = companyBusinessService.findCompanyBusinessByEmployeeId(employeeId, request);
+                companyBusinessPage = companyBusinessService.findCompanyBusinessByEmployeeIdAndIsCompleted(employeeId, isCompleted, request);
             }
-
 
             List<CompanyBusinessDTO> companyBusinessDTOList = new ArrayList<>();
             // 遍历数据库取出来的CompanyBusiness，将其resourceId和resourceName字段（字符串）
@@ -165,16 +170,16 @@ public class BusinessController {
                 CompanyBusinessDTO companyBusinessDTO = new CompanyBusinessDTO();
                 BeanUtils.copyProperties(companyBusinessTemp, companyBusinessDTO, getNullPropertyNames(companyBusinessTemp));
                 //companyBusinessDTO.setBusinessId(KeyUtil.createID());
-                String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
-                String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
-                List<Map<String, String>> resourceListTemp = new ArrayList<>();
-                for (int i = 0; i < resourceIdList.length; i++) {
-                    Map<String, String> resourceTemp = new HashMap<>();
-                    resourceTemp.put("resourceId", resourceIdList[i]);
-                    resourceTemp.put("resourceName", resourceNameList[i]);
-                    resourceListTemp.add(resourceTemp);
-                }
-                companyBusinessDTO.setResource(resourceListTemp);
+//                String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
+//                String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
+//                List<Map<String, String>> resourceListTemp = new ArrayList<>();
+//                for (int i = 0; i < resourceIdList.length; i++) {
+//                    Map<String, String> resourceTemp = new HashMap<>();
+//                    resourceTemp.put("resourceId", resourceIdList[i]);
+//                    resourceTemp.put("resourceName", resourceNameList[i]);
+//                    resourceListTemp.add(resourceTemp);
+//                }
+//                companyBusinessDTO.setResource(resourceListTemp);
                 companyBusinessDTOList.add(companyBusinessDTO);
             }
             map.put("businessList", companyBusinessDTOList);
@@ -231,15 +236,6 @@ public class BusinessController {
         return ResultVOUtil.success(ResultEnum.CREATE_COMPANY_BUSINESS_SUCCESS);
     }
 
-    public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId,
-                                                                 HttpServletResponse response) {
-        Integer flag = resourceBusinessService.deleteResourceBusinessByBusinessId(resourceBusinessId);
-        if (flag == 0) {
-            log.error("【删除人才订单】发生错误");
-            return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR, response);
-        }
-        return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_BUSINESS_SUCCESS);
-    }
 
     @PostMapping("/createCompanyBusiness")
     public ResultVO<Map<Integer, String>> createCompanyBusiness(@RequestBody HashMap paramMap,
@@ -261,12 +257,14 @@ public class BusinessController {
         employeeId = paramMap.get("employeeId").toString();
         Integer companyId = Integer.parseInt(paramMap.get("companyId").toString());
         BigDecimal orderPaySum = BigDecimal.valueOf(Double.parseDouble(paramMap.get("orderPaySum").toString()));
-        String resourceIdList = paramMap.get("resourceId").toString();
-        resourceIdList = resourceIdList.replace(" ", "");
+//        String resourceIdList = paramMap.get("resourceId").toString();
+//
+//        resourceIdList = resourceIdList.replace(" ", "");
+//
+//        String resourceIdString = resourceIdList.substring(1, resourceIdList.length() - 1);
+//        String[] resourceIdTemp = resourceIdString.split(",");
+//        String resourceNameString = "";
 
-        String resourceIdString = resourceIdList.substring(1, resourceIdList.length() - 1);
-        String[] resourceIdTemp = resourceIdString.split(",");
-        String resourceNameString = "";
 
         // 设置属性
         CompanyBusiness createBusiness = new CompanyBusiness();
@@ -285,19 +283,19 @@ public class BusinessController {
         }
         createBusiness.setEmployeeName(company.getEmployeeName());
         createBusiness.setCompanyName(company.getCompanyName());
-        // 封装resourceName属性（由多个Name拼接而成）
-        for (String s : resourceIdTemp) {
-            Integer t = Integer.parseInt(s);
-            Resource resource = resourceService.getResourceByResourceId(t);
-            if (resource == null) {
-                response.setStatus(400);
-                log.error("【创建公司订单】该人才不存在");
-                return ResultVOUtil.fail(ResultEnum.RESOURCE_NOT_EXIST, response);
-            }
-            resourceNameString += resource.getResourceName() + ",";
-        }
-        createBusiness.setResourceId(resourceIdString);
-        createBusiness.setResourceName(resourceNameString.substring(0, resourceNameString.length() - 1));
+//        // 封装resourceName属性（由多个Name拼接而成）
+//        for (String s : resourceIdTemp) {
+//            Integer t = Integer.parseInt(s);
+//            Resource resource = resourceService.getResourceByResourceId(t);
+//            if (resource == null) {
+//                response.setStatus(400);
+//                log.error("【创建公司订单】该人才不存在");
+//                return ResultVOUtil.fail(ResultEnum.RESOURCE_NOT_EXIST, response);
+//            }
+//            resourceNameString += resource.getResourceName() + ",";
+//        }
+//        createBusiness.setResourceId(resourceIdString);
+//        createBusiness.setResourceName(resourceNameString.substring(0, resourceNameString.length() - 1));
 
         CompanyBusiness returnCompanyBusiness = companyBusinessService.createCompanyBusiness(createBusiness);
         if (returnCompanyBusiness == null) {
@@ -324,17 +322,51 @@ public class BusinessController {
             log.error("【删除公司订单】 employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
-        if (businessType == 1) {
-            // 删除人才订单
-            return deleteResourceBusiness(businessId, response);
-        } else if (businessType == 2) {
-            // 删除公司订单
-            return deleteCompanyBusiness(businessId, response);
-        } else {
-            response.setStatus(400);
-            log.error("【删除订单】发生错误");
-            return ResultVOUtil.fail(ResultEnum.DELETE_BUSINESS_ERROR, response);
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
+
+        Boolean flag = false;
+        String info = "";
+        // 找到该订单最新回款记录
+        List<PayBackRecord> payBackRecordListTemp = payBackRecordService.findAllPayBackRecordByBusinessId(businessId);
+        PayBackRecord p = null;
+        if (payBackRecordListTemp.size() != 0) {
+            // 最新一条回款记录
+            p = Collections.min(payBackRecordListTemp);
         }
+        // 管理员：已完成订单和回款为0订单才可以删除
+        if (employee.getEmployeeRole() == 2) {
+            // 如果回款等于成交金额或者回款为0或者没有回款记录，则可以删除
+            if (p == null || p.getOwePay().equals(p.getOrderPaySum()) || p.getOwePay().compareTo(new BigDecimal("0.00")) == 0) {
+                flag = true;
+            } else {
+                info += "删除订单错误，订单在进行中！";
+            }
+        } else {
+            // 普通员工：回款为0订单才可以删除
+            // 如果回款为成交总额或者没有回款记录，则可以删除
+            if (p == null || p.getOwePay().equals(p.getOrderPaySum())) {
+                flag = true;
+            } else {
+                info += "删除订单错误，您没有权限！";
+            }
+        }
+
+        if (flag) {
+            if (businessType == 1) {
+                // 删除人才订单
+                return deleteResourceBusiness(businessId, response);
+            } else if (businessType == 2) {
+                // 删除公司订单
+                return deleteCompanyBusiness(businessId, response);
+            } else {
+                log.error("【删除订单】发生错误");
+                return ResultVOUtil.fail(ResultEnum.DELETE_BUSINESS_ERROR, response);
+            }
+        } else {
+            log.error("【删除订单】不能删除订单");
+            return ResultVOUtil.fail(info, response);
+        }
+
     }
 
     public ResultVO<Map<Integer, String>> deleteCompanyBusiness(String companyBusinessId,
@@ -350,6 +382,16 @@ public class BusinessController {
             return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_BUSINESS_ERROR, response);
         }
         return ResultVOUtil.success();
+    }
+
+    public ResultVO<Map<Integer, String>> deleteResourceBusiness(String resourceBusinessId,
+                                                                 HttpServletResponse response) {
+        Integer flag = resourceBusinessService.deleteResourceBusinessByBusinessId(resourceBusinessId);
+        if (flag == 0) {
+            log.error("【删除人才订单】发生错误");
+            return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_BUSINESS_ERROR, response);
+        }
+        return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_BUSINESS_SUCCESS);
     }
 
 }

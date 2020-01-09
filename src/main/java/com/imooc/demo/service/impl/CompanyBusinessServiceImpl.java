@@ -45,13 +45,13 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
     }
 
     @Override
-    public Page<CompanyBusiness> findAllCompanyBusinessPageable(Pageable pageable) {
-        return companyBusinessRepository.findAll(pageable);
+    public Page<CompanyBusiness> findCompanyBusinessByEmployeeIdAndIsCompleted(String employeeId, Integer isCompleted, Pageable pageable) {
+        return companyBusinessRepository.findCompanyBusinessByEmployeeIdAndIsCompleted(employeeId, isCompleted, pageable);
     }
 
     @Override
-    public Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId, Pageable pageable) {
-        return companyBusinessRepository.findCompanyBusinessByEmployeeId(employeeId, pageable);
+    public Page<CompanyBusiness> findAllCompanyBusinessByIsCompletedPageable(Integer isCompleted, Pageable pageable) {
+        return companyBusinessRepository.findAllCompanyBusinessByIsCompleted(isCompleted, pageable);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CompanyBusinessServiceImpl implements CompanyBusinessService {
 
     @Override
     public List<CompanyBusiness> findCompanyBusinessByEmployeeIdAndDate(String employeeId, String startDate, String endDate) {
-        return companyBusinessRepository.findCompanyBusinessesByEmployeeIdAndCreateDateBetween(employeeId,startDate, endDate);
+        return companyBusinessRepository.findCompanyBusinessesByEmployeeIdAndCreateDateBetween(employeeId, startDate, endDate);
     }
 
     @Override

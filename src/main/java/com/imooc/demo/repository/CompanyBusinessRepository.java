@@ -15,13 +15,25 @@ import java.util.List;
 
 public interface CompanyBusinessRepository extends JpaRepository<CompanyBusiness, Integer> {
     List<CompanyBusiness> getCompanyBusinessByEmployeeId(String employeeId);
+
     CompanyBusiness getCompanyBusinessById(Integer id);
+
     CompanyBusiness getCompanyBusinessByBusinessId(String businessId);
+
     Integer deleteCompanyBusinessByBusinessId(String businessId);
-    Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId,  Pageable pageable);
+
+    Page<CompanyBusiness> findCompanyBusinessByEmployeeId(String employeeId, Pageable pageable);
+
     List<CompanyBusiness> findCompanyBusinessesByEmployeeIdAndCreateDateBetween(String employeeId, String startDate, String endDate);
+
     List<CompanyBusiness> findCompanyBusinessByBusinessIdIsIn(List<String> businessId);
+
     List<CompanyBusiness> findAllCompanyBusinessByCreateDateBetween(String startDate, String endDate);
 
     List<CompanyBusiness> findCompanyBusinessesByCompanyId(Integer companyId);
+
+    Page<CompanyBusiness> findAllCompanyBusinessByIsCompleted(Integer isCompleted, Pageable pageable);
+
+    Page<CompanyBusiness> findCompanyBusinessByEmployeeIdAndIsCompleted(String employeeId, Integer isCompleted, Pageable pageable);
+
 }

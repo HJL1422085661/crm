@@ -94,7 +94,10 @@ public class EmployeeController {
         Boolean phoneExist = resourceService.existsByPhoneNumber(resource.getPhoneNumber());
         if (phoneExist) {
             log.error("【录入人才信息】电话号码已存在");
-            return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+            // 查找电话已经登记在哪个员工名下
+            Resource resourcePhoneNumber = resourceService.findResourceByPhoneNumber(resource.getPhoneNumber());
+            String employeeName = resourcePhoneNumber.getEmployeeName();
+            return ResultVOUtil.fail("电话号码已存在，" + "位于【" + employeeName + "】名下！", response);
         }
 
         Resource createResource = null;
@@ -412,7 +415,7 @@ public class EmployeeController {
         if (searchResource != null) {
             if (!searchResource.getResourceId().equals(resource.getResourceId())) {
                 log.error("【修改人才信息】电话号码已存在");
-                return ResultVOUtil.fail(ResultEnum.DUPLICATE_PHONE, response);
+                return ResultVOUtil.fail("电话号码已存在，" + "位于【" + searchResource.getEmployeeName() + "】名下！", response);
             }
         }
 
@@ -523,7 +526,7 @@ public class EmployeeController {
         }
         Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
 
-        for (Integer resourceId: resourceIds) {
+        for (Integer resourceId : resourceIds) {
             ResourceTemp createResource = new ResourceTemp();
 
             // 通过resourceId从数据库中取到对应的resource
@@ -540,11 +543,7 @@ public class EmployeeController {
                 if (!isSuccess) return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_ERROR, response);
 
                 Integer flag = resourceService.deleteResourceByResourceId(resource.resourceId);
-                Map<String, Integer> map = new HashMap<>();
-                if (flag != 0) {
-                    map.put("employeeRole", 2);
-                    return ResultVOUtil.success(map);
-                } else {
+                if (flag == 0) {
                     return ResultVOUtil.fail(ResultEnum.DELETE_RESOURCE_ERROR, response);
                 }
             }
@@ -574,7 +573,15 @@ public class EmployeeController {
                 return ResultVOUtil.fail(ResultEnum.UPDATE_RESOURCE_EXCEPTION, response);
             }
         }
-        return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_SUCCESS);
+
+        if (employee.getEmployeeRole() == 2) {
+            Map<String, Integer> map = new HashMap<>();
+            map.put("employeeRole", 2);
+            return ResultVOUtil.success(map);
+
+        } else {
+            return ResultVOUtil.success(ResultEnum.DELETE_RESOURCE_SUCCESS);
+        }
     }
 
     /**
@@ -690,7 +697,7 @@ public class EmployeeController {
             log.error("【删除企业信息】 employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
-        for (Integer companyId: companyIds) {
+        for (Integer companyId : companyIds) {
             Company company = companyService.getCompanyByCompanyId(companyId);
 
             Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);

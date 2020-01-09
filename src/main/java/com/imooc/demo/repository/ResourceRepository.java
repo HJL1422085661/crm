@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -82,7 +83,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer>, Jp
 //    Page<Resource> findResourceByShareStatusAndEmployeeIdAndProvinceLike(Integer shareStatus, String employeeId, String province, Pageable pageable);
 
 
-    @Query(nativeQuery = true, value = "select * from Resource r where r.shareStatus = ?1 " +
+    @Query(nativeQuery = true, value = "select * from resource r where r.shareStatus = ?1 " +
             "and (r.phoneNumber like CONCAT('%', ?2, '%') or ?2 = '') "
             + "and (r.resourceName like CONCAT('%', ?3, '%') or ?3  = '') " +
             "and (r.qq like CONCAT('%', ?4, '%') or ?4  = '') " +
@@ -94,7 +95,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer>, Jp
                                       String qq, String email, String info,
                                       String certificate, String province, Pageable pageable);
 
-    @Query(nativeQuery = true, value = "select * from Resource r where r.shareStatus = ?1 " +
+    @Query(nativeQuery = true, value = "select * from resource r where r.shareStatus = ?1 " +
             "and (r.phoneNumber like CONCAT('%', ?2, '%') or ?2 = '') "
             + "and (r.resourceName like CONCAT('%', ?3, '%') or ?3  = '') " +
             "and (r.qq like CONCAT('%', ?4, '%') or ?4  = '') " +
@@ -107,5 +108,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Integer>, Jp
                                                    String qq, String email, String info,
                                                    String certificate, String province, String employeeId, Pageable pageable);
 
+    @Query(nativeQuery = true, value =  "select phoneNumber from resource ")
+    HashSet<String> findAllResourcePhoneNumber();
 
 }

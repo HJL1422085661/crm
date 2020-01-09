@@ -1316,9 +1316,6 @@ public class ManagerController {
 
     /**新增模块：汇总简报**/
 
-
-    /**新增模块：汇总简报**/
-
     /**
      * 获取所有面板数据
      */
@@ -1477,16 +1474,16 @@ public class ManagerController {
                 CompanyBusinessDTO companyBusinessDTO = new CompanyBusinessDTO();
                 BeanUtils.copyProperties(companyBusinessTemp, companyBusinessDTO, getNullPropertyNames(companyBusinessTemp));
                 //companyBusinessDTO.setBusinessId(KeyUtil.createID());
-                String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
-                String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
-                List<Map<String, String>> resourceListTemp = new ArrayList<>();
-                for (int i = 0; i < resourceIdList.length; i++) {
-                    Map<String, String> resourceTemp = new HashMap<>();
-                    resourceTemp.put("resourceId", resourceIdList[i]);
-                    resourceTemp.put("resourceName", resourceNameList[i]);
-                    resourceListTemp.add(resourceTemp);
-                }
-                companyBusinessDTO.setResource(resourceListTemp);
+//                String[] resourceIdList = companyBusinessTemp.getResourceId().split(",");
+//                String[] resourceNameList = companyBusinessTemp.getResourceName().split(",");
+//                List<Map<String, String>> resourceListTemp = new ArrayList<>();
+//                for (int i = 0; i < resourceIdList.length; i++) {
+//                    Map<String, String> resourceTemp = new HashMap<>();
+//                    resourceTemp.put("resourceId", resourceIdList[i]);
+//                    resourceTemp.put("resourceName", resourceNameList[i]);
+//                    resourceListTemp.add(resourceTemp);
+//                }
+//                companyBusinessDTO.setResource(resourceListTemp);
                 companyBusinessDTOList.add(companyBusinessDTO);
             }
         }

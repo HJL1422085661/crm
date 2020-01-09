@@ -17,7 +17,9 @@ public interface ResourceBusinessService {
 
     Page<ResourceBusiness> findResourceBusinessByEmployeeId(String employeeId, Pageable pageable);
 
-    Page<ResourceBusiness> findAllResourceBusinessPageable(Pageable pageable);
+    Page<ResourceBusiness> findAllResourceBusinessByIsCompletedPageable(Integer isCompleted, Pageable pageable);
+
+    Page<ResourceBusiness> findResourceBusinessByEmployeeIdAndIsCompleted(String employeeId, Integer isCompleted, Pageable pageable);
 
     ResourceBusiness findResourceBusinessByBusinessId(String businessId);
 

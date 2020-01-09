@@ -12,7 +12,6 @@ import com.imooc.demo.service.*;
 import com.imooc.demo.utils.BeanCopyUtil;
 import com.imooc.demo.utils.ResultVOUtil;
 import com.imooc.demo.utils.TokenUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.imooc.demo.utils.BeanCopyUtil.getNullPropertyNames;
 
 
 @RestController
@@ -143,18 +140,6 @@ public class PayBackController {
 
         if (owePay.signum() == 0) {
             payBackRecordTemp.setIsCompleted(1);
-            Integer businessType = payBackRecordTemp.getBusinessType();
-            String businessId = payBackRecordTemp.getBusinessId();
-            //2表示企业订单
-            if (businessType.equals(2)) {
-                CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(businessId);
-                companyBusiness.setIsCompleted(1);
-                companyBusinessService.createCompanyBusiness(companyBusiness);
-            } else {
-                ResourceBusiness resourceBusiness = resourceBusinessService.getResourceBusinessByBusinessId(businessId);
-                resourceBusiness.setIsCompleted(1);
-                resourceBusinessService.createResourceBusiness(resourceBusiness);
-            }
         }
 
         //如果是老板则直接操作，不需要审批,但是需要记录操作
@@ -165,6 +150,22 @@ public class PayBackController {
             PayBackRecord payBackRecord = new PayBackRecord();
             BeanUtils.copyProperties(payBackRecordTemp, payBackRecord, BeanCopyUtil.getNullPropertyNames(payBackRecordTemp));
             Boolean saveSuccess = payBackRecordService.savePayBackRecord(payBackRecord);
+            // 更新订单是否已完成
+            if (owePay.signum() == 0) {
+                payBackRecordTemp.setIsCompleted(1);
+                Integer businessType = payBackRecordTemp.getBusinessType();
+                String businessId = payBackRecordTemp.getBusinessId();
+                //2表示企业订单
+                if (businessType.equals(2)) {
+                    CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(businessId);
+                    companyBusiness.setIsCompleted(1);
+                    companyBusinessService.createCompanyBusiness(companyBusiness);
+                } else {
+                    ResourceBusiness resourceBusiness = resourceBusinessService.getResourceBusinessByBusinessId(businessId);
+                    resourceBusiness.setIsCompleted(1);
+                    resourceBusinessService.createResourceBusiness(resourceBusiness);
+                }
+            }
 
             if (!saveSuccess) {
                 log.error("【创建回款记录】新建回款记录失败");
@@ -445,6 +446,21 @@ public class PayBackController {
             // 同意，则在回款记录表新建
             PayBackRecord payBackRecord = new PayBackRecord();
             BeanUtils.copyProperties(payBackRecordTemp, payBackRecord, BeanCopyUtil.getNullPropertyNames(payBackRecordTemp));
+            // 如果完全回款，则更新相应订单的完成状态
+            if (payBackRecordTemp.getIsCompleted() ==1) {
+                Integer businessType = payBackRecordTemp.getBusinessType();
+                String businessId = payBackRecordTemp.getBusinessId();
+                //2表示企业订单
+                if (businessType.equals(2)) {
+                    CompanyBusiness companyBusiness = companyBusinessService.getCompanyBusinessByBusinessId(businessId);
+                    companyBusiness.setIsCompleted(1);
+                    companyBusinessService.createCompanyBusiness(companyBusiness);
+                } else {
+                    ResourceBusiness resourceBusiness = resourceBusinessService.getResourceBusinessByBusinessId(businessId);
+                    resourceBusiness.setIsCompleted(1);
+                    resourceBusinessService.createResourceBusiness(resourceBusiness);
+                }
+            }
             Boolean flag = payBackRecordService.savePayBackRecord(payBackRecord);
             if (flag == false) {
                 log.error("【创建回款记录】发生错误");

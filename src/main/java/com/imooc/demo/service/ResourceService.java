@@ -4,6 +4,7 @@ import com.imooc.demo.model.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -44,33 +45,7 @@ public interface ResourceService {
 
     Resource findResourceByPhoneNumber(String phoneNumber);
 
-//    Page<Resource> findResourceByShareStatusAndPhoneNumberLike(Integer shareStatus, String phoneNumber, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndPhoneNumberLike(Integer shareStatus, String employeeId, String phoneNumber, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndResourceNameLike(Integer shareStatus, String resourceName, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndResourceNameLike(Integer shareStatus, String employeeId, String resourceName, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndQqLike(Integer shareStatus, String qq, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndQqLike(Integer shareStatus, String employeeId, String qq, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmailLike(Integer shareStatus, String email, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndEmailLike(Integer shareStatus, String employeeId, String email, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndInfoLike(Integer shareStatus, String info, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndInfoLike(Integer shareStatus, String employeeId, String info, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndCertificateLike(Integer shareStatus, String certificate, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndCertificateLike(Integer shareStatus, String employeeId, String certificate, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndProvinceLike(Integer shareStatus, String province, Pageable pageable);
-//
-//    Page<Resource> findResourceByShareStatusAndEmployeeIdAndProvinceLike(Integer shareStatus, String employeeId, String province, Pageable pageable);
+    HashSet<String> getAllResourcePhoneNumber();
 
     Page<Resource> findResourceByEmployeeIdAndLike(Integer shareStatus, String phoneNumber, String resourceName,
                                       String qq, String email, String info,

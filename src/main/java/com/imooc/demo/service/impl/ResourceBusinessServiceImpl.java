@@ -27,6 +27,11 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     }
 
     @Override
+    public Page<ResourceBusiness> findResourceBusinessByEmployeeIdAndIsCompleted(String employeeId, Integer isCompleted, Pageable pageable) {
+        return resourceBusinessRepository.findResourceBusinessByEmployeeIdAndIsCompleted(employeeId, isCompleted, pageable);
+    }
+
+    @Override
     public ResourceBusiness createResourceBusiness(ResourceBusiness resourceBusiness) {
         try {
             return resourceBusinessRepository.saveAndFlush(resourceBusiness);
@@ -54,8 +59,8 @@ public class ResourceBusinessServiceImpl implements ResourceBusinessService {
     }
 
     @Override
-    public Page<ResourceBusiness> findAllResourceBusinessPageable(Pageable pageable) {
-        return resourceBusinessRepository.findAll(pageable);
+    public Page<ResourceBusiness> findAllResourceBusinessByIsCompletedPageable( Integer isCompleted,Pageable pageable) {
+        return resourceBusinessRepository.findAllResourceBusinessByIsCompleted(isCompleted, pageable);
     }
 
     @Override
