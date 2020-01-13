@@ -1461,6 +1461,16 @@ public class ManagerController {
                         PayBackRecord p = Collections.min(payBackRecordListTemp);
                         countPayBackOweSum = countPayBackOweSum.add(p.owePay);
                         payBackRecordsOweList.add(p);
+                    }else {
+                        // 没有回款
+                        PayBackRecord p = new PayBackRecord();
+                        p.setBusinessId(companyBusiness.getBusinessId());
+                        p.setCompanyName(companyBusiness.getCompanyName());
+                        p.setOwePay(companyBusiness.getOrderPaySum());
+                        p.setEmployeeName(companyBusiness.getEmployeeName());
+                        countPayBackOweSum = countPayBackOweSum.add(companyBusiness.getOrderPaySum());
+                        payBackRecordsOweList.add(p);
+
                     }
                 }
             }

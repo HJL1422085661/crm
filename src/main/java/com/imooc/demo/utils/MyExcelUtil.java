@@ -9,11 +9,8 @@ import com.imooc.demo.service.CompanyService;
 import com.imooc.demo.service.EmployeeService;
 import com.imooc.demo.service.ResourceService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -31,10 +27,10 @@ import java.util.*;
 
 @Component
 @Slf4j
-public class ExcelUtil {
+public class MyExcelUtil {
 
 
-    public static ExcelUtil excelUtil;
+    public static MyExcelUtil myExcelUtil;
     @Autowired
     public EmployeeService employeeService;
     @Autowired
@@ -84,33 +80,37 @@ public class ExcelUtil {
             List<Integer> exceptionRow = new ArrayList<>();
             //取第i行(第一行i=0是表头）
             HashSet<String> phoneNumberSet = new HashSet<>();
-            phoneNumberSet = excelUtil.resourceService.getAllResourcePhoneNumber();
+            phoneNumberSet = myExcelUtil.resourceService.getAllResourcePhoneNumber();
 
             for (int i = firstRowNum + 1; i <= lastRowNum; i++) {
                 boolean flag = true;
                 Resource resource = new Resource();
                 Row row = sheet.getRow(i);
-                if(i ==147){
+                if (i == 147) {
                     System.out.println("aaa");
                 }
-                for(int j = 0; j < 10; j ++){
-                    if(!(getValue(row.getCell(j)).equals(""))) {
+                for (int j = 0; j < 10; j++) {
+                    if (!(getValue(row.getCell(j)).equals(""))) {
                         flag = false;
                     }
-                 }
-                if(flag) break;
+                }
+                if (flag) break;
                 Cell cell = row.getCell(0);
                 String resourceName = getValue(cell);
                 cell = row.getCell(1);
                 String certificate = getValue(cell);
                 cell = row.getCell(2);
-                String info =  getValue(cell);
+                String info = getValue(cell);
                 cell = row.getCell(3);
                 String province = getValue(cell);
                 cell = row.getCell(4);
                 String endDate = getValue(cell);
+                endDate = parseDate(endDate);
                 cell = row.getCell(5);
-                Integer gender = getValue(cell).equals("女") ? 1 : 2;
+                Integer gender = null;
+                if (getValue(cell) != "") {
+                    gender = getValue(cell).equals("女") ? 1 : 2;
+                }
                 cell = row.getCell(6);
                 String qq = getValue(cell);
                 cell = row.getCell(7);
@@ -119,18 +119,18 @@ public class ExcelUtil {
                 String email = getValue(cell);
                 cell = row.getCell(9);
                 String createDate = getValue(cell); //时间格式需要约定
-
+                createDate = parseDate(createDate);
 
                 String employeeName = "root";
 
                 //根据电话号码去数据库查重
-               // Boolean flag = excelUtil.resourceService.existsByPhoneNumber(phoneNumber);
+                // Boolean flag = excelUtil.resourceService.existsByPhoneNumber(phoneNumber);
                 if (phoneNumberSet.contains(phoneNumber)) {
                     //重复的行计数
                     repeatRow.add(i);
                 } else {
                     phoneNumberSet.add(phoneNumber);
-                    Employee employee = excelUtil.employeeService.getEmployeeByEmployeeName(employeeName);
+                    Employee employee = myExcelUtil.employeeService.getEmployeeByEmployeeName(employeeName);
                     if (employee == null) {
                         //员工不存在
                         log.error("【导入人才信息】经办人不存在");
@@ -153,7 +153,7 @@ public class ExcelUtil {
                         resource.setShareStatus(2);
 
                         //插入数据库
-                        Boolean success = excelUtil.resourceService.saveResource(resource);
+                        Boolean success = myExcelUtil.resourceService.saveResource(resource);
                         if (success) successRow++;
                         else exceptionRow.add(i);
                     }
@@ -169,6 +169,30 @@ public class ExcelUtil {
             e.printStackTrace();
         }
         return ResultVOUtil.success(returnMap);
+    }
+
+
+    public static String parseDate(String date) {
+        String returnDate;
+        if (date == "") {
+            return date;
+        } else {
+            //按年月日解析：2020年1月1日
+            if (date.contains("年")) {
+                returnDate = date.replace("年", "-");
+                returnDate = returnDate.replace("月", "-");
+                returnDate = returnDate.replace("日", "-");
+                return returnDate;
+            }
+            //按小数点解析：2020.01.01
+            else if (date.contains(".")) {
+                returnDate = date.replace(".", "-");
+                return returnDate;
+            }
+            else {
+                return date;
+            }
+        }
     }
 
     /**
@@ -233,7 +257,7 @@ public class ExcelUtil {
 //                if (flag) {
 //                    repeatRow.add(i);
 //                } else {
-                Employee employee = excelUtil.employeeService.getEmployeeByEmployeeName(employeeName);
+                Employee employee = myExcelUtil.employeeService.getEmployeeByEmployeeName(employeeName);
                 if (employee == null) {
                     //员工不存在
                     log.error("【导入公司信息】经办人不存在");
@@ -257,7 +281,7 @@ public class ExcelUtil {
                     company.setShareStatus(2);
 
                     //插入数据库
-                    Boolean success = excelUtil.companyService.saveCompany(company);
+                    Boolean success = myExcelUtil.companyService.saveCompany(company);
                     if (success) successRow++;
                     else exceptionRow.add(i);
                 }
@@ -275,12 +299,14 @@ public class ExcelUtil {
         return ResultVOUtil.success(returnMap);
     }
 
+
+
     @PostConstruct
     public void init() {
-        excelUtil = this;
-        excelUtil.resourceService = this.resourceService;
-        excelUtil.employeeService = this.employeeService;
-        excelUtil.companyService = this.companyService;
+        myExcelUtil = this;
+        myExcelUtil.resourceService = this.resourceService;
+        myExcelUtil.employeeService = this.employeeService;
+        myExcelUtil.companyService = this.companyService;
     }
 
 }

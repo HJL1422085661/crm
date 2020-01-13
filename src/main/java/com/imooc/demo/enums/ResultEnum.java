@@ -109,6 +109,7 @@ public enum ResultEnum {
     IMPORT_FILE_EXCEPTION(98, "导入数据发生异常"),
     PASS_PAYBACK_SUCCESS(99, "审批回款成功(同意)"),
     REJECT_PAYBACK_SUCCESS(100, "审批回款成功（驳回）"),
+    DOWNLOAD_EUCCESS(101, "导出人才信息成功"),
 
 
 
