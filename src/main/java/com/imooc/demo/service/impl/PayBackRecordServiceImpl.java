@@ -93,6 +93,16 @@ public class PayBackRecordServiceImpl implements PayBackRecordService {
     }
 
     @Override
+    public List<PayBackRecord> findPayBackRecordByBusinessTypeAndCreateDate(Integer businessType, String startDate, String endDate) {
+        return payBackRecordRepository.findPayBackRecordByBusinessTypeAndCreateDateBetween(businessType, startDate, endDate);
+    }
+
+    @Override
+    public List<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(String employeeId, Integer businessType, String startDate, String endDate) {
+        return payBackRecordRepository.findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDateBetween(employeeId, businessType, startDate, endDate);
+    }
+
+    @Override
     public List<PayBackRecord> findAllPayBackRecordByResourceId(Integer resourceId) {
         return payBackRecordRepository.findPayBackRecordByResourceId(resourceId);
     }

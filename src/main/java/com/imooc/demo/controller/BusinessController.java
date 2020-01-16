@@ -209,7 +209,6 @@ public class BusinessController {
         // 封装Name属性
         Resource resource = resourceService.getResourceByResourceId(resourceBusiness.getResourceId());
         if (resource == null) {
-            response.setStatus(400);
             log.error("【创建人才订单】该人才不存在");
             return ResultVOUtil.fail(ResultEnum.RESOURCE_NOT_EXIST, response);
         }
@@ -219,8 +218,10 @@ public class BusinessController {
         resourceBusiness.setEmployeeId(resource.getEmployeeId());
         resourceBusiness.setEmployeeName(resource.getEmployeeName());
         resourceBusiness.setResourceName(resource.getResourceName());
-        Company company = companyService.getCompanyByCompanyId(resourceBusiness.getCompanyId());
-        resourceBusiness.setCompanyName(company.getCompanyName());
+        if (resourceBusiness.getCompanyId() != null) {
+            Company company = companyService.getCompanyByCompanyId(resourceBusiness.getCompanyId());
+            resourceBusiness.setCompanyName(company.getCompanyName());
+        }
         // 存到数据库
         try {
             ResourceBusiness createBusiness = resourceBusinessService.createResourceBusiness(resourceBusiness);

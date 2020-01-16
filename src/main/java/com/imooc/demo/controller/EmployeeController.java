@@ -700,10 +700,10 @@ public class EmployeeController {
             log.error("【删除企业信息】 employeeId为空");
             return ResultVOUtil.fail(ResultEnum.EMPLOYEE_NOT_EXIST, response);
         }
+        Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
         for (Integer companyId : companyIds) {
             Company company = companyService.getCompanyByCompanyId(companyId);
 
-            Employee employee = employeeService.getEmployeeByEmployeeId(employeeId);
             CompanyTemp createCompanyTmp = new CompanyTemp();
             CompanyTemp companyTemp = new CompanyTemp();
             //如果是老板则直接操作，不需要审批,但是需要记录操作?
@@ -716,11 +716,7 @@ public class EmployeeController {
                 if (!isSuccess) return ResultVOUtil.fail(ResultEnum.MANAGER_DELETE_COMPANY_INFO_ERROR, response);
 
                 Integer flag = companyService.deleteCompanyByCompanyId(company.companyId);
-                Map<String, Integer> map = new HashMap<>();
-                if (flag != 0) {
-                    map.put("employeeRole", 2);
-                    return ResultVOUtil.success(map);
-                } else {
+                if (flag == 0) {
                     return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_ERROR, response);
                 }
             }
@@ -750,7 +746,14 @@ public class EmployeeController {
                 return ResultVOUtil.fail(ResultEnum.DELETE_COMPANY_INFO_EXCEPTION, response);
             }
         }
-        return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
+        if (employee.getEmployeeRole() == 2) {
+            Map<String, Integer> map = new HashMap<>();
+            map.put("employeeRole", 2);
+            return ResultVOUtil.success(map);
+        }else {
+            return ResultVOUtil.success(ResultEnum.DELETE_COMPANY_SUCCESS);
+
+        }
     }
 
     /**

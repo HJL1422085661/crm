@@ -74,6 +74,10 @@ public class PayBackRecordTemp {
     @Column(name = "resourceId")
     public Integer resourceId;
 
+    /** 人才姓名 **/
+    @Column(name = "resourceName")
+    public String resourceName;
+
     /** 公司ID **/
     @Column(name = "companyId")
     public  Integer companyId;

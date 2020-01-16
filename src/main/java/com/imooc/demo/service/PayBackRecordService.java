@@ -42,5 +42,9 @@ public interface PayBackRecordService {
 
     List<PayBackRecord> findAllPayBackRecordByResourceId(Integer resourceId);
 
+    List<PayBackRecord> findPayBackRecordByBusinessTypeAndCreateDate(Integer businessType, String startDate, String endDate);
+
+    List<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(String employeeId, Integer businessType, String startDate, String endDate);
+
 
 }

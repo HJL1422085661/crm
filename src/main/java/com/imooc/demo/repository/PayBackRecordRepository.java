@@ -36,6 +36,10 @@ public interface PayBackRecordRepository extends JpaRepository<PayBackRecord, In
 
     List<PayBackRecord> findPayBackRecordByCompanyId(Integer companyId);
 
+    List<PayBackRecord> findPayBackRecordByBusinessTypeAndCreateDateBetween(Integer businessType, String startDate, String endDate);
+
+    List<PayBackRecord> findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDateBetween(String employeeId, Integer businessType, String startDate, String endDate);
+
 
 }
 

@@ -956,7 +956,7 @@ public class ManagerController {
                 // 先去数据库找存在EmployeeSalaryRegulation与否
                 EmployeeSalaryRegulation searchEmployeeSalaryRegulation = employeeSalaryRegulationService.findEmployeeSalaryRegulationByEmployeeIdAndMonth(employeeIdIdx, searchMonth);
                 if (searchEmployeeSalaryRegulation != null) {
-                    BeanUtils.copyProperties(searchEmployeeSalaryRegulation, employeeSalary,BeanCopyUtil.getNullPropertyNames(searchEmployeeSalaryRegulation));
+                    BeanUtils.copyProperties(searchEmployeeSalaryRegulation, employeeSalary, BeanCopyUtil.getNullPropertyNames(searchEmployeeSalaryRegulation));
                 }
 
                 employeeSalary.setEmployeeId(employeeIdIdx);
@@ -1349,8 +1349,11 @@ public class ManagerController {
         List<CompanyBusiness> companyBusinessList = new ArrayList<>();
         List<ResourceBusiness> resourceBusinessList = new ArrayList<>();
         //获取回款记录：回款总额、欠款总额
-        List<PayBackRecord> payBackRecordsList = new ArrayList<>(); // 只取企业订单的回款记录
-        List<PayBackRecord> payBackRecordsOweList = new ArrayList<>(); // 只取企业订单的回款记录
+        List<PayBackRecord> resourcePayBackRecordsList = new ArrayList<>();
+        List<PayBackRecord> companyPayBackRecordsList = new ArrayList<>();
+
+        List<PayBackRecord> resourcePayBackRecordsOweList = new ArrayList<>();
+        List<PayBackRecord> companyPayBackRecordsOweList = new ArrayList<>();
 
         // 管理员
         if (employee.getEmployeeRole() == 2) {
@@ -1365,9 +1368,8 @@ public class ManagerController {
                 companyBusinessList = companyBusinessService.getAllCompanyBusiness(searchStartDate, searchEndDate);
                 resourceBusinessList = resourceBusinessService.getAllResourceBusiness(searchStartDate, searchEndDate);
                 //获取回款记录：回款总额、欠款总额
-                payBackRecordsList = payBackRecordService.getAllPayBackRecords(searchStartDate, searchEndDate);
-
-
+                resourcePayBackRecordsList = payBackRecordService.findPayBackRecordByBusinessTypeAndCreateDate(1, searchStartDate, searchEndDate);
+                companyPayBackRecordsList = payBackRecordService.findPayBackRecordByBusinessTypeAndCreateDate(2, searchStartDate, searchEndDate);
             } else {
                 //获取新增客户
                 newResourceClientsList = resourceService.getNewResourceClients(searchEmployeeId, searchStartDate, searchEndDate);
@@ -1380,8 +1382,8 @@ public class ManagerController {
                 companyBusinessList = companyBusinessService.getCompanyBusiness(searchEmployeeId, searchStartDate, searchEndDate);
                 resourceBusinessList = resourceBusinessService.getResourceBusiness(searchEmployeeId, searchStartDate, searchEndDate);
                 //获取回款记录：回款总额、欠款总额
-                payBackRecordsList = payBackRecordService.getPayBackRecords(searchEmployeeId, searchStartDate, searchEndDate);
-
+                resourcePayBackRecordsList = payBackRecordService.findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(searchEmployeeId, 1, searchStartDate, searchEndDate);
+                companyPayBackRecordsList = payBackRecordService.findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(searchEmployeeId, 2, searchStartDate, searchEndDate);
             }
         } else {
             //普通员工
@@ -1394,9 +1396,9 @@ public class ManagerController {
             //获取订单
             companyBusinessList = companyBusinessService.getCompanyBusiness(employee.getEmployeeId(), searchStartDate, searchEndDate);
             resourceBusinessList = resourceBusinessService.getResourceBusiness(employee.getEmployeeId(), searchStartDate, searchEndDate);
-            //获取回款记录：回款总额、欠款总额，只涉及企业回款和欠款
-            payBackRecordsList = payBackRecordService.getPayBackRecords(employee.getEmployeeId(), searchStartDate, searchEndDate);
-
+            //获取回款记录：回款总额、欠款总额
+            resourcePayBackRecordsList = payBackRecordService.findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(employee.getEmployeeId(), 1, searchStartDate, searchEndDate);
+            companyPayBackRecordsList = payBackRecordService.findPayBackRecordByEmployeeIdAndBusinessTypeAndCreateDate(employee.getEmployeeId(), 2, searchStartDate, searchEndDate);
         }
         //新增客户数
         Integer countNewResourceClients = newResourceClientsList.size();
@@ -1426,50 +1428,95 @@ public class ManagerController {
         Integer countCompanyBusiness = companyBusinessList.size();
         Integer countResourceBusiness = resourceBusinessList.size();
         //获取回款总额
-        BigDecimal countPayBackSum = new BigDecimal("0");
-        if (payBackRecordsList.size() != 0) {
-            countPayBackSum = payBackRecordsList.stream()
+        BigDecimal countCompanyPayBackSum = new BigDecimal("0");
+        BigDecimal countResourcePayBackSum = new BigDecimal("0");
+        if (companyPayBackRecordsList.size() != 0) {
+            countCompanyPayBackSum = companyPayBackRecordsList.stream()
                     .map(PayBackRecord::getLaterBackPay)
                     .reduce(BigDecimal::add).get();
         }
-        List<PayBackRecord> returnPayBackRecordsList = new ArrayList<>();
+        if (resourcePayBackRecordsList.size() != 0) {
+            countResourcePayBackSum = resourcePayBackRecordsList.stream()
+                    .map(PayBackRecord::getLaterBackPay)
+                    .reduce(BigDecimal::add).get();
+        }
+        List<PayBackRecord> returnCompanyPayBackRecordsList = new ArrayList<>();
+        List<PayBackRecord> returnResourcePayBackRecordsList = new ArrayList<>();
         // 扎到订单ID列表，去重
-        if (payBackRecordsList.size() != 0) {
-            List<String> businessIdList = payBackRecordsList.stream()
+        if (companyPayBackRecordsList.size() != 0) {
+            List<String> companyBusinessIdList = companyPayBackRecordsList.stream()
                     .map(PayBackRecord::getBusinessId).distinct()
                     .collect(Collectors.toList());
-            for (String businessId : businessIdList) {
+            for (String businessId : companyBusinessIdList) {
                 List<PayBackRecord> payBackRecordListTemp = payBackRecordService.findAllPayBackRecordByBusinessId(businessId);
                 if (payBackRecordListTemp.size() != 0) {
                     PayBackRecord p = Collections.min(payBackRecordListTemp);
-                    returnPayBackRecordsList.add(p);
+                    returnCompanyPayBackRecordsList.add(p);
                 }
             }
         }
-        countPayBackSum = countPayBackSum.setScale(1, BigDecimal.ROUND_DOWN);
+        if (resourcePayBackRecordsList.size() != 0) {
+            List<String> resourceBusinessIdList = resourcePayBackRecordsList.stream()
+                    .map(PayBackRecord::getBusinessId).distinct()
+                    .collect(Collectors.toList());
+            for (String businessId : resourceBusinessIdList) {
+                List<PayBackRecord> payBackRecordListTemp = payBackRecordService.findAllPayBackRecordByBusinessId(businessId);
+                if (payBackRecordListTemp.size() != 0) {
+                    PayBackRecord p = Collections.min(payBackRecordListTemp);
+                    returnResourcePayBackRecordsList.add(p);
+                }
+            }
+        }
+        countCompanyPayBackSum = countCompanyPayBackSum.setScale(1, BigDecimal.ROUND_DOWN);
+        countResourcePayBackSum = countResourcePayBackSum.setScale(1, BigDecimal.ROUND_DOWN);
 //        for (PayBackRecord payBackRecord : payBackRecordsList) {
 //            countPayBackSum = countPayBackSum.add(payBackRecord.getLaterBackPay());
 //        }
 
         //获取欠款总额及欠款列表
-        BigDecimal countPayBackOweSum = new BigDecimal("0");
+        // 公司欠款
+        BigDecimal countCompanyPayBackOweSum = new BigDecimal("0");
         if (companyBusinessList.size() != 0) {
             for (CompanyBusiness companyBusiness : companyBusinessList) {
                 if (companyBusiness.isCompleted == 0) {
                     List<PayBackRecord> payBackRecordListTemp = payBackRecordService.findAllPayBackRecordByBusinessId(companyBusiness.getBusinessId());
                     if (payBackRecordListTemp.size() != 0) {
                         PayBackRecord p = Collections.min(payBackRecordListTemp);
-                        countPayBackOweSum = countPayBackOweSum.add(p.owePay);
-                        payBackRecordsOweList.add(p);
-                    }else {
+                        countCompanyPayBackOweSum = countCompanyPayBackOweSum.add(p.owePay);
+                        companyPayBackRecordsOweList.add(p);
+                    } else {
                         // 没有回款
                         PayBackRecord p = new PayBackRecord();
                         p.setBusinessId(companyBusiness.getBusinessId());
                         p.setCompanyName(companyBusiness.getCompanyName());
                         p.setOwePay(companyBusiness.getOrderPaySum());
                         p.setEmployeeName(companyBusiness.getEmployeeName());
-                        countPayBackOweSum = countPayBackOweSum.add(companyBusiness.getOrderPaySum());
-                        payBackRecordsOweList.add(p);
+                        countCompanyPayBackOweSum = countCompanyPayBackOweSum.add(companyBusiness.getOrderPaySum());
+                        companyPayBackRecordsOweList.add(p);
+
+                    }
+                }
+            }
+        }
+        // 人才欠款
+        BigDecimal countResourcePayBackOweSum = new BigDecimal("0");
+        if (resourceBusinessList.size() != 0) {
+            for (ResourceBusiness resourceBusiness : resourceBusinessList) {
+                if (resourceBusiness.isCompleted == 0) {
+                    List<PayBackRecord> payBackRecordListTemp = payBackRecordService.findAllPayBackRecordByBusinessId(resourceBusiness.getBusinessId());
+                    if (payBackRecordListTemp.size() != 0) {
+                        PayBackRecord p = Collections.min(payBackRecordListTemp);
+                        countResourcePayBackOweSum = countResourcePayBackOweSum.add(p.owePay);
+                        resourcePayBackRecordsOweList.add(p);
+                    } else {
+                        // 没有回款
+                        PayBackRecord p = new PayBackRecord();
+                        p.setBusinessId(resourceBusiness.getBusinessId());
+                        p.setCompanyName(resourceBusiness.getCompanyName());
+                        p.setOwePay(resourceBusiness.getOrderPaySum());
+                        p.setEmployeeName(resourceBusiness.getEmployeeName());
+                        countResourcePayBackOweSum = countResourcePayBackOweSum.add(resourceBusiness.getOrderPaySum());
+                        resourcePayBackRecordsOweList.add(p);
 
                     }
                 }
@@ -1524,11 +1571,19 @@ public class ManagerController {
         returnMap.put("companyBusinessList", companyBusinessDTOList);
         returnMap.put("resourceBusinessList", resourceBusinessList);
         //获取回款总额
-        returnMap.put("payBackSum", countPayBackSum);
-        returnMap.put("payBackSumList", returnPayBackRecordsList);
+        returnMap.put("companyPayBackSum", countCompanyPayBackSum);
+        returnMap.put("companyPayBackSumList", returnCompanyPayBackRecordsList);
+        returnMap.put("resourcePayBackSum", countResourcePayBackSum);
+        returnMap.put("resourcePayBackSumList", returnResourcePayBackRecordsList);
+//        returnMap.put("payBackSum", countPayBackSum);
+//        returnMap.put("payBackSumList", returnPayBackRecordsList);
         //获取欠款总额
-        returnMap.put("payBackOweSum", countPayBackOweSum);
-        returnMap.put("payBackOweSumList", payBackRecordsOweList);
+        returnMap.put("companyPayBackOweSum", countCompanyPayBackOweSum);
+        returnMap.put("companyPayBackOweSumList", companyPayBackRecordsOweList);
+        returnMap.put("resourcePayBackOweSum", countResourcePayBackOweSum);
+        returnMap.put("resourcePayBackOweSumList", resourcePayBackRecordsOweList);
+//        returnMap.put("payBackOweSum", countPayBackOweSum);
+//        returnMap.put("payBackOweSumList", payBackRecordsOweList);
 
         return ResultVOUtil.success(returnMap);
     }
